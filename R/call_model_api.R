@@ -230,8 +230,8 @@ log_cpm <- function(expression) {
 #' }
 #' @export
 predict_query <- function(query, as_counts = TRUE) {
-  if (!exists("SYNTHESIZE_API_KEY", envir = Sys.getenv())) {
-    stop("Please set the SYNTHESIZE_API_KEY environment variable")
+  if (!has_synthesize_token()) {
+    stop("Please set your API key for synthesize Bio using set_synthesize_token()")
   }
 
   api_url <- paste0(API_BASE_URL, "/api/model/combined/v1.0")
@@ -261,68 +261,34 @@ predict_query <- function(query, as_counts = TRUE) {
     ))
   }
 
-  # Parse JSON response
-  content <- tryCatch({
-    parsed <- fromJSON(content(response, "text", encoding = "UTF-8"))
-    if (is.list(parsed) && length(parsed) == 1 && is.list(parsed[[1]])) {
-      parsed[[1]]
-    } else if (!is.list(parsed)) {
-      stop(paste0("API response is not a JSON object: ", content(response, "text")))
-    } else {
-      parsed
-    }
+  # Parse JSON response and handle errors
+  parsed_content <- tryCatch({
+    fromJSON(content(response, "text", encoding = "UTF-8"))
   }, error = function(e) {
-    stop(paste0("Failed to decode JSON from API response: ", content(response, "text")))
+    stop(paste0("Failed to decode JSON from API response: ", e$message))
   })
 
-  # Check for errors in the response
-  if ("error" %in% names(content)) {
-    stop(paste0("Error in response from API received: ", content$error))
-  }
-  if ("errors" %in% names(content)) {
-    stop(paste0("Error in response from API received: ", content$errors))
+  # If response is a single-item list, use its contents
+  if (is.list(parsed_content) && length(parsed_content) == 1 && is.list(parsed_content[[1]])) {
+    parsed_content <- parsed_content[[1]]
   }
 
-  # Process the response data
-  if ("outputs" %in% names(content) && "gene_order" %in% names(content)) {
-    # Create an empty expression data frame
-    expression <- data.frame(matrix(ncol = length(content$gene_order), nrow = 0))
-    colnames(expression) <- content$gene_order
+  # Check for API-reported errors
+  if (!is.null(parsed_content$error)) {
+    stop(paste0("API error: ", parsed_content$error))
+  }
+  if (!is.null(parsed_content$errors)) {
+    stop(paste0("API errors: ", paste(parsed_content$errors, collapse = "; ")))
+  }
 
-    # Create an empty metadata list
-    metadata_rows <- list()
-
-    # Process each output
-    for (output in content$outputs) {
-      # Add expression data
-      output_expression <- as.data.frame(output$expression)
-      colnames(output_expression) <- content$gene_order
-      expression <- rbind(expression, output_expression)
-
-      # Add metadata
-      for (i in 1:nrow(output_expression)) {
-        metadata_rows <- c(metadata_rows, list(output$metadata))
-      }
-    }
-
-    # Convert metadata list to data frame
-    metadata <- do.call(rbind, lapply(metadata_rows, function(x) {
-      as.data.frame(t(unlist(x)), stringsAsFactors = FALSE)
-    }))
-
-    # Convert expression to integers
-    expression <- as.data.frame(lapply(expression, as.integer))
-
-    # Apply log CPM transformation if requested
-    if (!as_counts) {
-      expression <- log_cpm(expression)
-    }
-
-    return(list(metadata = metadata, expression = expression))
+  if (as_counts) {
+    result <- extract_expression_data(parsed_content)
   } else {
-    stop(paste0(
-      "Unexpected API response structure (expected 'outputs' and 'gene_order'): ",
-      toJSON(content)
-    ))
+    result <- parsed_content
   }
+
+  return(result)
 }
+
+
+
