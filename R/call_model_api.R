@@ -140,51 +140,6 @@ validate_modality <- function(query) {
   invisible(TRUE)
 }
 
-#' @title Log CPM Transformation
-#' @description Transforms raw counts expression data into log1p(CPM) (Counts Per Million).
-#' This is a common normalization method for gene expression data that accounts for
-#' library size differences and applies a log transformation to reduce the effect of outliers.
-#'
-#' @param expression A data.frame containing raw counts expression data.
-#' @return A data.frame containing log1p(CPM) transformed data.
-#' @examples
-#' # Create a sample expression matrix with raw counts
-#' raw_counts <- data.frame(
-#'   gene1 = c(100, 200, 300),
-#'   gene2 = c(50, 100, 150),
-#'   gene3 = c(10, 20, 30)
-#' )
-#'
-#' # Transform to log CPM
-#' log_cpm_data <- log_cpm(raw_counts)
-#' print(log_cpm_data)
-#' @export
-log_cpm <- function(expression) {
-  # Check if the input is a data frame or matrix
-  if (!is.data.frame(expression) && !is.matrix(expression)) {
-    stop("Input must be a data frame or matrix.", call. = FALSE)
-  }
-
-  # Check if the input has more than zero rows and columns
-  if (nrow(expression) == 0 || ncol(expression) == 0) {
-    stop("Input must have at least one row and one column.", call. = FALSE)
-  }
-
-  log_cpm_df <- expression %>%
-    as_tibble() %>%
-    mutate(across(everything(), as.numeric),
-           across(everything(), ~ ifelse(is.na(.), 0, .)),
-           across(everything(), ~ ifelse(. < 0, 0, .)),
-           library_size = rowSums(across(where(is.numeric))),
-           across(where(is.numeric) & !matches("library_size"),
-                  ~ (. / library_size) * 1e6,
-                  .names = "{.col}_cpm")) %>%
-    select(-where(is.numeric) | ends_with("_cpm")) %>%
-    mutate(across(ends_with("_cpm"), log1p))
-
-  return(log_cpm_df)
-}
-
 #' @title Predict Gene Expression
 #' @description Sends a query to the Synthesize Bio API (combined/v1.0) for prediction
 #' and retrieves gene expression samples. This function validates the query, sends it
