@@ -1,0 +1,81 @@
+name: Release to CRAN
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+      notes:
+        description: 'Release notes'
+        required: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          
+      - name: Install dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, any::roxygen2, any::devtools
+          
+      - name: Update version
+        run: |
+          sed -i "s/Version: [0-9]*\.[0-9]*\.[0-9]*/Version: ${{ github.event.inputs.version }}/" DESCRIPTION
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add DESCRIPTION
+          git commit -m "Bump version to ${{ github.event.inputs.version }}"
+          git push
+          
+      - name: Document
+        run: |
+          Rscript -e 'roxygen2::roxygenize()'
+          git add man/
+          git add NAMESPACE
+          git commit -m "Update documentation" || echo "No changes to commit"
+          git push || echo "No changes to push"
+          
+      - name: Run checks
+        run: |
+          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")'
+          
+      - name: Build package
+        run: |
+          mkdir -p build
+          Rscript -e 'pkg <- devtools::build(path = "build")'
+          echo "PACKAGE_PATH=$(ls build/*.tar.gz)" >> $GITHUB_ENV
+          
+      - name: Check package
+        run: |
+          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check", path = Sys.getenv("PACKAGE_PATH"))'
+          
+      - name: Prepare for CRAN submission
+        run: |
+          Rscript -e 'usethis::use_cran_comments()'
+          echo "${{ github.event.inputs.notes }}" > cran-comments.md
+          
+      - name: Submit to CRAN
+        env:
+          CRAN_USER: ${{ secrets.CRAN_USER }}
+          CRAN_PASSWORD: ${{ secrets.CRAN_PASSWORD }}
+        run: |
+          Rscript -e 'devtools::submit_cran(pkg = Sys.getenv("PACKAGE_PATH"))'
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: Release v${{ github.event.inputs.version }}
+          body: ${{ github.event.inputs.notes }}
+          files: ${{ env.PACKAGE_PATH }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
