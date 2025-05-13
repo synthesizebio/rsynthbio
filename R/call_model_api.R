@@ -1,41 +1,3 @@
-#' @title Synthesize Bio API R Client
-#' @description A package for interacting with the Synthesize Bio API to generate
-#' gene expression data based on specified biological conditions.
-#'
-#' @importFrom httr POST add_headers content http_status status_code
-#' @importFrom jsonlite toJSON fromJSON
-#' @importFrom dplyr %>%
-#' @importFrom tidyr pivot_longer
-#'
-#' @name synthesize
-NULL
-
-library(httr)
-library(jsonlite)
-library(dplyr)
-library(tidyr)
-
-#' @title API Base URL
-#' @description Base URL for the Synthesize Bio API
-#' @export
-API_BASE_URL <- "https://app.synthesize.bio"
-
-#' @title Model Modalities
-#' @description A nested list containing supported modalities for different model versions
-#' @format A nested list with structure: model type > version > modalities
-#' @export
-MODEL_MODALITIES <- list(
-  combined = list(
-    "v1.0" = list(
-      "bulk_rna-seq",
-      "lincs",
-      "sra",
-      "single_cell_rna-seq",
-      "microarray",
-      "pseudo_bulk"
-    )
-  )
-)
 
 #' @title Get Valid Modalities
 #' @description Returns a vector of possible output modalities for the supported model.
@@ -108,8 +70,8 @@ get_valid_query <- function() {
 #' This function checks that the query is a list and contains all required keys.
 #'
 #' @param query A list containing the query data.
-#' @return Invisibly returns TRUE if validation passes. Throws an error If the
-#' query structure is invalid or missing required keys.
+#' @return Invisibly returns TRUE if validation passes.
+#' @throws error If the query structure is invalid or missing required keys.
 #' @examples
 #' # Create a valid query
 #' query <- get_valid_query()
@@ -145,7 +107,7 @@ validate_query <- function(query) {
 #'
 #' @param query A list containing the query data.
 #' @return Invisibly returns TRUE if validation passes.
-#' Throws an error If the modality key is missing or if the selected modality is not allowed.
+#' @throws error If the modality key is missing or if the selected modality is not allowed.
 #' @examples
 #' # Create a valid query
 #' query <- get_valid_query()
@@ -225,138 +187,4 @@ log_cpm <- function(expression) {
   log_cpm_transformed <- log1p(cpm)
 
   return(log_cpm_transformed)
-}
-
-#' @title Predict Gene Expression
-#' @description Sends a query to the Synthesize Bio API (combined/v1.0) for prediction
-#' and retrieves gene expression samples. This function validates the query, sends it
-#' to the API, and processes the response into usable data frames.
-#'
-#' @param query A list representing the query data to send to the API.
-#'        Use `get_valid_query()` to generate an example.
-#' @param as_counts Logical, if FALSE, transforms the predicted expression counts into logCPM
-#'        (default is TRUE, returning raw counts).
-#' @return A list with two data frames:
-#'         - 'metadata': contains metadata for each sample
-#'         - 'expression': contains expression data for each sample
-#' Throws an error If the API request fails or the response structure is invalid.
-#' @examples
-#' # Set your API key (in practice, use a more secure method)
-#' \dontrun{
-#' Sys.setenv(SYNTHESIZE_API_KEY = "your_api_key_here")
-#'
-#' # Create a query
-#' query <- get_valid_query()
-#'
-#' # Request raw counts
-#' result <- predict_query(query, as_counts = TRUE)
-#'
-#' # Access the results
-#' metadata <- result$metadata
-#' expression <- result$expression
-#'
-#' # Request log CPM transformed data
-#' log_result <- predict_query(query, as_counts = FALSE)
-#' log_expression <- log_result$expression
-#'
-#' # Explore the top expressed genes in the first sample
-#' head(sort(expression[1,], decreasing = TRUE))
-#' }
-#' @export
-predict_query <- function(query, as_counts = TRUE) {
-  if (!exists("SYNTHESIZE_API_KEY", envir = Sys.getenv())) {
-    stop("Please set the SYNTHESIZE_API_KEY environment variable")
-  }
-
-  api_url <- paste0(API_BASE_URL, "/api/model/combined/v1.0")
-
-  validate_query(query)
-  validate_modality(query)
-
-  # Convert the query list to JSON
-  query_json <- toJSON(query, auto_unbox = TRUE)
-
-  # Make the API request
-  response <- POST(
-    url = api_url,
-    add_headers(
-      Accept = "application/json",
-      Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY")),
-      `Content-Type` = "application/json"
-    ),
-    body = query_json,
-    encode = "raw"
-  )
-
-  if (http_status(response)$category != "Success") {
-    stop(paste0(
-      "API request to ", api_url, " failed with status ",
-      status_code(response), ": ", content(response, "text")
-    ))
-  }
-
-  # Parse JSON response
-  content <- tryCatch({
-    parsed <- fromJSON(content(response, "text", encoding = "UTF-8"))
-    if (is.list(parsed) && length(parsed) == 1 && is.list(parsed[[1]])) {
-      parsed[[1]]
-    } else if (!is.list(parsed)) {
-      stop(paste0("API response is not a JSON object: ", content(response, "text")))
-    } else {
-      parsed
-    }
-  }, error = function(e) {
-    stop(paste0("Failed to decode JSON from API response: ", content(response, "text")))
-  })
-
-  # Check for errors in the response
-  if ("error" %in% names(content)) {
-    stop(paste0("Error in response from API received: ", content$error))
-  }
-  if ("errors" %in% names(content)) {
-    stop(paste0("Error in response from API received: ", content$errors))
-  }
-
-  # Process the response data
-  if ("outputs" %in% names(content) && "gene_order" %in% names(content)) {
-    # Create an empty expression data frame
-    expression <- data.frame(matrix(ncol = length(content$gene_order), nrow = 0))
-    colnames(expression) <- content$gene_order
-
-    # Create an empty metadata list
-    metadata_rows <- list()
-
-    # Process each output
-    for (output in content$outputs) {
-      # Add expression data
-      output_expression <- as.data.frame(output$expression)
-      colnames(output_expression) <- content$gene_order
-      expression <- rbind(expression, output_expression)
-
-      # Add metadata
-      for (i in 1:nrow(output_expression)) {
-        metadata_rows <- c(metadata_rows, list(output$metadata))
-      }
-    }
-
-    # Convert metadata list to data frame
-    metadata <- do.call(rbind, lapply(metadata_rows, function(x) {
-      as.data.frame(t(unlist(x)), stringsAsFactors = FALSE)
-    }))
-
-    # Convert expression to integers
-    expression <- as.data.frame(lapply(expression, as.integer))
-
-    # Apply log CPM transformation if requested
-    if (!as_counts) {
-      expression <- log_cpm(expression)
-    }
-
-    return(list(metadata = metadata, expression = expression))
-  } else {
-    stop(paste0(
-      "Unexpected API response structure (expected 'outputs' and 'gene_order'): ",
-      toJSON(content)
-    ))
-  }
 }
