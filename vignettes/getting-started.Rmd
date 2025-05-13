@@ -39,28 +39,44 @@ remotes::install_github("synthesizebio/rsynthbio")
 Once installed, load the package:
 
 ```{r setup}
-library(synthesizeR)
+library(rsynthbio)
 ```
 
 ## Authentication
 
-Before using the Synthesize Bio API, you need to set up your API key.
+Before using the Synthesize Bio API, you need to set up your API token. The package provides a secure way to handle authentication:
 
-To start using pysynthbio, first you need to have an account with synthesize.bio.
-Go here to create and account and get your API key: https://app.synthesize.bio/
+```{r auth-secure}
+# Securely prompt for and store your API token
+# The token will not be visible in the console
+set_synthesize_token()
 
-Once you have an account you can get [your API key from your profile](https://app.synthesize.bio/profile)
+# You can also store the token in your system keyring for persistence
+# across R sessions (requires the 'keyring' package)
+set_synthesize_token(use_keyring = TRUE)
 
-The best practice is to store your API key in your environment variables:
+# In future sessions, load the stored token
+load_synthesize_token_from_keyring()
 
-```{r auth, eval=FALSE}
-# Set API key for the current R session
-Sys.setenv(SYNTHESIZE_API_KEY = "your_api_key_here")
-
-# For persistent storage, add to your .Renviron file
-# file.edit("~/.Renviron")
-# Add: SYNTHESIZE_API_KEY=your_api_key_here
+# Check if a token is already set
+has_synthesize_token()
 ```
+
+You can obtain an API token by registering at [Synthesize Bio](https://app.synthesize.bio).
+
+### Security Best Practices
+
+For security reasons, remember to clear your token when you're done:
+
+```{r clear-token}
+# Clear token from current session
+clear_synthesize_token()
+
+# Clear token from both session and keyring
+clear_synthesize_token(remove_from_keyring = TRUE)
+```
+
+Never hardcode your token in scripts that will be shared or committed to version control.
 
 You can obtain an API key by registering at [Synthesize Bio](https://app.synthesize.bio).
 
