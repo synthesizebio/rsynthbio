@@ -24,7 +24,12 @@
 #' }
 #' @export
 set_synthesize_token <- function(use_keyring = FALSE, token = NULL) {
+  
   if (is.null(token)) {
+    message("Create an account at https://app.synthesize.bio/ then go to your profile.")
+    message("Click create token then click the copy button in the corner.")
+    
+    browseURL("https://app.synthesize.bio/profile")
     token <- getPass::getPass(msg = "Paste Synthesize Bio API token here and press enter: ")
   }
   
@@ -35,7 +40,7 @@ set_synthesize_token <- function(use_keyring = FALSE, token = NULL) {
   if (use_keyring) {
     if (requireNamespace("keyring", quietly = TRUE)) {
       tryCatch({
-        keyring::key_set_with_value(service = "synthesizeR",
+        keyring::key_set_with_value(service = "rsynthbio",
                                     username = "api_token",
                                     password = token)
         message("API token stored in system keyring.")
@@ -71,7 +76,7 @@ load_synthesize_token_from_keyring <- function() {
   }
   
   tryCatch({
-    token <- keyring::key_get(service = "synthesizeR", username = "api_token")
+    token <- keyring::key_get(service = "rsynthbio", username = "api_token")
     Sys.setenv(SYNTHESIZE_API_KEY = token)
     message("API token loaded from keyring and set for current session.")
     invisible(TRUE)
@@ -112,8 +117,8 @@ clear_synthesize_token <- function(remove_from_keyring = FALSE) {
   if (remove_from_keyring) {
     if (requireNamespace("keyring", quietly = TRUE)) {
       tryCatch({
-        if (keyring::key_list(service = "synthesizeR")[1, "username"] == "api_token") {
-          keyring::key_delete(service = "synthesizeR", username = "api_token")
+        if (keyring::key_list(service = "rsynthbio")[1, "username"] == "api_token") {
+          keyring::key_delete(service = "rsynthbio", username = "api_token")
           message("API token removed from system keyring.")
         } else {
           message("No API token was found in the keyring.")
