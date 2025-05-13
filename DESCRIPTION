@@ -1,18 +1,22 @@
 Type: Package
-Package: SOME_NAME
-Title: 
+Package: rsynthbio
+Title: API wrapper in R
 Version: 0.0.1
 Authors@R: c(
-    person("first", "name", , 
+    person("Candace", "Savonen", , 
     c("email"), 
     role = c("aut", "cre")),
     )
-Description: SOME DESCRIPTION HERE
+Description: Access Synthesize Bio models from their API using this wrapper. 
 License: GPL-3
-URL: https://github.com/synthesizebio/repo_name
-BugReports: https://github.com/synthesizebio/repo_name/issues
+URL: https://github.com/synthesizebio/rsynthbio
+BugReports: https://github.com/synthesizebio/rsynthbio/issues
 Imports:
-    magrittr 
+    magrittr, 
+    dplyr, 
+    httr, 
+    tidyr, 
+    aws.s3
 Suggests: 
     rmarkdown,
     testthat (>= 3.0.0),
