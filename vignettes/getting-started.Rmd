@@ -1,5 +1,5 @@
 ---
-title: "Getting Started with synthesizeR"
+title: "Getting Started with rsynthbio"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Getting Started with synthesizeR}
@@ -113,6 +113,16 @@ The query consists of:
 2. `mode`: The prediction mode (e.g., "mean estimation")
 3. `inputs`: A list of biological conditions to generate data for
 
+
+```{r predict}
+# Request raw counts data
+result <- predict_query(query)
+
+# Structure of the result
+result
+```
+
+
 ### Modifying a Query
 
 You can customize the query to fit your specific research needs:
@@ -168,46 +178,20 @@ dim(expression)
 
 # View metadata sample
 head(metadata)
-
-# Find top expressed genes in first sample
-top_genes <- sort(expression[1,], decreasing = TRUE)
-head(top_genes)
 ```
 
-## Visualization Example
+You may want to process the data in chunks or save it for later use:
 
-Here's a simple example of how to visualize the generated expression data:
+```{r large-data, eval=FALSE}
+# Save results to RDS file
+saveRDS(result, "synthesize_results.rds")
 
-```{r visualization, eval=FALSE}
-library(ggplot2)
-library(tidyr)
+# Load previously saved results
+result <- readRDS("synthesize_results.rds")
 
-# Convert expression data to long format for plotting
-sample_idx <- 1:3  # Select first three samples
-genes_to_plot <- names(sort(apply(expression[sample_idx,], 2, mean), decreasing = TRUE))[1:20]
-
-plot_data <- expression[sample_idx, genes_to_plot] %>%
-  as.data.frame() %>%
-  tibble::rownames_to_column("sample") %>%
-  pivot_longer(cols = -sample, names_to = "gene", values_to = "expression")
-
-# Add metadata information
-plot_data$condition <- rep(paste(
-  metadata$sample_type[sample_idx], 
-  metadata$tissue[sample_idx],
-  sep = " - "
-), each = length(genes_to_plot))
-
-# Create heatmap
-ggplot(plot_data, aes(x = gene, y = sample, fill = log1p(expression))) +
-  geom_tile() +
-  scale_fill_viridis_c() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Expression of Top 20 Genes", 
-       fill = "log1p(counts)",
-       x = "Gene",
-       y = "Sample")
+# Export as CSV
+write.csv(result$expression, "expression_matrix.csv")
+write.csv(result$metadata, "sample_metadata.csv")
 ```
 
 ## Advanced Usage
@@ -222,30 +206,6 @@ validate_query(query)
 
 # Validate modality
 validate_modality(query)
-
-# Example of handling validation errors
-tryCatch({
-  invalid_query <- list(inputs = list(), mode = "mean estimation")
-  validate_query(invalid_query)
-}, error = function(e) {
-  message("Validation error: ", e$message)
-})
-```
-
-### Working with Large Results
-
-For large-scale analyses, you may want to process the data in chunks or save it for later use:
-
-```{r large-data, eval=FALSE}
-# Save results to RDS file
-saveRDS(result, "synthesize_results.rds")
-
-# Load previously saved results
-result <- readRDS("synthesize_results.rds")
-
-# Export as CSV
-write.csv(result$expression, "expression_matrix.csv")
-write.csv(result$metadata, "sample_metadata.csv")
 ```
 
 ## Session info
@@ -256,6 +216,5 @@ sessionInfo()
 
 ## Additional Resources
 
-- [Synthesize Bio Documentation](https://docs.synthesize.bio)
-- [Package Source Code](https://github.com/synthesizebio/synthesizeR)
-- [File Bug Reports](https://github.com/synthesizebio/synthesizeR/issues)
+- [Package Source Code](https://github.com/synthesizebio/rsynthbio)
+- [File Bug Reports](https://github.com/synthesizebio/rsynthbio/issues)
