@@ -54,7 +54,11 @@ set_synthesize_token()
 # You can also store the token in your system keyring for persistence
 # across R sessions (requires the 'keyring' package)
 set_synthesize_token(use_keyring = TRUE)
+```
 
+Loading your API key for a session. 
+
+```{r}
 # In future sessions, load the stored token
 load_synthesize_token_from_keyring()
 
@@ -68,7 +72,7 @@ You can obtain an API token by registering at [Synthesize Bio](https://app.synth
 
 For security reasons, remember to clear your token when you're done:
 
-```{r clear-token}
+```{r clear-token, eval = FALSE}
 # Clear token from current session
 clear_synthesize_token()
 
@@ -139,19 +143,18 @@ query$inputs[[3]] <- list(
 
 ### Making Predictions
 
-Once your query is ready, you can send it to the API to generate gene expression data:
+Once your query is ready, you can send it to the API to generate gene expression data.
 
 ```{r predict}
 # Request raw counts data
 result <- predict_query(query, as_counts = TRUE)
 
 # Structure of the result
-names(result)
+result
 ```
 
-The result contains two data frames:
-- `metadata`: Information about each sample
-- `expression`: Gene expression data (genes as columns, samples as rows)
+If you want more than just the result of the metdata and expression returned put `as_counts = FALSE`.
+
 
 ### Working with Results
 
@@ -165,10 +168,6 @@ dim(expression)
 
 # View metadata sample
 head(metadata)
-
-# Get log-transformed data instead of raw counts
-log_result <- predict_query(query, as_counts = FALSE)
-log_expression <- log_result$expression
 
 # Find top expressed genes in first sample
 top_genes <- sort(expression[1,], decreasing = TRUE)
