@@ -108,8 +108,8 @@ get_valid_query <- function() {
 #' This function checks that the query is a list and contains all required keys.
 #'
 #' @param query A list containing the query data.
-#' @return Invisibly returns TRUE if validation passes.
-#' @throws error If the query structure is invalid or missing required keys.
+#' @return Invisibly returns TRUE if validation passes. Throws an error If the
+#' query structure is invalid or missing required keys.
 #' @examples
 #' # Create a valid query
 #' query <- get_valid_query()
@@ -145,7 +145,7 @@ validate_query <- function(query) {
 #'
 #' @param query A list containing the query data.
 #' @return Invisibly returns TRUE if validation passes.
-#' @throws error If the modality key is missing or if the selected modality is not allowed.
+#' Throws an error If the modality key is missing or if the selected modality is not allowed.
 #' @examples
 #' # Create a valid query
 #' query <- get_valid_query()
@@ -239,7 +239,7 @@ log_cpm <- function(expression) {
 #' @return A list with two data frames:
 #'         - 'metadata': contains metadata for each sample
 #'         - 'expression': contains expression data for each sample
-#' @throws error If the API request fails or the response structure is invalid.
+#' Throws an error If the API request fails or the response structure is invalid.
 #' @examples
 #' # Set your API key (in practice, use a more secure method)
 #' \dontrun{
