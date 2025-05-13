@@ -160,33 +160,29 @@ validate_modality <- function(query) {
 #' print(log_cpm_data)
 #' @export
 log_cpm <- function(expression) {
-  # Convert to numeric and replace NA with 0
-  expression_numeric <- as.data.frame(lapply(expression, function(x) {
-    as.numeric(as.character(x))
-  }))
-  expression_numeric[is.na(expression_numeric)] <- 0
-  expression_numeric[expression_numeric < 0] <- 0
-
-  # Calculate library size
-  library_size <- rowSums(expression_numeric)
-
-  # Initialize CPM matrix
-  cpm <- matrix(0, nrow = nrow(expression), ncol = ncol(expression))
-  colnames(cpm) <- colnames(expression)
-  cpm <- as.data.frame(cpm)
-
-  # Calculate CPM for non-zero libraries
-  non_zero_library <- library_size > 0
-  if (any(non_zero_library)) {
-    for (i in which(non_zero_library)) {
-      cpm[i, ] <- expression_numeric[i, ] / library_size[i] * 1e6
-    }
+  # Check if the input is a data frame or matrix
+  if (!is.data.frame(expression) && !is.matrix(expression)) {
+    stop("Input must be a data frame or matrix.", call. = FALSE)
   }
 
-  # Log transform
-  log_cpm_transformed <- log1p(cpm)
+  # Check if the input has more than zero rows and columns
+  if (nrow(expression) == 0 || ncol(expression) == 0) {
+    stop("Input must have at least one row and one column.", call. = FALSE)
+  }
 
-  return(log_cpm_transformed)
+  log_cpm_df <- expression %>%
+    as_tibble() %>%
+    mutate(across(everything(), as.numeric),
+           across(everything(), ~ ifelse(is.na(.), 0, .)),
+           across(everything(), ~ ifelse(. < 0, 0, .)),
+           library_size = rowSums(across(where(is.numeric))),
+           across(where(is.numeric) & !matches("library_size"),
+                  ~ (. / library_size) * 1e6,
+                  .names = "{.col}_cpm")) %>%
+    select(-where(is.numeric) | ends_with("_cpm")) %>%
+    mutate(across(ends_with("_cpm"), log1p))
+
+  return(log_cpm_df)
 }
 
 #' @title Predict Gene Expression
