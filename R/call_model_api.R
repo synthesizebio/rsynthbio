@@ -243,6 +243,10 @@ log_cpm <- function(expression) {
 #' @examples
 #' # Set your API key (in practice, use a more secure method)
 #' \dontrun{
+#'
+#' To start using pysynthbio, first you need to have an account with synthesize.bio.
+#' # Go here to create one: https://app.synthesize.bio/
+#'
 #' Sys.setenv(SYNTHESIZE_API_KEY = "your_api_key_here")
 #'
 #' # Create a query
