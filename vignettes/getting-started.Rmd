@@ -49,6 +49,8 @@ Before using the Synthesize Bio API, you need to set up your API key.
 To start using pysynthbio, first you need to have an account with synthesize.bio.
 Go here to create and account and get your API key: https://app.synthesize.bio/
 
+Once you have an account you can get [your API key from your profile](https://app.synthesize.bio/profile)
+
 The best practice is to store your API key in your environment variables:
 
 ```{r auth, eval=FALSE}
