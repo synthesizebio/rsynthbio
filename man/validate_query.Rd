@@ -10,8 +10,8 @@ validate_query(query)
 \item{query}{A list containing the query data.}
 }
 \value{
-Invisibly returns TRUE if validation passes. Throws an error If the
-query structure is invalid or missing required keys.
+Invisibly returns TRUE if validation passes.
+Throws an error If the query structure is invalid or missing required keys.
 }
 \description{
 Validates the structure and contents of the query based on the v1.0 model.
