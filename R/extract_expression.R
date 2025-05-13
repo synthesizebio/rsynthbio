@@ -7,64 +7,65 @@
 #' @param as_counts Logical, if FALSE, transforms the predicted expression counts into logCPM 
 #'        (default is TRUE, returning raw counts).
 #' @return A list with two components:
-#'         - metadata: data frame containing sample metadata
-#'         - expression: data frame containing combined gene expression data
+#'         - metadata: tibble containing sample metadata
+#'         - expression: tibble containing combined gene expression data
 #'         
 #' @export
 extract_expression_data <- function(api_response, as_counts = TRUE) {
   # Extract gene names
   gene_order <- api_response$gene_order
   
-  # Initialize empty data frames for expression and metadata
-  all_expression <- NULL
-  all_metadata <- data.frame()
-  
-  # Process each output group
-  for (i in seq_along(api_response$outputs$expression)) {
+  # Process expression data and metadata
+  results <- purrr::map_dfr(seq_along(api_response$outputs$expression), function(group_idx) {
     # Get expression data for this group
-    expr_data <- api_response$outputs$expression[[i]]
+    expr_data <- api_response$outputs$expression[[group_idx]]
     
-    # Convert to data frame and add column names (genes)
-    expr_df <- as.data.frame(expr_data)
-    colnames(expr_df) <- gene_order
+    # Convert to tibble with gene names - explicitly set column names to avoid warnings
+    expr_tibble <- expr_data %>%
+      tibble::as_tibble(.name_repair = "minimal") %>%
+      purrr::set_names(gene_order)
     
-    # Get metadata for this group
-    group_metadata <- api_response$outputs$metadata[i, , drop = FALSE]
+    # Get metadata for this group and repeat for each sample
+    metadata_tibble <- api_response$outputs$metadata[group_idx, , drop = FALSE] %>%
+      tibble::as_tibble() %>%
+      tidyr::uncount(nrow(expr_tibble))
     
-    # Repeat metadata for each sample in this group
-    n_samples <- nrow(expr_df)
-    repeated_metadata <- group_metadata[rep(1, n_samples), , drop = FALSE]
-    rownames(repeated_metadata) <- NULL
-    
-    # Add sample IDs
-    repeated_metadata$sample_id <- paste0("sample_", 
-                                          ifelse(is.null(all_metadata), 1, nrow(all_metadata) + 1):
-                                            (ifelse(is.null(all_metadata), 1, nrow(all_metadata) + 1) + n_samples - 1))
-    
-    # Combine with previous results
-    if (is.null(all_expression)) {
-      all_expression <- expr_df
-    } else {
-      all_expression <- rbind(all_expression, expr_df)
-    }
-    
-    all_metadata <- rbind(all_metadata, repeated_metadata)
-  }
+    # Return combined data with sample index
+    dplyr::bind_cols(
+      metadata_tibble,
+      sample_group = group_idx,
+      sample_index = seq_len(nrow(expr_tibble))
+    )
+  }, .id = "output_group") %>%
+    # Create unique sample IDs
+    dplyr::mutate(sample_id = paste0("sample_", dplyr::row_number()))
   
-  # Make sure all_expression is a data frame with integer values
-  all_expression <- as.data.frame(lapply(all_expression, as.integer))
+  # Separate metadata from sample indices
+  metadata <- results %>%
+    dplyr::select(-sample_group, -sample_index)
   
-  # Add sample IDs as row names
-  rownames(all_expression) <- all_metadata$sample_id
+  # Process expression data
+  expression <- purrr::map_dfr(seq_along(api_response$outputs$expression), function(group_idx) {
+    api_response$outputs$expression[[group_idx]] %>%
+      tibble::as_tibble(.name_repair = "minimal") %>%  # Add .name_repair parameter here
+      purrr::set_names(gene_order)
+  }) %>%
+    # Convert all columns to integers
+    dplyr::mutate(dplyr::across(dplyr::everything(), as.integer))
+  
+  # Add sample IDs as row names (tidyverse approach typically avoids rownames)
+  expression <- expression %>%
+    dplyr::mutate(sample_id = metadata$sample_id) %>%
+    tibble::column_to_rownames("sample_id")
   
   # Apply log CPM transformation if requested
   if (!as_counts) {
-    all_expression <- log_cpm(all_expression)
+    expression <- log_cpm(expression)
   }
   
   # Return both components
   return(list(
-    metadata = all_metadata,
-    expression = all_expression
+    metadata = metadata,
+    expression = expression
   ))
 }

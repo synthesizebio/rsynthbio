@@ -196,8 +196,10 @@ log_cpm <- function(expression) {
 #'
 #' @param query A list representing the query data to send to the API.
 #'        Use `get_valid_query()` to generate an example.
-#' @param as_counts Logical, if FALSE, transforms the predicted expression counts into logCPM
-#'        (default is TRUE, returning raw counts).
+#' @param raw_response If you do not want the gene expression data extracted from the JSON
+#' response set this to FALSE. Default is to return only the expression and metadata.
+#' @param as_counts passed to extract_expression() function. Logical, if FALSE,
+#' transforms the predicted expression counts into logCPM (default is TRUE, returning raw counts).
 #' @return A list with two data frames:
 #'         - 'metadata': contains metadata for each sample
 #'         - 'expression': contains expression data for each sample
@@ -229,7 +231,7 @@ log_cpm <- function(expression) {
 #' head(sort(expression[1,], decreasing = TRUE))
 #' }
 #' @export
-predict_query <- function(query, as_counts = TRUE) {
+predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
   if (!has_synthesize_token()) {
     stop("Please set your API key for synthesize Bio using set_synthesize_token()")
   }
@@ -281,8 +283,10 @@ predict_query <- function(query, as_counts = TRUE) {
     stop(paste0("API errors: ", paste(parsed_content$errors, collapse = "; ")))
   }
 
-  if (as_counts) {
-    result <- extract_expression_data(parsed_content)
+  if (!raw_response) {
+    result <- extract_expression_data(
+      parsed_content,
+      as_counts = as_counts)
   } else {
     result <- parsed_content
   }
