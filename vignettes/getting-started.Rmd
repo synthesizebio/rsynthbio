@@ -1,8 +1,8 @@
 ---
-title: "getting-started"
+title: "Getting Started with synthesizeR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{getting-started}
+  %\VignetteIndexEntry{Getting Started with synthesizeR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,35 +10,230 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE  # Set to FALSE since API calls require credentials
 )
 ```
 
-# SOME_PACKAGE
+# rsynthbio
 
-`SOME_PACKAGE` is an R package that ____
+`rsynthbio` is an R package that provides a convenient interface to the Synthesize Bio API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access synthetic transcriptomic data for various modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
 
 ## How to install
 
-You can install SOME_PACKAGE from CRAN.
-```
-install.packages("SOME_PACKAGE")
+You can install `rsynthbio` from CRAN:
+
+```{r installation, eval=FALSE}
+install.packages("rsynthbio")
 ```
 
-If you want the development version (not advised) you can install using the `remotes` package to install from GitHub.
-```
+If you want the development version, you can install using the `remotes` package to install from GitHub:
+
+```{r github-installation, eval=FALSE}
 if (!("remotes" %in% installed.packages())) {
   install.packages("remotes")
 }
-remotes::install_github("synthesizebio/SOME_PACKAGE")
+remotes::install_github("synthesizebio/rsynthbio")
 ```
 
-```
-library(SOME_PACKAGE)
+Once installed, load the package:
+
+```{r setup}
+library(synthesizeR)
 ```
 
-### Session info
+## Authentication
 
-```{r}
+Before using the Synthesize Bio API, you need to set up your API key. The best practice is to store your API key in your environment variables:
+
+```{r auth, eval=FALSE}
+# Set API key for the current R session
+Sys.setenv(SYNTHESIZE_API_KEY = "your_api_key_here")
+
+# For persistent storage, add to your .Renviron file
+# file.edit("~/.Renviron")
+# Add: SYNTHESIZE_API_KEY=your_api_key_here
+```
+
+You can obtain an API key by registering at [Synthesize Bio](https://app.synthesize.bio).
+
+## Basic Usage
+
+### Available Modalities
+
+The package supports various data modalities. You can view all available modalities with:
+
+```{r modalities}
+# Check available modalities
+get_valid_modalities()
+```
+
+### Creating a Query
+
+The first step to generating synthetic gene expression data is to create a query. The package provides a sample query that you can modify:
+
+```{r query}
+# Get a sample query
+query <- get_valid_query()
+
+# Inspect the query structure
+str(query)
+```
+
+The query consists of:
+
+1. `output_modality`: The type of gene expression data to generate
+2. `mode`: The prediction mode (e.g., "mean estimation")
+3. `inputs`: A list of biological conditions to generate data for
+
+### Modifying a Query
+
+You can customize the query to fit your specific research needs:
+
+```{r modify-query}
+# Change output modality
+query$output_modality <- "bulk_rna-seq"
+
+# Adjust number of samples
+query$inputs[[1]]$num_samples <- 10
+
+# Modify cell line information
+query$inputs[[1]]$metadata$cell_line <- "MCF7"
+query$inputs[[1]]$metadata$perturbation <- "TP53"
+
+# Add a new condition
+query$inputs[[3]] <- list(
+  metadata = list(
+    tissue = "lung",
+    disease = "adenocarcinoma",
+    sex = "male",
+    age = "57 years",
+    sample_type = "primary tissue"
+  ),
+  num_samples = 3
+)
+```
+
+### Making Predictions
+
+Once your query is ready, you can send it to the API to generate gene expression data:
+
+```{r predict}
+# Request raw counts data
+result <- predict_query(query, as_counts = TRUE)
+
+# Structure of the result
+names(result)
+```
+
+The result contains two data frames:
+- `metadata`: Information about each sample
+- `expression`: Gene expression data (genes as columns, samples as rows)
+
+### Working with Results
+
+```{r analyze}
+# Access metadata and expression matrices
+metadata <- result$metadata
+expression <- result$expression
+
+# Check dimensions
+dim(expression)
+
+# View metadata sample
+head(metadata)
+
+# Get log-transformed data instead of raw counts
+log_result <- predict_query(query, as_counts = FALSE)
+log_expression <- log_result$expression
+
+# Find top expressed genes in first sample
+top_genes <- sort(expression[1,], decreasing = TRUE)
+head(top_genes)
+```
+
+## Visualization Example
+
+Here's a simple example of how to visualize the generated expression data:
+
+```{r visualization, eval=FALSE}
+library(ggplot2)
+library(tidyr)
+
+# Convert expression data to long format for plotting
+sample_idx <- 1:3  # Select first three samples
+genes_to_plot <- names(sort(apply(expression[sample_idx,], 2, mean), decreasing = TRUE))[1:20]
+
+plot_data <- expression[sample_idx, genes_to_plot] %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column("sample") %>%
+  pivot_longer(cols = -sample, names_to = "gene", values_to = "expression")
+
+# Add metadata information
+plot_data$condition <- rep(paste(
+  metadata$sample_type[sample_idx], 
+  metadata$tissue[sample_idx],
+  sep = " - "
+), each = length(genes_to_plot))
+
+# Create heatmap
+ggplot(plot_data, aes(x = gene, y = sample, fill = log1p(expression))) +
+  geom_tile() +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Expression of Top 20 Genes", 
+       fill = "log1p(counts)",
+       x = "Gene",
+       y = "Sample")
+```
+
+## Advanced Usage
+
+### Custom Validation
+
+You can validate your queries before sending them to the API:
+
+```{r validation}
+# Validate structure
+validate_query(query)
+
+# Validate modality
+validate_modality(query)
+
+# Example of handling validation errors
+tryCatch({
+  invalid_query <- list(inputs = list(), mode = "mean estimation")
+  validate_query(invalid_query)
+}, error = function(e) {
+  message("Validation error: ", e$message)
+})
+```
+
+### Working with Large Results
+
+For large-scale analyses, you may want to process the data in chunks or save it for later use:
+
+```{r large-data, eval=FALSE}
+# Save results to RDS file
+saveRDS(result, "synthesize_results.rds")
+
+# Load previously saved results
+result <- readRDS("synthesize_results.rds")
+
+# Export as CSV
+write.csv(result$expression, "expression_matrix.csv")
+write.csv(result$metadata, "sample_metadata.csv")
+```
+
+## Session info
+
+```{r session-info}
 sessionInfo()
 ```
+
+## Additional Resources
+
+- [Synthesize Bio Documentation](https://docs.synthesize.bio)
+- [Package Source Code](https://github.com/synthesizebio/synthesizeR)
+- [File Bug Reports](https://github.com/synthesizebio/synthesizeR/issues)
