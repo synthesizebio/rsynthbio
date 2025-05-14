@@ -5,6 +5,8 @@
 #'
 #' @param expression A data.frame containing raw counts expression data.
 #' @return A data.frame containing log1p(CPM) transformed data.
+#' @import dplyr
+#' @importFrom tibble as_tibble
 #' @examples
 #' # Create a sample expression matrix with raw counts
 #' raw_counts <- data.frame(
@@ -29,16 +31,16 @@ log_cpm <- function(expression) {
   }
 
   log_cpm_df <- expression %>%
-    as_tibble() %>%
-    mutate(across(everything(), as.numeric),
-           across(everything(), ~ ifelse(is.na(.), 0, .)),
-           across(everything(), ~ ifelse(. < 0, 0, .)),
-           library_size = rowSums(across(where(is.numeric))),
-           across(where(is.numeric) & !matches("library_size"),
+    tibble::as_tibble() %>%
+    dplyr::mutate(dplyr::across(everything(), as.numeric),
+           dplyr::across(everything(), ~ ifelse(is.na(.), 0, .)),
+           dplyr::across(everything(), ~ ifelse(. < 0, 0, .)),
+           library_size = dplyr::rowSums(dplyr::across(where(is.numeric))),
+           dplyr::across(dplyr::where(is.numeric) & !matches("library_size"),
                   ~ (. / library_size) * 1e6,
                   .names = "{.col}_cpm")) %>%
-    select(-where(is.numeric) | ends_with("_cpm")) %>%
-    mutate(across(ends_with("_cpm"), log1p))
+    dplyr::select(-dplyr::where(is.numeric) | dplyr::ends_with("_cpm")) %>%
+    dplyr::mutate(dplyr::across(dplyr::ends_with("_cpm"), log1p))
 
   return(log_cpm_df)
 }
@@ -51,6 +53,10 @@ log_cpm <- function(expression) {
 #' @param api_response The raw API response list
 #' @param as_counts Logical, if FALSE, transforms the predicted expression counts into logCPM
 #'        (default is TRUE, returning raw counts).
+#' @importFrom purrr map_dfr set_names
+#' @importFrom tibble as_tibble
+#' @importFrom tidyr uncount
+#' @importFrom dplyr bind_cols mutate across
 #' @return A list with two components:
 #'         - metadata: tibble containing sample metadata
 #'         - expression: tibble containing combined gene expression data
