@@ -1,23 +1,26 @@
 Type: Package
-Package: SOME_NAME
-Title: 
+Package: rsynthbio
+Title: API wrapper in R
 Version: 0.0.1
 Authors@R: c(
-    person("first", "name", , 
-    c("email"), 
-    role = c("aut", "cre")),
+    person("Candace", "Savonen", , 
+    c("cansav09@gmail.com", "candace@synthesize.bio"),
+    role = c("aut", "cre"))
     )
-Description: SOME DESCRIPTION HERE
-License: GPL-3
-URL: https://github.com/synthesizebio/repo_name
-BugReports: https://github.com/synthesizebio/repo_name/issues
+Description: Access Synthesize Bio models from their API using this wrapper. Does additional data handling. 
+URL: https://github.com/synthesizebio/rsynthbio
+BugReports: https://github.com/synthesizebio/rsynthbio/issues
 Imports:
-    magrittr 
+    getPass,
+    keyring
 Suggests: 
     rmarkdown,
+    knitr,
     testthat (>= 3.0.0),
+    mockery
 Config/testthat/edition: 3
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 LazyData: true
 VignetteBuilder: knitr
+License: GPL-3 + file LICENSE
