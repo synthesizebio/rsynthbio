@@ -140,55 +140,6 @@ validate_modality <- function(query) {
   invisible(TRUE)
 }
 
-#' @title Log CPM Transformation
-#' @description Transforms raw counts expression data into log1p(CPM) (Counts Per Million).
-#' This is a common normalization method for gene expression data that accounts for
-#' library size differences and applies a log transformation to reduce the effect of outliers.
-#'
-#' @param expression A data.frame containing raw counts expression data.
-#' @return A data.frame containing log1p(CPM) transformed data.
-#' @examples
-#' # Create a sample expression matrix with raw counts
-#' raw_counts <- data.frame(
-#'   gene1 = c(100, 200, 300),
-#'   gene2 = c(50, 100, 150),
-#'   gene3 = c(10, 20, 30)
-#' )
-#'
-#' # Transform to log CPM
-#' log_cpm_data <- log_cpm(raw_counts)
-#' print(log_cpm_data)
-#' @export
-log_cpm <- function(expression) {
-  # Convert to numeric and replace NA with 0
-  expression_numeric <- as.data.frame(lapply(expression, function(x) {
-    as.numeric(as.character(x))
-  }))
-  expression_numeric[is.na(expression_numeric)] <- 0
-  expression_numeric[expression_numeric < 0] <- 0
-
-  # Calculate library size
-  library_size <- rowSums(expression_numeric)
-
-  # Initialize CPM matrix
-  cpm <- matrix(0, nrow = nrow(expression), ncol = ncol(expression))
-  colnames(cpm) <- colnames(expression)
-  cpm <- as.data.frame(cpm)
-
-  # Calculate CPM for non-zero libraries
-  non_zero_library <- library_size > 0
-  if (any(non_zero_library)) {
-    for (i in which(non_zero_library)) {
-      cpm[i, ] <- expression_numeric[i, ] / library_size[i] * 1e6
-    }
-  }
-
-  # Log transform
-  log_cpm_transformed <- log1p(cpm)
-
-  return(log_cpm_transformed)
-}
-
 #' @title Predict Gene Expression
 #' @description Sends a query to the Synthesize Bio API (combined/v1.0) for prediction
 #' and retrieves gene expression samples. This function validates the query, sends it

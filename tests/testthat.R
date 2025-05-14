@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(SOME_PACKAGE)
+library(rsynthbio)
 
-test_check("SOME_PACKAGE")
+test_check("rsynthbio")

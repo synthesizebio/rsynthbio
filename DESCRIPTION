@@ -4,24 +4,29 @@ Title: API wrapper in R
 Version: 0.0.1
 Authors@R: c(
     person("Candace", "Savonen", , 
-    c("email"), 
-    role = c("aut", "cre")),
+    "cansav09@gmail.com", 
+    role = c("aut", "cre"))
     )
-Description: Access Synthesize Bio models from their API using this wrapper. 
-License: GPL-3
+Description: Access Synthesize Bio models from their API using this wrapper. Does additional data handling. 
 URL: https://github.com/synthesizebio/rsynthbio
 BugReports: https://github.com/synthesizebio/rsynthbio/issues
 Imports:
-    magrittr, 
-    dplyr, 
+    getPass,
+    keyring, 
+    jsonlite,
     httr, 
+    dplyr, 
+    magrittr,
     tidyr, 
     aws.s3
 Suggests: 
     rmarkdown,
+    knitr,
     testthat (>= 3.0.0),
+    mockery
 Config/testthat/edition: 3
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 LazyData: true
 VignetteBuilder: knitr
+License: GPL-3 + file LICENSE
