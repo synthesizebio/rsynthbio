@@ -1,7 +1,3 @@
-library(dplyr)
-library(purrr)
-library(tibble)
-library(tidyr)
 
 # Test file for log_cpm and extract_expression_data functions
 
