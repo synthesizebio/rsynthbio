@@ -194,7 +194,6 @@ write.csv(result$expression, "expression_matrix.csv")
 write.csv(result$metadata, "sample_metadata.csv")
 ```
 
-## Advanced Usage
 
 ### Custom Validation
 
