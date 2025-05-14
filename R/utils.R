@@ -36,30 +36,3 @@ MODEL_MODALITIES <- list(
     )
   )
 )
-
-
-
-#' @title Synthesize Bio API R Client
-#' @description A package for interacting with the Synthesize Bio API to generate
-#' gene expression data based on specified biological conditions.
-#' @import mockery
-#' @export
-mock_api_response <- function(success = TRUE, error = NULL, data = NULL) {
-  if (success) {
-    response <- list(
-      status_code = 200,
-      headers = list(`content-type` = "application/json"),
-      content = charToRaw('{"status":"success"}')
-    )
-    class(response) <- "response"
-    return(response)
-  } else {
-    response <- list(
-      status_code = 400,
-      headers = list(`content-type` = "application/json"),
-      content = charToRaw('{"error":"Mock API error"}')
-    )
-    class(response) <- "response"
-    return(response)
-  }
-}
