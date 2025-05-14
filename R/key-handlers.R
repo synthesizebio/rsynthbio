@@ -27,12 +27,14 @@
 set_synthesize_token <- function(use_keyring = FALSE, token = NULL) {
 
   if (is.null(token)) {
+    message("Create an account at https://app.synthesize.bio/ then go to your profile.")
+    message("Click create token then click the copy button in the corner.")
 
     browseURL("https://app.synthesize.bio/profile")
     token <- getPass::getPass(msg = paste(
       "Create an account at https://app.synthesize.bio/ then go to your profile.",
       "Click create token then copy it.",
-      "Paste token here and press OK: "))
+      "Paste token here and press enter: "))
   }
 
   # Store in environment

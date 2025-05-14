@@ -283,39 +283,3 @@ test_that("has_synthesize_token detects token presence correctly", {
   Sys.unsetenv("SYNTHESIZE_API_KEY")
 })
 
-# Integration test with mock keyring
-test_that("Token functions work together with mock keyring", {
-  skip("This test is for manual verification only")
-
-  # This test creates a more realistic integration test using our mock keyring
-  # to verify the functions working together
-
-  # Save original environment state
-  orig_env <- Sys.getenv("SYNTHESIZE_API_KEY", unset = NA)
-  on.exit(if (is.na(orig_env)) Sys.unsetenv("SYNTHESIZE_API_KEY") else Sys.setenv(SYNTHESIZE_API_KEY = orig_env))
-
-  # Clear environment before test
-  Sys.unsetenv("SYNTHESIZE_API_KEY")
-
-  # Mock keyring package with our fake implementation
-  # This would need a more sophisticated setup in a real test
-
-  # 1. Set token and store in keyring
-  set_synthesize_token(token = "integrated-test-token", use_keyring = TRUE)
-  expect_equal(Sys.getenv("SYNTHESIZE_API_KEY"), "integrated-test-token")
-
-  # 2. Clear token from environment
-  clear_synthesize_token(remove_from_keyring = FALSE)
-  expect_equal(Sys.getenv("SYNTHESIZE_API_KEY"), "")
-
-  # 3. Load token from keyring
-  load_synthesize_token_from_keyring()
-  expect_equal(Sys.getenv("SYNTHESIZE_API_KEY"), "integrated-test-token")
-
-  # 4. Clear token from both environment and keyring
-  clear_synthesize_token(remove_from_keyring = TRUE)
-  expect_equal(Sys.getenv("SYNTHESIZE_API_KEY"), "")
-
-  # 5. Verify token is cleared from keyring too
-  expect_error(load_synthesize_token_from_keyring())
-})
