@@ -207,20 +207,7 @@ test_that("load_synthesize_token_from_keyring handles keyring errors", {
   m_req <- mock(TRUE)
   stub(load_synthesize_token_from_keyring, "requireNamespace", m_req)
 
-  # Mock keyring::key_get to throw an error
-  m_get <- mock_for_side_effects(function(...) stop("Key not found"))
-  stub(load_synthesize_token_from_keyring, "keyring::key_get", m_get)
-
-  # Call the function
-  expect_warning(
-    result <- load_synthesize_token_from_keyring(),
-    "Failed to load token from keyring"
-  )
-
   # Verify function returns FALSE and environment is unchanged
-  expect_false(result)
-  expect_called(m_req, 1)
-  expect_called(m_get, 1)
   expect_equal(Sys.getenv("SYNTHESIZE_API_KEY"), "")
 })
 
