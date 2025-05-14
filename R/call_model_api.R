@@ -14,7 +14,7 @@
 #' "bulk_rna-seq" %in% get_valid_modalities()
 #' @export
 get_valid_modalities <- function() {
-  unlist(MODEL_MODALITIES$combined$"v1.0")
+  unlist(MODEL_MODALITIES$"v1.0")
 }
 
 #' @title Get Valid Query Example
@@ -121,7 +121,7 @@ validate_query <- function(query) {
 #' }
 #' @export
 validate_modality <- function(query) {
-  allowed_modalities <- unlist(MODEL_MODALITIES$combined$"v1.0")
+  allowed_modalities <- unlist(MODEL_MODALITIES$"v1.0")
 
   modality_key <- "output_modality"
   if (!(modality_key %in% names(query))) {
