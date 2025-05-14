@@ -1,4 +1,4 @@
-context("Synthesize Bio API Token Management")
+library(mockery)
 
 # Mock for environment variables
 mock_env <- function(expr, envvar, value) {
@@ -56,8 +56,6 @@ test_that("set_synthesize_token stores token in environment", {
 })
 
 test_that("set_synthesize_token prompts for token when not provided", {
-  skip_if_not_installed("mockery")
-  library(mockery)
 
   # Save original to restore after test
   orig_env <- Sys.getenv("SYNTHESIZE_API_KEY", unset = NA)
@@ -78,8 +76,6 @@ test_that("set_synthesize_token prompts for token when not provided", {
 })
 
 test_that("set_synthesize_token stores token in keyring when requested", {
-  skip_if_not_installed("mockery")
-  library(mockery)
 
   # Save original to restore after test
   orig_env <- Sys.getenv("SYNTHESIZE_API_KEY", unset = NA)
@@ -109,8 +105,6 @@ test_that("set_synthesize_token stores token in keyring when requested", {
 })
 
 test_that("set_synthesize_token handles missing keyring package", {
-  skip_if_not_installed("mockery")
-  library(mockery)
 
   # Save original to restore after test
   orig_env <- Sys.getenv("SYNTHESIZE_API_KEY", unset = NA)
@@ -134,8 +128,6 @@ test_that("set_synthesize_token handles missing keyring package", {
 })
 
 test_that("load_synthesize_token_from_keyring loads token from keyring", {
-  skip_if_not_installed("mockery")
-  library(mockery)
 
   # Save original to restore after test
   orig_env <- Sys.getenv("SYNTHESIZE_API_KEY", unset = NA)
@@ -166,8 +158,6 @@ test_that("load_synthesize_token_from_keyring loads token from keyring", {
 })
 
 test_that("load_synthesize_token_from_keyring handles missing keyring package", {
-  skip_if_not_installed("mockery")
-  library(mockery)
 
   # Save original to restore after test
   orig_env <- Sys.getenv("SYNTHESIZE_API_KEY", unset = NA)
@@ -193,8 +183,6 @@ test_that("load_synthesize_token_from_keyring handles missing keyring package", 
 })
 
 test_that("load_synthesize_token_from_keyring handles keyring errors", {
-  skip_if_not_installed("mockery")
-  library(mockery)
 
   # Save original to restore after test
   orig_env <- Sys.getenv("SYNTHESIZE_API_KEY", unset = NA)
@@ -234,8 +222,6 @@ test_that("clear_synthesize_token handles already empty environment", {
 })
 
 test_that("clear_synthesize_token removes token from keyring when requested", {
-  skip_if_not_installed("mockery")
-  library(mockery)
 
   # Set a token
   Sys.setenv(SYNTHESIZE_API_KEY = "token-to-clear-from-keyring")
@@ -265,8 +251,6 @@ test_that("clear_synthesize_token removes token from keyring when requested", {
 })
 
 test_that("clear_synthesize_token handles missing keyring package", {
-  skip_if_not_installed("mockery")
-  library(mockery)
 
   # Set a token
   Sys.setenv(SYNTHESIZE_API_KEY = "token-to-clear-no-keyring")
@@ -299,39 +283,3 @@ test_that("has_synthesize_token detects token presence correctly", {
   Sys.unsetenv("SYNTHESIZE_API_KEY")
 })
 
-# Integration test with mock keyring
-test_that("Token functions work together with mock keyring", {
-  skip("This test is for manual verification only")
-
-  # This test creates a more realistic integration test using our mock keyring
-  # to verify the functions working together
-
-  # Save original environment state
-  orig_env <- Sys.getenv("SYNTHESIZE_API_KEY", unset = NA)
-  on.exit(if (is.na(orig_env)) Sys.unsetenv("SYNTHESIZE_API_KEY") else Sys.setenv(SYNTHESIZE_API_KEY = orig_env))
-
-  # Clear environment before test
-  Sys.unsetenv("SYNTHESIZE_API_KEY")
-
-  # Mock keyring package with our fake implementation
-  # This would need a more sophisticated setup in a real test
-
-  # 1. Set token and store in keyring
-  set_synthesize_token(token = "integrated-test-token", use_keyring = TRUE)
-  expect_equal(Sys.getenv("SYNTHESIZE_API_KEY"), "integrated-test-token")
-
-  # 2. Clear token from environment
-  clear_synthesize_token(remove_from_keyring = FALSE)
-  expect_equal(Sys.getenv("SYNTHESIZE_API_KEY"), "")
-
-  # 3. Load token from keyring
-  load_synthesize_token_from_keyring()
-  expect_equal(Sys.getenv("SYNTHESIZE_API_KEY"), "integrated-test-token")
-
-  # 4. Clear token from both environment and keyring
-  clear_synthesize_token(remove_from_keyring = TRUE)
-  expect_equal(Sys.getenv("SYNTHESIZE_API_KEY"), "")
-
-  # 5. Verify token is cleared from keyring too
-  expect_error(load_synthesize_token_from_keyring())
-})
