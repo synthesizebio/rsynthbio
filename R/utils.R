@@ -10,10 +10,6 @@
 #' @name synthesize
 NULL
 
-library(httr)
-library(jsonlite)
-library(dplyr)
-library(tidyr)
 
 #' @title API Base URL
 #' @description Base URL for the Synthesize Bio API
