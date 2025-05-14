@@ -129,7 +129,7 @@ test_that("extract_expression_data processes API response correctly", {
 test_that("extract_expression_data correctly assigns sample IDs", {
   # Create mock API response with multiple groups
   mock_api_groups <- list(
-    gene_order = c("GENE1", "GENE2"),
+    gene_order = c("ENSG00001", "ENSG00002"),
     outputs = list(
       expression = list(
         matrix(c(100, 200, 50, 100), nrow = 2),
