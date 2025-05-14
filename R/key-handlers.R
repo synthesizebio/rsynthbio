@@ -24,18 +24,21 @@
 #' }
 #' @export
 set_synthesize_token <- function(use_keyring = FALSE, token = NULL) {
-  
+
   if (is.null(token)) {
     message("Create an account at https://app.synthesize.bio/ then go to your profile.")
     message("Click create token then click the copy button in the corner.")
-    
+
     browseURL("https://app.synthesize.bio/profile")
-    token <- getPass::getPass(msg = "Paste Synthesize Bio API token here and press enter: ")
+    token <- getPass::getPass(msg = paste(
+      "Create an account at https://app.synthesize.bio/ then go to your profile.",
+      "Click create token then copy it.",
+      "Paste token here and press enter: "))
   }
-  
+
   # Store in environment
   Sys.setenv(SYNTHESIZE_API_KEY = token)
-  
+
   # Optionally store in keyring if requested and available
   if (use_keyring) {
     if (requireNamespace("keyring", quietly = TRUE)) {
@@ -52,7 +55,7 @@ set_synthesize_token <- function(use_keyring = FALSE, token = NULL) {
       message("To store token in keyring, install with: install.packages('keyring')")
     }
   }
-  
+
   message("API token set for current session.")
   invisible(TRUE)
 }
@@ -74,7 +77,7 @@ load_synthesize_token_from_keyring <- function() {
     message("To use this feature, install with: install.packages('keyring')")
     return(invisible(FALSE))
   }
-  
+
   tryCatch({
     token <- keyring::key_get(service = "rsynthbio", username = "api_token")
     Sys.setenv(SYNTHESIZE_API_KEY = token)
@@ -112,7 +115,7 @@ clear_synthesize_token <- function(remove_from_keyring = FALSE) {
   } else {
     message("No API token was set in the current session.")
   }
-  
+
   # Optionally remove from keyring
   if (remove_from_keyring) {
     if (requireNamespace("keyring", quietly = TRUE)) {
@@ -132,7 +135,7 @@ clear_synthesize_token <- function(remove_from_keyring = FALSE) {
       message("To use this feature, install with: install.packages('keyring')")
     }
   }
-  
+
   invisible(TRUE)
 }
 
