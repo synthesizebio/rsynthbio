@@ -29,3 +29,4 @@ Encoding: UTF-8
 RoxygenNote: 7.3.2
 LazyData: true
 VignetteBuilder: knitr
+License: GPL-3 + file LICENSE
