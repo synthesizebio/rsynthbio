@@ -108,7 +108,7 @@ extract_expression_data <- function(api_response, as_counts = TRUE) {
   # Process expression data
   expression <- purrr::map_dfr(seq_along(api_response$outputs$expression), function(group_idx) {
     api_response$outputs$expression[[group_idx]] |>
-      tibble::as_tibble(.name_repair = "minimal") |>  # Add .name_repair parameter here
+      tibble::as_tibble(.name_repair = "minimal") |> # Add .name_repair parameter here
       purrr::set_names(gene_order)
   }) |>
     # Convert all columns to integers
@@ -130,4 +130,3 @@ extract_expression_data <- function(api_response, as_counts = TRUE) {
     expression = expression
   ))
 }
-
