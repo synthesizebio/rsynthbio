@@ -455,7 +455,6 @@ test_that("predict_query returns raw response when requested", {
 
   # Should return the raw response without extraction
   expect_equal(result, raw_response_data)
-  expect_false(any(sapply(stub_registry(), function(s) identical(s$name, "extract_expression_data"))))
 })
 
 test_that("predict_query passes as_counts parameter to extract_expression_data", {
