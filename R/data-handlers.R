@@ -6,6 +6,7 @@
 #' @param expression A data.frame containing raw counts expression data.
 #' @return A data.frame containing log1p(CPM) transformed data.
 #' @import dplyr
+#' @importFrom magrittr %>%
 #' @importFrom tibble as_tibble
 #' @examples
 #' # Create a sample expression matrix with raw counts
