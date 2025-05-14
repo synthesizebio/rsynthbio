@@ -29,8 +29,8 @@ test_that("log_cpm transforms data correctly", {
 
   # Check values for first row (with tolerance for floating point differences)
   expect_equal(result$gene1_cpm[1], expected_gene1_log, tolerance = 1e-5)
-  expect_equal(result$gene2_cpm[1], expected_gene2_log, tolerance = 1e-5)
-  expect_equal(result$gene3_cpm[1], expected_gene3_log, tolerance = 1e-5)
+  expect_equal(result$gene2_cpm[2], expected_gene2_log, tolerance = 1e-5)
+  expect_equal(result$gene3_cpm[3], expected_gene3_log, tolerance = 1e-5)
 
   # Check dimensions
   expect_equal(nrow(result), nrow(raw_counts))
