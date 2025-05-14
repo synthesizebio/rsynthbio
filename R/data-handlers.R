@@ -36,7 +36,7 @@ log_cpm <- function(expression) {
     dplyr::mutate(dplyr::across(everything(), as.numeric),
            dplyr::across(everything(), ~ ifelse(is.na(.), 0, .)),
            dplyr::across(everything(), ~ ifelse(. < 0, 0, .)),
-           library_size = dplyr::rowSums(dplyr::across(where(is.numeric))),
+           library_size = rowSums(dplyr::across(where(is.numeric))),
            dplyr::across(dplyr::where(is.numeric) & !matches("library_size"),
                   ~ (. / library_size) * 1e6,
                   .names = "{.col}_cpm")) %>%
