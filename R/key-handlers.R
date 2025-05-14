@@ -11,6 +11,7 @@
 #'
 #' @return Invisibly returns TRUE if successful.
 #' @importFrom getPass getPass
+#' @importFrom utils browseURL
 #' @examples
 #' # Interactive prompt for token
 #' \dontrun{
