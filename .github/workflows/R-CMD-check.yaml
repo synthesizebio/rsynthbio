@@ -45,6 +45,8 @@ jobs:
           
       - name: Check package
         uses: r-lib/actions/check-r-package@v2
+        env:
+          SYNTHESIZE_API_KEY: ${{ secrets.SYNTHESIZE_API_KEY }}
         with:
           args: 'c("--as-cran", "--no-manual", "--no-build-vignettes")'
           upload-results: true

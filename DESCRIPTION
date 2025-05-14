@@ -4,7 +4,7 @@ Title: API wrapper in R
 Version: 0.0.1
 Authors@R: c(
     person("Candace", "Savonen", , 
-    "cansav09@gmail.com", 
+    c("cansav09@gmail.com", "candace@synthesize.bio"),
     role = c("aut", "cre"))
     )
 Description: Access Synthesize Bio models from their API using this wrapper. Does additional data handling. 
@@ -18,7 +18,8 @@ Imports:
     dplyr, 
     magrittr,
     tidyr, 
-    aws.s3
+    purrr,
+    tibble
 Suggests: 
     rmarkdown,
     knitr,
