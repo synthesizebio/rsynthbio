@@ -12,14 +12,7 @@ License: GPL-3
 URL: https://github.com/synthesizebio/rsynthbio
 BugReports: https://github.com/synthesizebio/rsynthbio/issues
 Imports:
-    magrittr, 
-    purrr,
-    getPass, 
-    jsonlite,
-    dplyr, 
-    httr, 
-    tidyr, 
-    aws.s3, 
+    getPass,
     keyring
 Suggests: 
     rmarkdown,
