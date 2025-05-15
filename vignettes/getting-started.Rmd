@@ -149,7 +149,7 @@ query$inputs[[3]] <- list(
 
 Once your query is ready, you can send it to the API to generate gene expression data.
 
-```{r predict-2}
+```{r predict-2, eval=TRUE}
 # Request raw counts data
 result <- predict_query(query, as_counts = TRUE)
 ```
