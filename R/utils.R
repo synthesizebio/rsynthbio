@@ -4,7 +4,6 @@
 #'
 #' @importFrom httr POST add_headers content http_status status_code
 #' @importFrom jsonlite toJSON fromJSON
-#' @importFrom dplyr %>%
 #' @importFrom tidyr pivot_longer
 #'
 #' @name synthesize
