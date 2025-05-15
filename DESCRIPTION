@@ -12,7 +12,14 @@ URL: https://github.com/synthesizebio/rsynthbio
 BugReports: https://github.com/synthesizebio/rsynthbio/issues
 Imports:
     getPass,
-    keyring
+    keyring, 
+    jsonlite,
+    httr, 
+    dplyr, 
+    magrittr,
+    tidyr, 
+    purrr,
+    tibble
 Suggests: 
     rmarkdown,
     knitr,
