@@ -6,10 +6,20 @@
 <url><loc>/articles/index.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
+<url><loc>/reference/API_BASE_URL.html</loc></url>
+<url><loc>/reference/MODEL_MODALITIES.html</loc></url>
 <url><loc>/reference/clear_synthesize_token.html</loc></url>
+<url><loc>/reference/extract_expression_data.html</loc></url>
+<url><loc>/reference/get_valid_modalities.html</loc></url>
+<url><loc>/reference/get_valid_query.html</loc></url>
 <url><loc>/reference/has_synthesize_token.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/load_synthesize_token_from_keyring.html</loc></url>
+<url><loc>/reference/log_cpm.html</loc></url>
+<url><loc>/reference/predict_query.html</loc></url>
 <url><loc>/reference/set_synthesize_token.html</loc></url>
+<url><loc>/reference/synthesize.html</loc></url>
+<url><loc>/reference/validate_modality.html</loc></url>
+<url><loc>/reference/validate_query.html</loc></url>
 </urlset>
 
