@@ -154,6 +154,8 @@ validate_modality <- function(query) {
 #'         - 'metadata': contains metadata for each sample
 #'         - 'expression': contains expression data for each sample
 #' Throws an error If the API request fails or the response structure is invalid.
+#' @importFrom httr POST add_headers content http_status status_code
+#' @importFrom jsonlite toJSON fromJSON
 #' @examples
 #' # Set your API key (in practice, use a more secure method)
 #' \dontrun{

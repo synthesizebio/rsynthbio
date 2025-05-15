@@ -31,7 +31,7 @@ to the API, and processes the response into usable data frames.
 # Set your API key (in practice, use a more secure method)
 \dontrun{
 
-To start using pysynthbio, first you need to have an account with synthesize.bio.
+# To start using pysynthbio, first you need to have an account with synthesize.bio.
 # Go here to create one: https://app.synthesize.bio/
 
 Sys.setenv(SYNTHESIZE_API_KEY = "your_api_key_here")
@@ -51,6 +51,6 @@ log_result <- predict_query(query, as_counts = FALSE)
 log_expression <- log_result$expression
 
 # Explore the top expressed genes in the first sample
-head(sort(expression[1,], decreasing = TRUE))
+head(sort(expression[1, ], decreasing = TRUE))
 }
 }

@@ -1,14 +1,3 @@
-#' @title Synthesize Bio API R Client
-#' @description A package for interacting with the Synthesize Bio API to generate
-#' gene expression data based on specified biological conditions.
-#'
-#' @importFrom httr POST add_headers content http_status status_code
-#' @importFrom jsonlite toJSON fromJSON
-#' @importFrom tidyr pivot_longer
-#'
-#' @name synthesize
-NULL
-
 
 #' @title API Base URL
 #' @description Base URL for the Synthesize Bio API
@@ -29,3 +18,6 @@ MODEL_MODALITIES <- list(
     "pseudo_bulk"
   )
 )
+
+utils::globalVariables(c("sample_group", "sample_index"))
+
