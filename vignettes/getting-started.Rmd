@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 # rsynthbio
 
-`rsynthbio` is an R package that provides a convenient interface to the Synthesize Bio API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access synthetic transcriptomic data for various modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
+`rsynthbio` is an R package that provides a convenient interface to the Synthesize Bio API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
 
 ## How to install
 
@@ -80,9 +80,7 @@ clear_synthesize_token()
 clear_synthesize_token(remove_from_keyring = TRUE)
 ```
 
-Never hardcode your token in scripts that will be shared or committed to version control.
-
-You can obtain an API key by registering at [Synthesize Bio](https://app.synthesize.bio).
+Never hard-code your token in scripts that will be shared or committed to version control.
 
 ## Basic Usage
 
@@ -97,7 +95,7 @@ get_valid_modalities()
 
 ### Creating a Query
 
-The first step to generating synthetic gene expression data is to create a query. The package provides a sample query that you can modify:
+The first step to generating AI-generated gene expression data is to create a query. The package provides a sample query that you can modify:
 
 ```{r query}
 # Get a sample query
@@ -163,7 +161,7 @@ result <- predict_query(query, as_counts = TRUE)
 result
 ```
 
-If you want more than just the result of the metdata and expression returned put `as_counts = FALSE`.
+If you want the full API response beyond just than just the result of the metadata and expression returned put `as_response = FALSE`.
 
 
 ### Working with Results
