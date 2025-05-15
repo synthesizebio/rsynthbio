@@ -38,7 +38,7 @@ remotes::install_github("synthesizebio/rsynthbio")
 
 Once installed, load the package:
 
-```{r setup}
+```{r}
 library(rsynthbio)
 ```
 
@@ -149,7 +149,7 @@ query$inputs[[3]] <- list(
 
 Once your query is ready, you can send it to the API to generate gene expression data.
 
-```{r predict-2, eval=TRUE}
+```{r predict-2, eval=FALSE}
 # Request raw counts data
 result <- predict_query(query, as_counts = TRUE)
 ```
@@ -159,7 +159,7 @@ If you want the full API response beyond just than just the result of the metada
 
 ### Working with Results
 
-```{r analyze, eval=TRUE}
+```{r analyze, eval=FALSE}
 # Access metadata and expression matrices
 metadata <- result$metadata
 expression <- result$expression
