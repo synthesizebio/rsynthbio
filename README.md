@@ -8,13 +8,13 @@
 
 You can install `rsynthbio` from CRAN:
 
-```{r installation, eval=FALSE}
+```
 install.packages("rsynthbio")
 ```
 
 If you want the development version, you can install using the `remotes` package to install from GitHub:
 
-```{r github-installation, eval=FALSE}
+```
 if (!("remotes" %in% installed.packages())) {
   install.packages("remotes")
 }
@@ -23,7 +23,7 @@ remotes::install_github("synthesizebio/rsynthbio")
 
 Once installed, load the package:
 
-```{r setup}
+```
 library(rsynthbio)
 ```
 
@@ -31,7 +31,7 @@ library(rsynthbio)
 
 Before using the Synthesize Bio API, you need to set up your API token. The package provides a secure way to handle authentication:
 
-```{r auth-secure}
+```
 # Securely prompt for and store your API token
 # The token will not be visible in the console
 set_synthesize_token()
@@ -43,7 +43,7 @@ set_synthesize_token(use_keyring = TRUE)
 
 Loading your API key for a session. 
 
-```{r}
+```
 # In future sessions, load the stored token
 load_synthesize_token_from_keyring()
 
@@ -57,7 +57,7 @@ You can obtain an API token by registering at [Synthesize Bio](https://app.synth
 
 For security reasons, remember to clear your token when you're done:
 
-```{r clear-token, eval = FALSE}
+```
 # Clear token from current session
 clear_synthesize_token()
 
@@ -73,7 +73,7 @@ Never hard-code your token in scripts that will be shared or committed to versio
 
 The package supports various data modalities. You can view all available modalities with:
 
-```{r modalities}
+```
 # Check available modalities
 get_valid_modalities()
 ```
@@ -82,7 +82,7 @@ get_valid_modalities()
 
 The first step to generating AI-generated gene expression data is to create a query. The package provides a sample query that you can modify:
 
-```{r query}
+```
 # Get a sample query
 query <- get_valid_query()
 
@@ -97,7 +97,7 @@ The query consists of:
 3. `inputs`: A list of biological conditions to generate data for
 
 
-```{r predict}
+```
 # Request raw counts data
 result <- predict_query(query)
 
