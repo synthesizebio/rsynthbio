@@ -46,7 +46,7 @@ library(rsynthbio)
 
 Before using the Synthesize Bio API, you need to set up your API token. The package provides a secure way to handle authentication:
 
-```{r auth-secure}
+```{r auth-secure, eval=FALSE}
 # Securely prompt for and store your API token
 # The token will not be visible in the console
 set_synthesize_token()
@@ -58,7 +58,7 @@ set_synthesize_token(use_keyring = TRUE)
 
 Loading your API key for a session. 
 
-```{r}
+```{r, eval=FALSE}
 # In future sessions, load the stored token
 load_synthesize_token_from_keyring()
 
@@ -112,14 +112,10 @@ The query consists of:
 3. `inputs`: A list of biological conditions to generate data for
 
 
-```{r predict}
+```{r predict, eval=FALSE}
 # Request raw counts data
 result <- predict_query(query)
-
-# Structure of the result
-result
 ```
-
 
 ### Modifying a Query
 
@@ -156,9 +152,6 @@ Once your query is ready, you can send it to the API to generate gene expression
 ```{r predict-2}
 # Request raw counts data
 result <- predict_query(query, as_counts = TRUE)
-
-# Structure of the result
-result
 ```
 
 If you want the full API response beyond just than just the result of the metadata and expression returned put `as_response = FALSE`.

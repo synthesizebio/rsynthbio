@@ -20,11 +20,11 @@ This function checks that the query is a list and contains all required keys.
 \examples{
 # Create a valid query
 query <- get_valid_query()
-validate_query(query)  # Passes validation
+validate_query(query) # Passes validation
 
 # Example with invalid query (missing required key)
 \dontrun{
 invalid_query <- list(inputs = list(), mode = "mean estimation")
-validate_query(invalid_query)  # Throws error for missing output_modality
+validate_query(invalid_query) # Throws error for missing output_modality
 }
 }

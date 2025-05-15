@@ -20,12 +20,12 @@ This function checks that the output_modality value is one of the supported moda
 \examples{
 # Create a valid query
 query <- get_valid_query()
-validate_modality(query)  # Passes validation
+validate_modality(query) # Passes validation
 
 # Example with invalid modality
 \dontrun{
 invalid_query <- get_valid_query()
 invalid_query$output_modality <- "unsupported_modality"
-validate_modality(invalid_query)  # Throws error for invalid modality
+validate_modality(invalid_query) # Throws error for invalid modality
 }
 }
