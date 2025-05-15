@@ -50,7 +50,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/getting-started.html">getting-started</a>
+      <a href="articles/getting-started.html">Getting Started with rsynthbio</a>
     </li>
   </ul>
 </li>
@@ -74,11 +74,97 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
+
 <div class="section level1">
 <div class="page-header"><h1 id="rsynthbio">rsynthbio<a class="anchor" aria-label="anchor" href="#rsynthbio"></a>
 </h1></div>
-<p>An API wrapper package</p>
+<p><code>rsynthbio</code> is an R package that provides a convenient interface to the Synthesize Bio API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.</p>
+<p><a href="https://synthesizebio.github.io/rsynthbio/" class="external-link">See the full documentation pages here</a>.</p>
+<div class="section level2">
+<h2 id="how-to-install">How to install<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
+</h2>
+<p>You can install <code>rsynthbio</code> from CRAN:</p>
+<p><code>{r installation, eval=FALSE} install.packages("rsynthbio")</code></p>
+<p>If you want the development version, you can install using the <code>remotes</code> package to install from GitHub:</p>
+<p><code>{r github-installation, eval=FALSE} if (!("remotes" %in% installed.packages())) {   install.packages("remotes") } remotes::install_github("synthesizebio/rsynthbio")</code></p>
+<p>Once installed, load the package:</p>
+<p><code>{r setup} library(rsynthbio)</code></p>
 </div>
+<div class="section level2">
+<h2 id="authentication">Authentication<a class="anchor" aria-label="anchor" href="#authentication"></a>
+</h2>
+<p>Before using the Synthesize Bio API, you need to set up your API token. The package provides a secure way to handle authentication:</p>
+<p>```{r auth-secure} # Securely prompt for and store your API token # The token will not be visible in the console set_synthesize_token()</p>
+</div>
+</div>
+<div class="section level1">
+<h1 id="you-can-also-store-the-token-in-your-system-keyring-for-persistence">You can also store the token in your system keyring for persistence<a class="anchor" aria-label="anchor" href="#you-can-also-store-the-token-in-your-system-keyring-for-persistence"></a>
+</h1>
+</div>
+<div class="section level1">
+<h1 id="across-r-sessions-requires-the-keyring-package">across R sessions (requires the ‘keyring’ package)<a class="anchor" aria-label="anchor" href="#across-r-sessions-requires-the-keyring-package"></a>
+</h1>
+<p>set_synthesize_token(use_keyring = TRUE)</p>
+<pre><code>
+Loading your API key for a session.
+
+```{r}
+# In future sessions, load the stored token
+load_synthesize_token_from_keyring()
+
+# Check if a token is already set
+has_synthesize_token()</code></pre>
+<p>You can obtain an API token by registering at <a href="https://app.synthesize.bio" class="external-link">Synthesize Bio</a>.</p>
+<div class="section level3">
+<h3 id="security-best-practices">Security Best Practices<a class="anchor" aria-label="anchor" href="#security-best-practices"></a>
+</h3>
+<p>For security reasons, remember to clear your token when you’re done:</p>
+<p>```{r clear-token, eval = FALSE} # Clear token from current session clear_synthesize_token()</p>
+</div>
+</div>
+<div class="section level1">
+<h1 id="clear-token-from-both-session-and-keyring">Clear token from both session and keyring<a class="anchor" aria-label="anchor" href="#clear-token-from-both-session-and-keyring"></a>
+</h1>
+<p>clear_synthesize_token(remove_from_keyring = TRUE)</p>
+<pre><code>
+Never hard-code your token in scripts that will be shared or committed to version control.
+
+## Basic Usage
+
+### Available Modalities
+
+The package supports various data modalities. You can view all available modalities with:
+
+```{r modalities}
+# Check available modalities
+get_valid_modalities()</code></pre>
+<div class="section level3">
+<h3 id="creating-a-query">Creating a Query<a class="anchor" aria-label="anchor" href="#creating-a-query"></a>
+</h3>
+<p>The first step to generating AI-generated gene expression data is to create a query. The package provides a sample query that you can modify:</p>
+<p>```{r query} # Get a sample query query &lt;- get_valid_query()</p>
+</div>
+</div>
+<div class="section level1">
+<h1 id="inspect-the-query-structure">Inspect the query structure<a class="anchor" aria-label="anchor" href="#inspect-the-query-structure"></a>
+</h1>
+<p>str(query)</p>
+<pre><code>
+The query consists of:
+
+1. `output_modality`: The type of gene expression data to generate
+2. `mode`: The prediction mode (e.g., "mean estimation")
+3. `inputs`: A list of biological conditions to generate data for
+
+
+```{r predict}
+# Request raw counts data
+result &lt;- predict_query(query)
+
+# Structure of the result
+result</code></pre>
+</div>
+
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
