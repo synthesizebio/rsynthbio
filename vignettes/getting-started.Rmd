@@ -159,7 +159,7 @@ If you want the full API response beyond just than just the result of the metada
 
 ### Working with Results
 
-```{r analyze}
+```{r analyze, eval=TRUE}
 # Access metadata and expression matrices
 metadata <- result$metadata
 expression <- result$expression
