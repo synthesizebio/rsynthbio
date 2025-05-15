@@ -6,7 +6,6 @@
 #' @param expression A data.frame containing raw counts expression data.
 #' @return A data.frame containing log1p(CPM) transformed data.
 #' @import dplyr
-#' @importFrom magrittr %>%
 #' @importFrom tibble as_tibble
 #' @examples
 #' # Create a sample expression matrix with raw counts
@@ -31,19 +30,29 @@ log_cpm <- function(expression) {
     stop("Input must have at least one row and one column.", call. = FALSE)
   }
 
-  log_cpm_df <- expression %>%
-    tibble::as_tibble() %>%
-    dplyr::mutate(dplyr::across(everything(), as.numeric),
-           dplyr::across(everything(), ~ ifelse(is.na(.), 0, .)),
-           dplyr::across(everything(), ~ ifelse(. < 0, 0, .)),
-           library_size = rowSums(dplyr::across(where(is.numeric))),
-           dplyr::across(dplyr::where(is.numeric) & !matches("library_size"),
-                  ~ (. / library_size) * 1e6,
-                  .names = "{.col}_cpm")) %>%
-    dplyr::select(-dplyr::where(is.numeric) | dplyr::ends_with("_cpm")) %>%
-    dplyr::mutate(dplyr::across(dplyr::ends_with("_cpm"), log1p))
+  # Convert to matrix if not already
+  expr_matrix <- as.matrix(expression)
 
-  return(log_cpm_df)
+  # Replace NAs with 0
+  expr_matrix[is.na(expr_matrix)] <- 0
+
+  # Replace negative values with 0
+  expr_matrix[expr_matrix < 0] <- 0
+
+  # Calculate library size (row sums)
+  library_size <- rowSums(expr_matrix)
+
+  # Calculate CPM
+  cpm_matrix <- t(t(expr_matrix) / library_size) * 1e6
+
+  # Apply log1p transformation
+  log_cpm_matrix <- log1p(cpm_matrix)
+
+  # Return as data frame with appropriate column names
+  result <- as.data.frame(log_cpm_matrix)
+  colnames(result) <- paste0(colnames(expression), "_cpm")
+
+  return(result)
 }
 
 #' Extract Gene Expression Data from API Response
@@ -73,13 +82,13 @@ extract_expression_data <- function(api_response, as_counts = TRUE) {
     expr_data <- api_response$outputs$expression[[group_idx]]
 
     # Convert to tibble with gene names - explicitly set column names to avoid warnings
-    expr_tibble <- expr_data %>%
-      tibble::as_tibble(.name_repair = "minimal") %>%
+    expr_tibble <- expr_data |>
+      tibble::as_tibble(.name_repair = "minimal") |>
       purrr::set_names(gene_order)
 
     # Get metadata for this group and repeat for each sample
-    metadata_tibble <- api_response$outputs$metadata[group_idx, , drop = FALSE] %>%
-      tibble::as_tibble() %>%
+    metadata_tibble <- api_response$outputs$metadata[group_idx, , drop = FALSE] |>
+      tibble::as_tibble() |>
       tidyr::uncount(nrow(expr_tibble))
 
     # Return combined data with sample index
@@ -88,26 +97,26 @@ extract_expression_data <- function(api_response, as_counts = TRUE) {
       sample_group = group_idx,
       sample_index = seq_len(nrow(expr_tibble))
     )
-  }, .id = "output_group") %>%
+  }, .id = "output_group") |>
     # Create unique sample IDs
     dplyr::mutate(sample_id = paste0("sample_", dplyr::row_number()))
 
   # Separate metadata from sample indices
-  metadata <- results %>%
+  metadata <- results |>
     dplyr::select(-sample_group, -sample_index)
 
   # Process expression data
   expression <- purrr::map_dfr(seq_along(api_response$outputs$expression), function(group_idx) {
-    api_response$outputs$expression[[group_idx]] %>%
-      tibble::as_tibble(.name_repair = "minimal") %>%  # Add .name_repair parameter here
+    api_response$outputs$expression[[group_idx]] |>
+      tibble::as_tibble(.name_repair = "minimal") |> # Add .name_repair parameter here
       purrr::set_names(gene_order)
-  }) %>%
+  }) |>
     # Convert all columns to integers
     dplyr::mutate(dplyr::across(dplyr::everything(), as.integer))
 
   # Add sample IDs as row names (tidyverse approach typically avoids rownames)
-  expression <- expression %>%
-    dplyr::mutate(sample_id = metadata$sample_id) %>%
+  expression <- expression |>
+    dplyr::mutate(sample_id = metadata$sample_id) |>
     tibble::column_to_rownames("sample_id")
 
   # Apply log CPM transformation if requested
@@ -121,4 +130,3 @@ extract_expression_data <- function(api_response, as_counts = TRUE) {
     expression = expression
   ))
 }
-

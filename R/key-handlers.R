@@ -25,7 +25,6 @@
 #' }
 #' @export
 set_synthesize_token <- function(use_keyring = FALSE, token = NULL) {
-
   if (is.null(token)) {
     message("Create an account at https://app.synthesize.bio/ then go to your profile.")
     message("Click create token then click the copy button in the corner.")
@@ -34,7 +33,8 @@ set_synthesize_token <- function(use_keyring = FALSE, token = NULL) {
     token <- getPass::getPass(msg = paste(
       "Create an account at https://app.synthesize.bio/ then go to your profile.",
       "Click create token then copy it.",
-      "Paste token here and press enter: "))
+      "Paste token here and press enter: "
+    ))
   }
 
   # Store in environment
@@ -43,14 +43,19 @@ set_synthesize_token <- function(use_keyring = FALSE, token = NULL) {
   # Optionally store in keyring if requested and available
   if (use_keyring) {
     if (requireNamespace("keyring", quietly = TRUE)) {
-      tryCatch({
-        keyring::key_set_with_value(service = "rsynthbio",
-                                    username = "api_token",
-                                    password = token)
-        message("API token stored in system keyring.")
-      }, error = function(e) {
-        warning("Failed to store token in keyring: ", e$message)
-      })
+      tryCatch(
+        {
+          keyring::key_set_with_value(
+            service = "rsynthbio",
+            username = "api_token",
+            password = token
+          )
+          message("API token stored in system keyring.")
+        },
+        error = function(e) {
+          warning("Failed to store token in keyring: ", e$message)
+        }
+      )
     } else {
       warning("Package 'keyring' is not installed. Token not stored in keyring.")
       message("To store token in keyring, install with: install.packages('keyring')")
@@ -79,15 +84,18 @@ load_synthesize_token_from_keyring <- function() {
     return(invisible(FALSE))
   }
 
-  tryCatch({
-    token <- keyring::key_get(service = "rsynthbio", username = "api_token")
-    Sys.setenv(SYNTHESIZE_API_KEY = token)
-    message("API token loaded from keyring and set for current session.")
-    invisible(TRUE)
-  }, error = function(e) {
-    warning("Failed to load token from keyring: ", e$message)
-    invisible(FALSE)
-  })
+  tryCatch(
+    {
+      token <- keyring::key_get(service = "rsynthbio", username = "api_token")
+      Sys.setenv(SYNTHESIZE_API_KEY = token)
+      message("API token loaded from keyring and set for current session.")
+      invisible(TRUE)
+    },
+    error = function(e) {
+      warning("Failed to load token from keyring: ", e$message)
+      invisible(FALSE)
+    }
+  )
 }
 
 #' @title Clear Synthesize Bio API Token
@@ -120,17 +128,20 @@ clear_synthesize_token <- function(remove_from_keyring = FALSE) {
   # Optionally remove from keyring
   if (remove_from_keyring) {
     if (requireNamespace("keyring", quietly = TRUE)) {
-      tryCatch({
-        if (keyring::key_list(service = "rsynthbio")[1, "username"] == "api_token") {
-          keyring::key_delete(service = "rsynthbio", username = "api_token")
-          message("API token removed from system keyring.")
-        } else {
-          message("No API token was found in the keyring.")
+      tryCatch(
+        {
+          if (keyring::key_list(service = "rsynthbio")[1, "username"] == "api_token") {
+            keyring::key_delete(service = "rsynthbio", username = "api_token")
+            message("API token removed from system keyring.")
+          } else {
+            message("No API token was found in the keyring.")
+          }
+        },
+        error = function(e) {
+          # This might occur if no token exists or other keyring issues
+          message("No API token was found in the keyring or could not access keyring.")
         }
-      }, error = function(e) {
-        # This might occur if no token exists or other keyring issues
-        message("No API token was found in the keyring or could not access keyring.")
-      })
+      )
     } else {
       warning("Package 'keyring' is not installed. Cannot remove token from keyring.")
       message("To use this feature, install with: install.packages('keyring')")

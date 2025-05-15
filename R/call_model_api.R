@@ -1,4 +1,3 @@
-
 #' @title Get Valid Modalities
 #' @description Returns a vector of possible output modalities for the supported model.
 #' These modalities represent different types of gene expression data that can be
@@ -14,7 +13,7 @@
 #' "bulk_rna-seq" %in% get_valid_modalities()
 #' @export
 get_valid_modalities <- function() {
-  unlist(MODEL_MODALITIES$combined$"v1.0")
+  unlist(MODEL_MODALITIES$"v1.0")
 }
 
 #' @title Get Valid Query Example
@@ -75,12 +74,12 @@ get_valid_query <- function() {
 #' @examples
 #' # Create a valid query
 #' query <- get_valid_query()
-#' validate_query(query)  # Passes validation
+#' validate_query(query) # Passes validation
 #'
 #' # Example with invalid query (missing required key)
 #' \dontrun{
 #' invalid_query <- list(inputs = list(), mode = "mean estimation")
-#' validate_query(invalid_query)  # Throws error for missing output_modality
+#' validate_query(invalid_query) # Throws error for missing output_modality
 #' }
 #' @export
 validate_query <- function(query) {
@@ -111,17 +110,17 @@ validate_query <- function(query) {
 #' @examples
 #' # Create a valid query
 #' query <- get_valid_query()
-#' validate_modality(query)  # Passes validation
+#' validate_modality(query) # Passes validation
 #'
 #' # Example with invalid modality
 #' \dontrun{
 #' invalid_query <- get_valid_query()
 #' invalid_query$output_modality <- "unsupported_modality"
-#' validate_modality(invalid_query)  # Throws error for invalid modality
+#' validate_modality(invalid_query) # Throws error for invalid modality
 #' }
 #' @export
 validate_modality <- function(query) {
-  allowed_modalities <- unlist(MODEL_MODALITIES$combined$"v1.0")
+  allowed_modalities <- unlist(MODEL_MODALITIES$"v1.0")
 
   modality_key <- "output_modality"
   if (!(modality_key %in% names(query))) {
@@ -159,7 +158,7 @@ validate_modality <- function(query) {
 #' # Set your API key (in practice, use a more secure method)
 #' \dontrun{
 #'
-#' To start using pysynthbio, first you need to have an account with synthesize.bio.
+#' # To start using pysynthbio, first you need to have an account with synthesize.bio.
 #' # Go here to create one: https://app.synthesize.bio/
 #'
 #' Sys.setenv(SYNTHESIZE_API_KEY = "your_api_key_here")
@@ -179,7 +178,7 @@ validate_modality <- function(query) {
 #' log_expression <- log_result$expression
 #'
 #' # Explore the top expressed genes in the first sample
-#' head(sort(expression[1,], decreasing = TRUE))
+#' head(sort(expression[1, ], decreasing = TRUE))
 #' }
 #' @export
 predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
@@ -215,11 +214,14 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
   }
 
   # Parse JSON response and handle errors
-  parsed_content <- tryCatch({
-    fromJSON(content(response, "text", encoding = "UTF-8"))
-  }, error = function(e) {
-    stop(paste0("Failed to decode JSON from API response: ", e$message))
-  })
+  parsed_content <- tryCatch(
+    {
+      fromJSON(content(response, "text", encoding = "UTF-8"))
+    },
+    error = function(e) {
+      stop(paste0("Failed to decode JSON from API response: ", e$message))
+    }
+  )
 
   # If response is a single-item list, use its contents
   if (is.list(parsed_content) && length(parsed_content) == 1 && is.list(parsed_content[[1]])) {
@@ -237,13 +239,11 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
   if (!raw_response) {
     result <- extract_expression_data(
       parsed_content,
-      as_counts = as_counts)
+      as_counts = as_counts
+    )
   } else {
     result <- parsed_content
   }
 
   return(result)
 }
-
-
-
