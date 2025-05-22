@@ -86,7 +86,9 @@ Never hard-code your token in scripts that will be shared or committed to versio
 
 ### Available Modalities
 
-The package supports various data modalities. You can view all available modalities with:
+Some Synthesize models support generation of different gene expression data types. 
+
+In the v1 model, you should use "sra" for bulk gene expression.
 
 ```{r modalities}
 # Check available modalities
@@ -107,10 +109,15 @@ str(query)
 
 The query consists of:
 
-1. `output_modality`: The type of gene expression data to generate
-2. `mode`: The prediction mode (e.g., "mean estimation")
+1. `output_modality`: The type of gene expression data to generate (see `get_valid_modalities`)
+2. `mode`: The prediction mode (e.g., "mean estimation" or "sample generation")
 3. `inputs`: A list of biological conditions to generate data for
 
+We train our models with diverse multi-omics datasets. There are two model types/modes available today:
+
++ Sample generation: This runs in "diffusion" mode and generates different results for each sample requested. Use this mode to understand the distribution of expression across sample groups.
+
++ Mean estimation: This is deterministic. For a given metadata specification, you will get the same values.
 
 ```{r predict, eval=FALSE}
 # Request raw counts data
@@ -123,7 +130,7 @@ You can customize the query to fit your specific research needs:
 
 ```{r modify-query}
 # Change output modality
-query$output_modality <- "bulk_rna-seq"
+query$output_modality <- "single_cell_rna-seq"
 
 # Adjust number of samples
 query$inputs[[1]]$num_samples <- 10

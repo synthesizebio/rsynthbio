@@ -5,12 +5,13 @@
 API_BASE_URL <- "https://app.synthesize.bio"
 
 #' @title Model Modalities
-#' @description A nested list containing supported modalities for different model versions
+#' @description A nested list containing supported modalities for different
+#' model versions
+#' + sra = this is bulk RNA-seq
 #' @format A nested list with structure: model type > version > modalities
 #' @export
 MODEL_MODALITIES <- list(
   "v1.0" = list(
-    "bulk_rna-seq",
     "lincs",
     "sra",
     "single_cell_rna-seq",
