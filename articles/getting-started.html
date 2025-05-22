@@ -152,8 +152,9 @@ committed to version control.</p>
 <div class="section level4">
 <h4 id="available-modalities">Available Modalities<a class="anchor" aria-label="anchor" href="#available-modalities"></a>
 </h4>
-<p>The package supports various data modalities. You can view all
-available modalities with:</p>
+<p>Some Synthesize models support generation of different gene
+expression data types.</p>
+<p>In the v1 model, you should use “sra” for bulk gene expression.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Check available modalities</span></span>
 <span><span class="fu"><a href="../reference/get_valid_modalities.html">get_valid_modalities</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -174,14 +175,23 @@ modify:</p>
 <ol style="list-style-type: decimal">
 <li>
 <code>output_modality</code>: The type of gene expression data to
-generate</li>
+generate (see <code>get_valid_modalities</code>)</li>
 <li>
-<code>mode</code>: The prediction mode (e.g., “mean
-estimation”)</li>
+<code>mode</code>: The prediction mode (e.g., “mean estimation” or
+“sample generation”)</li>
 <li>
 <code>inputs</code>: A list of biological conditions to generate
 data for</li>
 </ol>
+<p>We train our models with diverse multi-omics datasets. There are two
+model types/modes available today:</p>
+<ul>
+<li><p>Sample generation: This runs in “diffusion” mode and generates
+different results for each sample requested. Use this mode to understand
+the distribution of expression across sample groups.</p></li>
+<li><p>Mean estimation: This is deterministic. For a given metadata
+specification, you will get the same values.</p></li>
+</ul>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Request raw counts data</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></code></pre></div>
@@ -192,7 +202,7 @@ data for</li>
 <p>You can customize the query to fit your specific research needs:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Change output modality</span></span>
-<span><span class="va">query</span><span class="op">$</span><span class="va">output_modality</span> <span class="op">&lt;-</span> <span class="st">"bulk_rna-seq"</span></span>
+<span><span class="va">query</span><span class="op">$</span><span class="va">output_modality</span> <span class="op">&lt;-</span> <span class="st">"single_cell_rna-seq"</span></span>
 <span></span>
 <span><span class="co"># Adjust number of samples</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">num_samples</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
