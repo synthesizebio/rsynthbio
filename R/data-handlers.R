@@ -5,8 +5,6 @@
 #'
 #' @param expression A data.frame containing raw counts expression data.
 #' @return A data.frame containing log1p(CPM) transformed data.
-#' @import dplyr
-#' @importFrom tibble as_tibble
 #' @examples
 #' # Create a sample expression matrix with raw counts
 #' raw_counts <- data.frame(
@@ -63,10 +61,6 @@ log_cpm <- function(expression) {
 #' @param parsed_content The parsed API response list
 #' @param as_counts Logical, if FALSE, transforms the predicted expression counts into logCPM
 #'        (default is TRUE, returning raw counts).
-#' @importFrom purrr map_dfr set_names
-#' @importFrom tibble as_tibble
-#' @importFrom tidyr uncount
-#' @importFrom dplyr bind_cols mutate across
 #' @return A list with two components:
 #'         - metadata: tibble containing sample metadata
 #'         - expression: tibble containing combined gene expression data

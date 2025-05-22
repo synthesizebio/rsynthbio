@@ -14,11 +14,7 @@ Imports:
     getPass,
     keyring, 
     jsonlite,
-    httr, 
-    dplyr, 
-    tidyr, 
-    purrr,
-    tibble
+    httr
 Suggests: 
     rmarkdown,
     knitr,
