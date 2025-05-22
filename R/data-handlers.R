@@ -83,13 +83,14 @@ extract_expression_data <- function(parsed_content, as_counts = TRUE) {
   rownames(metadata_expanded) <- NULL
 
   # Add sample identifiers to match the expression data
-  metadata_expanded$sample_id <- paste0("sample_",
-                                        rep(1:length(parsed_content$outputs$expression),
-                                            sapply(parsed_content$outputs$expression, nrow)))
+  metadata_expanded <- data.frame(sample_id =
+                                    paste0("sample_",
+                                           rep(1:nrow(metadata_expanded))),
+                                  metadata_expanded)
 
   # Add sample identifiers
-  sample_ids <- sapply(expression_list, nrow)
-  expression <- data.frame(sample_id = sample_ids, expression)
+  expression <- data.frame(sample_id = metadata_expanded$sample_id,
+                           expression)
 
   # Set gene names as column names (excluding sample_id column)
   colnames(expression)[-1] <- parsed_content$gene_order
@@ -101,7 +102,7 @@ extract_expression_data <- function(parsed_content, as_counts = TRUE) {
 
   # Return both components
   return(list(
-    metadata = metadata,
+    metadata = metadata_expanded,
     expression = expression
   ))
 }

@@ -143,4 +143,8 @@ test_that("extract_expression_data correctly assigns sample IDs", {
   expect_equal(
     nrow(result_groups$metadata),
     ncol(result_groups$expression))
+
+  # sample ids should match
+  expect_equal(result$metadata$sample_id, result$expression$sample_id)
 })
+
