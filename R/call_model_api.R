@@ -218,7 +218,7 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
   # Parse JSON response and handle errors
   parsed_content <- tryCatch(
     {
-      json_text <- rawToChar(content(response, "raw"))
+      json_text <- content(response, "text")
       parsed_content <- fromJSON(json_text, simplifyDataFrame = TRUE)
     },
     error = function(e) {
