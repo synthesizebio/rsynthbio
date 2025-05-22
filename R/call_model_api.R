@@ -140,7 +140,7 @@ validate_modality <- function(query) {
 }
 
 #' @title Predict Gene Expression
-#' @description Sends a query to the Synthesize Bio API (combined/v1.0) for prediction
+#' @description Sends a query to the Synthesize Bio API (v1.0) for prediction
 #' and retrieves gene expression samples. This function validates the query, sends it
 #' to the API, and processes the response into usable data frames.
 #'
@@ -188,7 +188,7 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
     stop("Please set your API key for synthesize Bio using set_synthesize_token()")
   }
 
-  api_url <- paste0(API_BASE_URL, "/api/model/combined/v1.0")
+  api_url <- paste0(API_BASE_URL, "/api/model/v1.0")
 
   validate_query(query)
   validate_modality(query)
@@ -205,7 +205,7 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
       `Content-Type` = "application/json"
     ),
     body = query_json,
-    encode = "raw"
+    encode = "json"
   )
 
   if (http_status(response)$category != "Success") {
@@ -218,7 +218,8 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
   # Parse JSON response and handle errors
   parsed_content <- tryCatch(
     {
-      fromJSON(content(response, "text", encoding = "UTF-8"))
+      json_text <- rawToChar(content(response, "raw"))
+      parsed_content <- fromJSON(json_text, simplifyDataFrame = TRUE)
     },
     error = function(e) {
       stop(paste0("Failed to decode JSON from API response: ", e$message))
