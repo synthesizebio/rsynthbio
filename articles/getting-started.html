@@ -195,6 +195,8 @@ specification, you will get the same values.</p></li>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Request raw counts data</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></code></pre></div>
+<p>This result will be a list of two dataframes: <code>metadata</code>
+and <code>expression</code></p>
 </div>
 <div class="section level4">
 <h4 id="modifying-a-query">Modifying a Query<a class="anchor" aria-label="anchor" href="#modifying-a-query"></a>
@@ -233,7 +235,7 @@ expression data.</p>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, as_counts <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>If you want the full API response beyond just than just the result of
 the metadata and expression returned put
-<code>as_response = FALSE</code>.</p>
+<code>raw_response = TRUE</code>.</p>
 </div>
 <div class="section level4">
 <h4 id="working-with-results">Working with Results<a class="anchor" aria-label="anchor" href="#working-with-results"></a>
