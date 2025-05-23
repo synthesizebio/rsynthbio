@@ -1,6 +1,6 @@
 Type: Package
 Package: rsynthbio
-Title: API wrapper in R
+Title: API Wrapper in R
 Version: 0.9.0
 Authors@R: c(
     person("Candace", "Savonen", , 
@@ -25,4 +25,4 @@ Encoding: UTF-8
 RoxygenNote: 7.3.2
 LazyData: true
 VignetteBuilder: knitr
-License: file LICENSE
+License: MIT + file LICENSE

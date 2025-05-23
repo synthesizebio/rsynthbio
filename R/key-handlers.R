@@ -156,11 +156,12 @@ clear_synthesize_token <- function(remove_from_keyring = FALSE) {
 #' environment. Useful for conditional code that requires an API token.
 #'
 #' @return Logical, TRUE if token is set, FALSE otherwise.
-#' @examples
+#' @examples  \dontrun{
 #' # Check if token is set
 #' if (!has_synthesize_token()) {
 #'   # Prompt for token if not set
 #'   set_synthesize_token()
+#' }
 #' }
 #' @export
 has_synthesize_token <- function() {
