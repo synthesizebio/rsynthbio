@@ -4,10 +4,10 @@
 \alias{extract_expression_data}
 \title{Extract Gene Expression Data from API Response}
 \usage{
-extract_expression_data(api_response, as_counts = TRUE)
+extract_expression_data(parsed_content, as_counts = TRUE)
 }
 \arguments{
-\item{api_response}{The raw API response list}
+\item{parsed_content}{The parsed API response list}
 
 \item{as_counts}{Logical, if FALSE, transforms the predicted expression counts into logCPM
 (default is TRUE, returning raw counts).}

@@ -5,8 +5,6 @@
 #'
 #' @param expression A data.frame containing raw counts expression data.
 #' @return A data.frame containing log1p(CPM) transformed data.
-#' @import dplyr
-#' @importFrom tibble as_tibble
 #' @examples
 #' # Create a sample expression matrix with raw counts
 #' raw_counts <- data.frame(
@@ -30,7 +28,16 @@ log_cpm <- function(expression) {
     stop("Input must have at least one row and one column.", call. = FALSE)
   }
 
-  # Convert to matrix if not already
+  # If there's a sample ID deal with it
+  if ("sample_id" %in% colnames(expression)) {
+    deal_with_sample_id <- TRUE
+    sample_id <- expression$sample_id
+    expression <- expression[,-1]
+  } else {
+    deal_with_sample_id <- FALSE
+  }
+
+  # Convert to matrix but drop sample id
   expr_matrix <- as.matrix(expression)
 
   # Replace NAs with 0
@@ -49,8 +56,15 @@ log_cpm <- function(expression) {
   log_cpm_matrix <- log1p(cpm_matrix)
 
   # Return as data frame with appropriate column names
-  result <- as.data.frame(log_cpm_matrix)
-  colnames(result) <- paste0(colnames(expression), "_cpm")
+  if (deal_with_sample_id) {
+    result <- data.frame(sample_id = sample_id,
+                         as.data.frame(log_cpm_matrix))
+    colnames(result) <- c("sample_id",
+                          paste0(colnames(expression), "_cpm"))
+  } else {
+    result <- as.data.frame(log_cpm_matrix)
+    colnames(result) <- colnames(expression)
+  }
 
   return(result)
 }
@@ -60,64 +74,42 @@ log_cpm <- function(expression) {
 #' @description Extracts and combines gene expression data from a complex API response,
 #' with proper formatting and metadata association.
 #'
-#' @param api_response The raw API response list
+#' @param parsed_content The parsed API response list
 #' @param as_counts Logical, if FALSE, transforms the predicted expression counts into logCPM
 #'        (default is TRUE, returning raw counts).
-#' @importFrom purrr map_dfr set_names
-#' @importFrom tibble as_tibble
-#' @importFrom tidyr uncount
-#' @importFrom dplyr bind_cols mutate across
 #' @return A list with two components:
 #'         - metadata: tibble containing sample metadata
 #'         - expression: tibble containing combined gene expression data
 #'
 #' @export
-extract_expression_data <- function(api_response, as_counts = TRUE) {
-  # Extract gene names
-  gene_order <- api_response$gene_order
+extract_expression_data <- function(parsed_content, as_counts = TRUE) {
 
-  # Process expression data and metadata
-  results <- purrr::map_dfr(seq_along(api_response$outputs$expression), function(group_idx) {
-    # Get expression data for this group
-    expr_data <- api_response$outputs$expression[[group_idx]]
+  # Extract the expression matrices and combine them
+  expression_list <- parsed_content$outputs$expression
+  expression <- do.call(rbind, expression_list)
 
-    # Convert to tibble with gene names - explicitly set column names to avoid warnings
-    expr_tibble <- expr_data |>
-      tibble::as_tibble(.name_repair = "minimal") |>
-      purrr::set_names(gene_order)
+  # Get metadata dataframe
+  metadata <- parsed_content$outputs$metadata
 
-    # Get metadata for this group and repeat for each sample
-    metadata_tibble <- api_response$outputs$metadata[group_idx, , drop = FALSE] |>
-      tibble::as_tibble() |>
-      tidyr::uncount(nrow(expr_tibble))
+  # Expand metadata to match the expression data
+  metadata_expanded <- metadata[rep(1:nrow(metadata),
+                                    sapply(parsed_content$outputs$expression, nrow)), ]
 
-    # Return combined data with sample index
-    dplyr::bind_cols(
-      metadata_tibble,
-      sample_group = group_idx,
-      sample_index = seq_len(nrow(expr_tibble))
-    )
-  }, .id = "output_group") |>
-    # Create unique sample IDs
-    dplyr::mutate(sample_id = paste0("sample_", dplyr::row_number()))
+  # Reset row names to be clean
+  rownames(metadata_expanded) <- NULL
 
-  # Separate metadata from sample indices
-  metadata <- results |>
-    dplyr::select(-sample_group, -sample_index)
+  # Add sample identifiers to match the expression data
+  metadata_expanded <- data.frame(sample_id =
+                                    paste0("sample_",
+                                           rep(1:nrow(metadata_expanded))),
+                                  metadata_expanded)
 
-  # Process expression data
-  expression <- purrr::map_dfr(seq_along(api_response$outputs$expression), function(group_idx) {
-    api_response$outputs$expression[[group_idx]] |>
-      tibble::as_tibble(.name_repair = "minimal") |> # Add .name_repair parameter here
-      purrr::set_names(gene_order)
-  }) |>
-    # Convert all columns to integers
-    dplyr::mutate(dplyr::across(dplyr::everything(), as.integer))
+  # Add sample identifiers
+  expression <- data.frame(sample_id = metadata_expanded$sample_id,
+                           expression)
 
-  # Add sample IDs as row names (tidyverse approach typically avoids rownames)
-  expression <- expression |>
-    dplyr::mutate(sample_id = metadata$sample_id) |>
-    tibble::column_to_rownames("sample_id")
+  # Set gene names as column names (excluding sample_id column)
+  colnames(expression)[-1] <- parsed_content$gene_order
 
   # Apply log CPM transformation if requested
   if (!as_counts) {
@@ -126,7 +118,7 @@ extract_expression_data <- function(api_response, as_counts = TRUE) {
 
   # Return both components
   return(list(
-    metadata = metadata,
+    metadata = metadata_expanded,
     expression = expression
   ))
 }

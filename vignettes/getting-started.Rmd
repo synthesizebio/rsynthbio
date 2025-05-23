@@ -124,6 +124,8 @@ We train our models with diverse multi-omics datasets. There are two model types
 result <- predict_query(query)
 ```
 
+This result will be a list of two dataframes: `metadata` and `expression`
+
 ### Modifying a Query
 
 You can customize the query to fit your specific research needs:
@@ -161,8 +163,7 @@ Once your query is ready, you can send it to the API to generate gene expression
 result <- predict_query(query, as_counts = TRUE)
 ```
 
-If you want the full API response beyond just than just the result of the metadata and expression returned put `as_response = FALSE`.
-
+If you want the full API response beyond just than just the result of the metadata and expression returned put `raw_response = TRUE`.
 
 ### Working with Results
 
