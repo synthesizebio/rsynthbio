@@ -14,9 +14,11 @@ Checks whether a Synthesize Bio API token is currently set in the
 environment. Useful for conditional code that requires an API token.
 }
 \examples{
+ \dontrun{
 # Check if token is set
 if (!has_synthesize_token()) {
   # Prompt for token if not set
   set_synthesize_token()
+}
 }
 }
