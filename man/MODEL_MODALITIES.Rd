@@ -11,6 +11,8 @@ A nested list with structure: model type > version > modalities
 MODEL_MODALITIES
 }
 \description{
-A nested list containing supported modalities for different model versions
+A nested list containing supported modalities for different
+model versions
++ sra = this is bulk RNA-seq
 }
 \keyword{datasets}
