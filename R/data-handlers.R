@@ -27,9 +27,10 @@ log_cpm <- function(expression) {
   if (nrow(expression) == 0 || ncol(expression) == 0) {
     stop("Input must have at least one row and one column.", call. = FALSE)
   }
+  sample_id <- expression$sample_id
 
-  # Convert to matrix if not already
-  expr_matrix <- as.matrix(expression)
+  # Convert to matrix but drop sample id
+  expr_matrix <- as.matrix(expression[,-1])
 
   # Replace NAs with 0
   expr_matrix[is.na(expr_matrix)] <- 0
@@ -47,8 +48,10 @@ log_cpm <- function(expression) {
   log_cpm_matrix <- log1p(cpm_matrix)
 
   # Return as data frame with appropriate column names
-  result <- as.data.frame(log_cpm_matrix)
-  colnames(result) <- paste0(colnames(expression), "_cpm")
+  result <- data.frame(sample_id = sample_id,
+                       as.data.frame(log_cpm_matrix))
+  colnames(result) <- c("sample_id",
+                        paste0(colnames(expression[-1]), "_cpm"))
 
   return(result)
 }
