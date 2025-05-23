@@ -189,12 +189,12 @@ test_that("extract_expression_data processes API response correctly", {
 test_that("extract_expression_data correctly assigns sample IDs", {
 
   # Test sample ID generation
-  result_groups <- extract_expression_data(mock_api_response)
+  result <- extract_expression_data(mock_api_response)
 
   # Check sample IDs match between metadata and expression
   expect_equal(
-    nrow(result_groups$metadata),
-    nrow(result_groups$expression))
+    nrow(result$metadata),
+    nrow(result$expression))
 
   # sample ids should match
   expect_equal(result$metadata$sample_id, result$expression$sample_id)
