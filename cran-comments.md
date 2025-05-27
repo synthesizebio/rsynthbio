@@ -3,4 +3,4 @@
 0 errors | 0 warnings | 0 note
 
 * Initial release
-* Addressed minor CRAN suggestions
+* Addressed minor CRAN suggestion to make description more detailed
