@@ -85,27 +85,20 @@ log_cpm <- function(expression) {
 extract_expression_data <- function(parsed_content, as_counts = TRUE) {
 
   # Extract the expression matrices and combine them
-  expression_list <- parsed_content$outputs$expression
+  expression_list <- parsed_content$outputs$counts
   expression <- do.call(rbind, expression_list)
 
   # Get metadata dataframe
   metadata <- parsed_content$outputs$metadata
 
-  # Expand metadata to match the expression data
-  metadata_expanded <- metadata[rep(1:nrow(metadata),
-                                    sapply(parsed_content$outputs$expression, nrow)), ]
-
-  # Reset row names to be clean
-  rownames(metadata_expanded) <- NULL
-
   # Add sample identifiers to match the expression data
-  metadata_expanded <- data.frame(sample_id =
-                                    paste0("sample_",
-                                           rep(1:nrow(metadata_expanded))),
-                                  metadata_expanded)
+  metadata <- data.frame(
+    sample_id = paste0("sample_", rep(1:nrow(metadata))),
+    metadata
+  )
 
   # Add sample identifiers
-  expression <- data.frame(sample_id = metadata_expanded$sample_id,
+  expression <- data.frame(sample_id = metadata$sample_id,
                            expression)
 
   # Set gene names as column names (excluding sample_id column)
@@ -118,7 +111,7 @@ extract_expression_data <- function(parsed_content, as_counts = TRUE) {
 
   # Return both components
   return(list(
-    metadata = metadata_expanded,
+    metadata = metadata,
     expression = expression
   ))
 }

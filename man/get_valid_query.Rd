@@ -7,10 +7,10 @@
 get_valid_query()
 }
 \value{
-A list representing a valid query structure for v1.0.
+A list representing a valid query structure for v2.0.
 }
 \description{
-Generates a sample query for prediction and validation for the v1.0 model.
+Generates a sample query for prediction and validation for the v2.0 model.
 This function provides an example query structure that can be modified for specific needs.
 The sample query contains two example inputs: one for a cell line with CRISPR perturbation
 and another for a primary tissue sample with disease information.
@@ -20,7 +20,7 @@ and another for a primary tissue sample with disease information.
 query <- get_valid_query()
 
 # Modify the query for a different modality
-query$output_modality <- "bulk_rna-seq"
+query$modality <- "bulk_rna-seq"
 
 # Adjust the number of samples to generate
 query$inputs[[1]]$num_samples <- 10

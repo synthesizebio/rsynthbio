@@ -26,7 +26,7 @@ test_that("predict_query passes as_counts parameter to extract_expression_data",
   parsed_api_response <- list(
     classifier_keys = list(sex = c("female", "male"), sample_type = c("cell line", "primary tissue")),
     gene_order = c("gene1", "gene2", "gene3"),
-    model_version = 1,
+    model_version = 2,
     outputs = list(
       classifier_probs = list(),
       expression = list(

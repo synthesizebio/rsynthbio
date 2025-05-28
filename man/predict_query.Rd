@@ -23,7 +23,7 @@ A list with two data frames:
 Throws an error If the API request fails or the response structure is invalid.
 }
 \description{
-Sends a query to the Synthesize Bio API (v1.0) for prediction
+Sends a query to the Synthesize Bio API (v2.0) for prediction
 and retrieves gene expression samples. This function validates the query, sends it
 to the API, and processes the response into usable data frames.
 }

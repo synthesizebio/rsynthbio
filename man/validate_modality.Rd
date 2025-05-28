@@ -14,8 +14,8 @@ Invisibly returns TRUE if validation passes.
 Throws an error If the modality key is missing or if the selected modality is not allowed.
 }
 \description{
-Validates that the modality specified in the query is allowed for the v1.0 model.
-This function checks that the output_modality value is one of the supported modalities.
+Validates that the modality specified in the query is allowed for the v2.0 model.
+This function checks that the `modality` value is one of the supported modalities.
 }
 \examples{
 # Create a valid query
@@ -25,7 +25,7 @@ validate_modality(query) # Passes validation
 # Example with invalid modality
 \dontrun{
 invalid_query <- get_valid_query()
-invalid_query$output_modality <- "unsupported_modality"
+invalid_query$modality <- "unsupported_modality"
 validate_modality(invalid_query) # Throws error for invalid modality
 }
 }

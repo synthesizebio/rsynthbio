@@ -104,3 +104,12 @@ result <- predict_query(query)
 # Structure of the result
 result
 ```
+
+## Releases 
+
+These docs are specific to Version 2.x.x of the pysynthbio API. 
+Note that the versioning for this package runs parallel to the versioning of the AI models from 
+Synthesize Bio. 
+
+The major releases indicate what model from the API is being used. So 2.x.x means v2.0 from the API is being used. 
+Whereas the .x.x part is related to the package releases/bug fixes, etc. 
