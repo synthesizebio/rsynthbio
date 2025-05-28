@@ -62,8 +62,8 @@ get_valid_query <- function() {
     inputs = list(
       list(
         metadata = list(
-          cell_line_ontology_id = "A-549",
-          perturbation_ontology_id = "ABL1",
+          cell_line_ontology_id = "CVCL_0023",
+          perturbation_ontology_id = "ENSG00000156127",
           perturbation_type = "crispr",
           perturbation_time = "96 hours",
           sample_type = "cell line"
@@ -72,11 +72,11 @@ get_valid_query <- function() {
       ),
       list(
         metadata = list(
-          disease_ontology_id = "gastrointestinal stromal tumor",
-          age_years = "65 years",
+          disease_ontology_id = "MONDO:0011719",
+          age_years = "65",
           sex = "female",
           sample_type = "primary tissue",
-          tissue_ontology_id = "stomach"
+          tissue_ontology_id = "UBERON:0000945"
         ),
         num_samples = 5
       )
