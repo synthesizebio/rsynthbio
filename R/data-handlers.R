@@ -89,13 +89,13 @@ extract_expression_data <- function(parsed_content, as_counts = TRUE) {
   expression <- do.call(rbind, expression_list)
 
   # Get metadata dataframe
-  metadata_list <- parsed_content$outputs$metadata
-  metadata <- do.call(rbind.data.frame, metadata_list)
+  metadata <- parsed_content$outputs$metadata
 
   # Add sample identifiers to match the expression data
-  metadata <- data.frame(sample_id = paste0("sample_",
-                                            rep(1:nrow(metadata))),
-                                  metadata)
+  metadata <- data.frame(
+    sample_id = paste0("sample_", rep(1:nrow(metadata))),
+    metadata
+  )
 
   # Add sample identifiers
   expression <- data.frame(sample_id = metadata$sample_id,
