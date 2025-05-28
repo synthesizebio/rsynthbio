@@ -88,7 +88,7 @@ Never hard-code your token in scripts that will be shared or committed to versio
 
 Some Synthesize models support generation of different gene expression data types. 
 
-In the v1 model, you should use "sra" for bulk gene expression.
+In the v2 model, you should use "bulk" for bulk gene expression.
 
 ```{r modalities}
 # Check available modalities

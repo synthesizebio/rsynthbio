@@ -54,7 +54,7 @@ get_valid_modes <- function() {
 #' @export
 get_valid_query <- function() {
   list(
-    modality = "sra",
+    modality = "bulk",
     mode = "sample generation",
     return_classifier_probs = TRUE,
     seed = 11,
