@@ -46,7 +46,6 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
   if (!has_synthesize_token()) {
     stop("Please set your API key for synthesize Bio using set_synthesize_token()")
   }
-
   api_url <- paste0(API_BASE_URL, "/api/model/v2.0")
 
   validate_query(query)

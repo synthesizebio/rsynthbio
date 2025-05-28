@@ -32,7 +32,7 @@ get_valid_modalities <- function() {
 #' "sample generation" %in% get_valid_modes()
 #' @export
 get_valid_modes <- function() {
-  return(c("sample generation", "mean estimation", "metadata prediction"))
+  return(c("sample generation", "mean estimation", "predict metadata"))
 }
 
 
@@ -91,23 +91,11 @@ get_valid_query <- function(type = "sample_generation") {
   )
 
   metadata_prediction <- list(
+    inputs = list(counts = runif(69573),
+                  counts = runif(69573)),
     modality = "bulk",
     mode = "predict metadata",
-    seed = 11,
-    inputs = list(
-      list(
-        classifier_probs = list(
-          sex = list(female = 0.9, male = 0.1)
-        ),
-        latents = list(
-          biological = c(0.1, 0.1, 0.3 ),
-          perturbation = c(0.2, 0.4, 0.1),
-          technical = c(0.3, 0.2, 0.1)
-        ),
-        metadata = list(sex = "female")
-      )
-    ),
-    model_version = 2.0
+    seed = 11
   )
 
   query <-
