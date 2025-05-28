@@ -1,3 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 .github/*
+^CRAN-SUBMISSION$
+cran-comments.md
+docs/*
+^LICENSE\.md$
