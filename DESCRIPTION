@@ -1,7 +1,7 @@
 Type: Package
 Package: rsynthbio
 Title: API Wrapper in R
-Version: 0.9.0
+Version: 2.0.0
 Authors@R: c(
     person("Candace", "Savonen", , 
     c("cansav09@gmail.com", "candace@synthesize.bio"),
