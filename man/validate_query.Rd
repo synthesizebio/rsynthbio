@@ -14,7 +14,7 @@ Invisibly returns TRUE if validation passes.
 Throws an error If the query structure is invalid or missing required keys.
 }
 \description{
-Validates the structure and contents of the query based on the v1.0 model.
+Validates the structure and contents of the query based on the v2.0 model.
 This function checks that the query is a list and contains all required keys.
 }
 \examples{
@@ -25,6 +25,6 @@ validate_query(query) # Passes validation
 # Example with invalid query (missing required key)
 \dontrun{
 invalid_query <- list(inputs = list(), mode = "mean estimation")
-validate_query(invalid_query) # Throws error for missing output_modality
+validate_query(invalid_query) # Throws error for missing modality
 }
 }
