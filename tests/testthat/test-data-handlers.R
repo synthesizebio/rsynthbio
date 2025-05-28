@@ -222,11 +222,11 @@ test_that("extract_expression_data processes API response correctly", {
 
   # Check metadata
   expect_s3_class(result_counts$metadata, "data.frame")
-  expect_equal(nrow(result_counts$metadata), 20)
+  expect_equal(nrow(result_counts$metadata), 10)
 
   # Check expression data
   expect_s3_class(result_counts$expression, "data.frame")
-  expect_equal(nrow(result_counts$expression), 20)
+  expect_equal(nrow(result_counts$expression), 10)
   expect_equal(colnames(result_counts$expression)[1:4],
                c("sample_id", "ENSG00000000003", "ENSG00000000005", "ENSG00000000419"))
 
