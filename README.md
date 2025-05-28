@@ -92,8 +92,8 @@ str(query)
 
 The query consists of:
 
-1. `output_modality`: The type of gene expression data to generate
-2. `mode`: The prediction mode (e.g., "mean estimation")
+1. `modality`: The type of gene expression data to generate
+2. `mode`: The prediction mode (e.g., "sample_generation")
 3. `inputs`: A list of biological conditions to generate data for
 
 
