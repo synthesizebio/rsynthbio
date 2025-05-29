@@ -1,15 +1,15 @@
 Type: Package
 Package: rsynthbio
-Title: API Wrapper in R
-Version: 2.0.0
+Title: Synthesize Bio API Wrapper
+Version: 1.0.0
 Authors@R: c(
     person("Candace", "Savonen", , 
     c("cansav09@gmail.com", "candace@synthesize.bio"),
     role = c("aut", "cre"))
     )
-Description: Access Synthesize Bio models from their API using this wrapper that
-  provides a convenient interface to the Synthesize Bio API, allowing users to generate 
-  realistic gene expression data based on specified biological conditions. This package 
+Description: Access Synthesize Bio models from their API <https://app.synthesize.bio/> using
+  this wrapper that provides a convenient interface to the Synthesize Bio API, allowing users
+  to generate realistic gene expression data based on specified biological conditions. This package 
   enables researchers to easily access AI-generated transcriptomic data for various 
   modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
 URL: https://github.com/synthesizebio/rsynthbio
