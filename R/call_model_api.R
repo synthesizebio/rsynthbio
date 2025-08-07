@@ -213,6 +213,9 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
   validate_query(query)
   validate_modality(query)
 
+  # Add source field for reporting
+  query$source <- "rsynthbio"
+
   # Convert the query list to JSON
   query_json <- toJSON(query, auto_unbox = TRUE)
 
