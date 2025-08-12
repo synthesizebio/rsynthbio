@@ -14,7 +14,7 @@
 #' "bulk_rna-seq" %in% get_valid_modalities()
 #' @export
 get_valid_modalities <- function() {
-  unlist(MODEL_MODALITIES$"v2.0")
+  unlist(MODEL_MODALITIES$"v2.2")
 }
 
 #' @title Get Valid Modes
