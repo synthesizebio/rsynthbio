@@ -39,7 +39,7 @@ remotes::install_github("synthesizebio/rsynthbio")
 Once installed, load the package:
 
 ```{r}
-#library(rsynthbio)
+library(rsynthbio)
 ```
 
 ## Authentication
