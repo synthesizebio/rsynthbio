@@ -153,22 +153,12 @@ committed to version control.</p>
 <h3 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
 </h3>
 <div class="section level4">
-<h4 id="available-modalities">Available Modalities<a class="anchor" aria-label="anchor" href="#available-modalities"></a>
-</h4>
-<p>Some Synthesize models support generation of different gene
-expression data types.</p>
-<p>In the v2 model, you should use “bulk” for bulk gene expression.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Check available modalities</span></span>
-<span><span class="fu"><a href="../reference/get_valid_modalities.html">get_valid_modalities</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level4">
 <h4 id="creating-a-query">Creating a Query<a class="anchor" aria-label="anchor" href="#creating-a-query"></a>
 </h4>
 <p>The first step to generating AI-generated gene expression data is to
 create a query. The package provides a sample query that you can
 modify:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get a sample query</span></span>
 <span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -195,9 +185,9 @@ the distribution of expression across sample groups.</p></li>
 <li><p>Mean estimation: This is deterministic. For a given metadata
 specification, you will get the same values.</p></li>
 </ul>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Request raw counts data</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, raw_response <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>This result will be a list of two dataframes: <code>metadata</code>
 and <code>expression</code></p>
 </div>
@@ -205,24 +195,17 @@ and <code>expression</code></p>
 <h4 id="modifying-a-query">Modifying a Query<a class="anchor" aria-label="anchor" href="#modifying-a-query"></a>
 </h4>
 <p>You can customize the query to fit your specific research needs:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Change output modality</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">output_modality</span> <span class="op">&lt;-</span> <span class="st">"single_cell_rna-seq"</span></span>
 <span></span>
 <span><span class="co"># Adjust number of samples</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">num_samples</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
 <span></span>
-<span><span class="co"># Modify cell line information</span></span>
-<span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">cell_line</span> <span class="op">&lt;-</span> <span class="st">"MCF7"</span></span>
-<span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">perturbation</span> <span class="op">&lt;-</span> <span class="st">"TP53"</span></span>
-<span></span>
 <span><span class="co"># Add a new condition</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  metadata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    tissue <span class="op">=</span> <span class="st">"lung"</span>,</span>
-<span>    disease <span class="op">=</span> <span class="st">"adenocarcinoma"</span>,</span>
 <span>    sex <span class="op">=</span> <span class="st">"male"</span>,</span>
-<span>    age <span class="op">=</span> <span class="st">"57 years"</span>,</span>
 <span>    sample_type <span class="op">=</span> <span class="st">"primary tissue"</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  num_samples <span class="op">=</span> <span class="fl">3</span></span>
@@ -233,7 +216,7 @@ and <code>expression</code></p>
 </h4>
 <p>Once your query is ready, you can send it to the API to generate gene
 expression data.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Request raw counts data</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, as_counts <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>If you want the full API response beyond just than just the result of
@@ -243,7 +226,7 @@ the metadata and expression returned put
 <div class="section level4">
 <h4 id="working-with-results">Working with Results<a class="anchor" aria-label="anchor" href="#working-with-results"></a>
 </h4>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Access metadata and expression matrices</span></span>
 <span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">metadata</span></span>
 <span><span class="va">expression</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">expression</span></span>
@@ -255,7 +238,7 @@ the metadata and expression returned put
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">metadata</span><span class="op">)</span></span></code></pre></div>
 <p>You may want to process the data in chunks or save it for later
 use:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Save results to RDS file</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"synthesize_results.rds"</span><span class="op">)</span></span>
 <span></span>
@@ -270,7 +253,7 @@ use:</p>
 <h4 id="custom-validation">Custom Validation<a class="anchor" aria-label="anchor" href="#custom-validation"></a>
 </h4>
 <p>You can validate your queries before sending them to the API:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Validate structure</span></span>
 <span><span class="fu"><a href="../reference/validate_query.html">validate_query</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span>
 <span></span>
@@ -281,7 +264,7 @@ use:</p>
 <div class="section level3">
 <h3 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
