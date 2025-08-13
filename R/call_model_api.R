@@ -11,10 +11,10 @@
 #' print(modalities)
 #'
 #' # Check if a specific modality is supported
-#' "bulk_rna-seq" %in% get_valid_modalities()
+#' "bulk" %in% get_valid_modalities()
 #' @export
 get_valid_modalities <- function() {
-  unlist(MODEL_MODALITIES$"v2.0")
+  unlist(MODEL_MODALITIES$"v2.2")
 }
 
 #' @title Get Valid Modes
@@ -140,7 +140,7 @@ validate_query <- function(query) {
 #' }
 #' @export
 validate_modality <- function(query) {
-  allowed_modalities <- unlist(MODEL_MODALITIES$"v2.0")
+  allowed_modalities <- get_valid_modalities()
 
   modality_key <- "modality"
   if (!(modality_key %in% names(query))) {

@@ -84,17 +84,6 @@ Never hard-code your token in scripts that will be shared or committed to versio
 
 ## Basic Usage
 
-### Available Modalities
-
-Some Synthesize models support generation of different gene expression data types. 
-
-In the v2 model, you should use "bulk" for bulk gene expression.
-
-```{r modalities}
-# Check available modalities
-get_valid_modalities()
-```
-
 ### Creating a Query
 
 The first step to generating AI-generated gene expression data is to create a query. The package provides a sample query that you can modify:
@@ -121,7 +110,7 @@ We train our models with diverse multi-omics datasets. There are two model types
 
 ```{r predict, eval=FALSE}
 # Request raw counts data
-result <- predict_query(query)
+result <- predict_query(query, raw_response = TRUE)
 ```
 
 This result will be a list of two dataframes: `metadata` and `expression`
@@ -137,17 +126,10 @@ query$output_modality <- "single_cell_rna-seq"
 # Adjust number of samples
 query$inputs[[1]]$num_samples <- 10
 
-# Modify cell line information
-query$inputs[[1]]$metadata$cell_line <- "MCF7"
-query$inputs[[1]]$metadata$perturbation <- "TP53"
-
 # Add a new condition
 query$inputs[[3]] <- list(
   metadata = list(
-    tissue = "lung",
-    disease = "adenocarcinoma",
     sex = "male",
-    age = "57 years",
     sample_type = "primary tissue"
   ),
   num_samples = 3
