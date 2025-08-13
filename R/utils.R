@@ -11,7 +11,7 @@ API_BASE_URL <- "https://app.synthesize.bio"
 #' @format A nested list with structure: model type > version > modalities
 #' @export
 MODEL_MODALITIES <- list(
-  "v2.0" = list(
+  "v2.2" = list(
     "bulk"
   )
 )
