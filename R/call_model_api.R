@@ -208,8 +208,6 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
     stop("Please set your API key for synthesize Bio using set_synthesize_token()")
   }
 
-  api_url <- paste0(API_BASE_URL, "/api/model/v2.0")
-
   validate_query(query)
   validate_modality(query)
 
@@ -221,7 +219,7 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
 
   # Make the API request
   response <- POST(
-    url = api_url,
+    url = API_BASE_URL,
     add_headers(
       Accept = "application/json",
       Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY")),
