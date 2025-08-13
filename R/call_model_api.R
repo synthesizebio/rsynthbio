@@ -14,7 +14,7 @@
 #' "bulk" %in% get_valid_modalities()
 #' @export
 get_valid_modalities <- function() {
-  unlist(MODEL_MODALITIES$"v2.2")
+  unlist(MODEL_MODALITIES[[RELEASE_NUMBER]])
 }
 
 #' @title Get Valid Modes
