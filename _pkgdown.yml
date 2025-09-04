@@ -4,7 +4,7 @@ template:
   assets: ["assets"]
   bootstrap: 5
   bslib:
-    pkgdown-nav-height: 56px
+    pkgdown-nav-height: 64px
     base_font: "{bslib::bs_font_google('Inter')}"
     heading_font: "{bslib::bs_font_google('Inter')}"
   includes:
