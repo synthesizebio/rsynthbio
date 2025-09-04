@@ -231,7 +231,7 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
 
   if (http_status(response)$category != "Success") {
     stop(paste0(
-      "API request to ", api_url, " failed with status ",
+      "API request to ", API_BASE_URL, " failed with status ",
       status_code(response), ": ", content(response, "text")
     ))
   }
