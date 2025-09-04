@@ -14,8 +14,9 @@
 /* Enlarge page-header logo at top of pages (slightly smaller) */
 .logo { height: 52px !important; width: auto !important; }
 
-/* Make navbar version number white */
-.navbar .nav-text, .navbar small.text-muted { color: #ffffff !important; }
+/* Hide navbar version text (e.g., "2.0.0") */
+.navbar small.nav-text,
+.navbar small.text-muted { display: none !important; }
 
 /* Inter font fallback in case bslib load fails */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
