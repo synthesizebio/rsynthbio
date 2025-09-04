@@ -8,7 +8,7 @@ template:
     base_font: "{bslib::bs_font_google('Inter')}"
     heading_font: "{bslib::bs_font_google('Inter')}"
   includes:
-    before_title: <img src="https://github.com/synthesizebio/rsynthbio/blob/cansavvy/docs-update/assets/logo.png?raw=true", width = '200px'>
+    before_title: <img src="https://github.com/synthesizebio/rsynthbio/blob/cansavvy/docs-update/assets/whitelogo.png?raw=true", width = '200px'>
 
 logo: assets/logo.png
 

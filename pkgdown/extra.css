@@ -10,6 +10,9 @@
 /* Restore brand text visibility */
 .navbar-brand { font-size: inherit; }
 
+/* Remove left brand text/link from navbar */
+.navbar .navbar-brand { display: none !important; }
+
 /* White-backed logo chip for contrast on purple */
 /* Enlarge page-header logo at top of pages (slightly smaller) */
 .logo { height: 52px !important; width: auto !important; }
