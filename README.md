@@ -106,14 +106,9 @@ result
 
 ## Rate limits
 
-Free usage of Synthesize Bio is limited on a per week basis.
-If you exceed this limit you may recieve a message like:
-
-```
-The limit is 100 samples per week. You have 0 samples remaining this week. If you need to generate more samples, please contact us.
-```
-
-Please email us info@synthesize.bio for more information.
+Free usage of Synthesize Bio is limited.
+If you exceed this limit you may recieve an error message stating you've exceeded your limit.
+To generate more samples, please contact us at `info@synthesize.bio` for more information.
 
 ## Releases
 
