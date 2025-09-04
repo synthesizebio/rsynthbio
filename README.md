@@ -1,8 +1,10 @@
-# rsynthbio
+# rsynthbio <img src="assets/logomark.png" style="width: 80px;" alt="Logomark">
 
-`rsynthbio` is an R package that provides a convenient interface to the Synthesize Bio API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
+`rsynthbio` is an R package that provides a convenient interface to the [Synthesize Bio](https://www.synthesize.bio/) API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
 
 [See the full documentation pages here](https://synthesizebio.github.io/rsynthbio/).
+
+Alternatively, you can AI generate datasets from our [platform website](https://app.synthesize.bio/datasets/).
 
 ## How to install
 
@@ -41,7 +43,7 @@ set_synthesize_token()
 set_synthesize_token(use_keyring = TRUE)
 ```
 
-Loading your API key for a session. 
+Loading your API key for a session.
 
 ```
 # In future sessions, load the stored token
@@ -96,7 +98,6 @@ The query consists of:
 2. `mode`: The prediction mode (e.g., "mean estimation")
 3. `inputs`: A list of biological conditions to generate data for
 
-
 ```
 # Request raw counts data
 result <- predict_query(query)
@@ -105,11 +106,11 @@ result <- predict_query(query)
 result
 ```
 
-## Releases 
+## Releases
 
-These docs are specific to Version 2.x.x of the pysynthbio API. 
-Note that the versioning for this package runs parallel to the versioning of the AI models from 
-Synthesize Bio. 
+These docs are specific to Version 2.x.x of the pysynthbio API.
+Note that the versioning for this package runs parallel to the versioning of the AI models from
+Synthesize Bio.
 
-The major releases indicate what model from the API is being used. So 2.x.x means v2.0 from the API is being used. 
-Whereas the .x.x part is related to the package releases/bug fixes, etc. 
+The major releases indicate what model from the API is being used. So 2.x.x means v2.0 from the API is being used.
+Whereas the .x.x part is related to the package releases/bug fixes, etc.
