@@ -8,7 +8,6 @@ template:
     base_font: "{bslib::bs_font_google('Inter')}"
     heading_font: "{bslib::bs_font_google('Inter')}"
   includes:
-    before_title: "<img class='brand-logo' src='https://synthesizebio.github.io/rsynthbio/assets/logo.png' alt='rsynthbio logo' style='height: 32px; margin-right: 10px;'>"
     in_header: |
       <link rel="icon" type="image/png" href="https://synthesizebio.github.io/rsynthbio/assets/logomark.png">
       <link rel="shortcut icon" type="image/png" href="https://synthesizebio.github.io/rsynthbio/assets/logomark.png">
@@ -16,7 +15,7 @@ template:
 logo: assets/logo.png
 
 navbar:
-  title: ""
+  title: "rsynthbio"
   structure:
     right: [github, synthesize_site]
   components:

@@ -1,10 +1,9 @@
 ---
 name: Feature Request
-about: Suggest an idea for the course templates
-title: ''
-labels: ''
+about: Suggest an idea for a feature
+title: ""
+labels: ""
 assignees: cansavvy
-
 ---
 
 **Is your feature request related to a problem? Please describe.**

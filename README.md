@@ -2,8 +2,6 @@
 
 `rsynthbio` is an R package that provides a convenient interface to the [Synthesize Bio](https://www.synthesize.bio/) API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
 
-[See the full documentation pages here](https://synthesizebio.github.io/rsynthbio/).
-
 Alternatively, you can AI generate datasets from our [platform website](https://app.synthesize.bio/datasets/).
 
 ## How to install
