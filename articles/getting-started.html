@@ -4,101 +4,82 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Getting Started with rsynthbio • rsynthbio</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
-<script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started with rsynthbio">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Getting Started • rsynthbio</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Getting Started">
+<link rel="icon" type="image/png" href="https://github.com/synthesizebio/rsynthbio/tree/main/assets/logomark.png?raw=true">
+<link rel="shortcut icon" type="image/png" href="https://github.com/synthesizebio/rsynthbio/tree/main/assets/logomark.png?raw=true">
 </head>
-<body data-spy="scroll" data-target="#toc">
+<body>
+    <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <div class="container template-article">
-      <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">rsynthbio</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
-      </span>
-    </div>
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <img src="https://github.com/synthesizebio/rsynthbio/tree/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-<li>
-  <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Articles
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="../articles/getting-started.html">Getting Started with rsynthbio</a>
-    </li>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar" class="collapse navbar-collapse ms-3">
+      <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="active nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
   </ul>
 </li>
-<li>
-  <a href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-  <a href="https://github.com/synthesizebio/rsynthbio/" class="external-link">
-    <span class="fab fa-github fa-lg"></span>
-
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/synthesizebio/rsynthbio" aria-label="GitHub repository"><span class="fa fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://www.synthesize.bio/">Synthesize.bio main page</a></li>
       </ul>
 </div>
-<!--/.nav-collapse -->
+
+
   </div>
-<!--/.container -->
-</div>
-<!--/.navbar -->
+</nav><div class="container template-article">
 
 
 
-      </header><div class="row">
-  <div class="col-md-9 contents">
-    <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Getting Started with rsynthbio</h1>
+
+<div class="row">
+  <main id="main" class="col-md-9"><div class="page-header">
+      <img src="../logo.png" class="logo" alt=""><h1>Getting Started</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/synthesizebio/rsynthbio/blob/v2.2/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
-      <div class="hidden name"><code>getting-started.Rmd</code></div>
-
+      <small class="dont-index">Source: <a href="https://github.com/synthesizebio/rsynthbio/blob/main/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
+      <div class="d-none name"><code>getting-started.Rmd</code></div>
     </div>
 
     
     
-<div class="section level2">
-<h2 id="rsynthbio">rsynthbio<a class="anchor" aria-label="anchor" href="#rsynthbio"></a>
-</h2>
 <p><code>rsynthbio</code> is an R package that provides a convenient
-interface to the Synthesize Bio API, allowing users to generate
-realistic gene expression data based on specified biological conditions.
-This package enables researchers to easily access AI-generated
-transcriptomic data for various modalities including bulk RNA-seq,
-single-cell RNA-seq, microarray data, and more.</p>
-<div class="section level3">
-<h3 id="how-to-install">How to install<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
-</h3>
+interface to the <a href="https://www.synthesize.bio/" class="external-link">Synthesize
+Bio</a> API, allowing users to generate realistic gene expression data
+based on specified biological conditions. This package enables
+researchers to easily access AI-generated transcriptomic data for
+various modalities including bulk RNA-seq, single-cell RNA-seq,
+microarray data, and more.</p>
+<p>Alternatively, you can AI generate datasets from our <a href="https://app.synthesize.bio/datasets/" class="external-link">platform website</a>.</p>
+<div class="section level2">
+<h2 id="how-to-install">How to install<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
+</h2>
 <p>You can install <code>rsynthbio</code> from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rsynthbio"</span><span class="op">)</span></span></code></pre></div>
@@ -113,9 +94,9 @@ single-cell RNA-seq, microarray data, and more.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/synthesizebio/rsynthbio" class="external-link">rsynthbio</a></span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="authentication">Authentication<a class="anchor" aria-label="anchor" href="#authentication"></a>
-</h3>
+<div class="section level2">
+<h2 id="authentication">Authentication<a class="anchor" aria-label="anchor" href="#authentication"></a>
+</h2>
 <p>Before using the Synthesize Bio API, you need to set up your API
 token. The package provides a secure way to handle authentication:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -134,9 +115,9 @@ token. The package provides a secure way to handle authentication:</p>
 <span><span class="co"># Check if a token is already set</span></span>
 <span><span class="fu"><a href="../reference/has_synthesize_token.html">has_synthesize_token</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>You can obtain an API token by registering at <a href="https://app.synthesize.bio" class="external-link">Synthesize Bio</a>.</p>
-<div class="section level4">
-<h4 id="security-best-practices">Security Best Practices<a class="anchor" aria-label="anchor" href="#security-best-practices"></a>
-</h4>
+<div class="section level3">
+<h3 id="security-best-practices">Security Best Practices<a class="anchor" aria-label="anchor" href="#security-best-practices"></a>
+</h3>
 <p>For security reasons, remember to clear your token when you’re
 done:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -149,12 +130,12 @@ done:</p>
 committed to version control.</p>
 </div>
 </div>
+<div class="section level2">
+<h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
+</h2>
 <div class="section level3">
-<h3 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
+<h3 id="creating-a-query">Creating a Query<a class="anchor" aria-label="anchor" href="#creating-a-query"></a>
 </h3>
-<div class="section level4">
-<h4 id="creating-a-query">Creating a Query<a class="anchor" aria-label="anchor" href="#creating-a-query"></a>
-</h4>
 <p>The first step to generating AI-generated gene expression data is to
 create a query. The package provides a sample query that you can
 modify:</p>
@@ -191,9 +172,9 @@ specification, you will get the same values.</p></li>
 <p>This result will be a list of two dataframes: <code>metadata</code>
 and <code>expression</code></p>
 </div>
-<div class="section level4">
-<h4 id="modifying-a-query">Modifying a Query<a class="anchor" aria-label="anchor" href="#modifying-a-query"></a>
-</h4>
+<div class="section level3">
+<h3 id="modifying-a-query">Modifying a Query<a class="anchor" aria-label="anchor" href="#modifying-a-query"></a>
+</h3>
 <p>You can customize the query to fit your specific research needs:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Change output modality</span></span>
@@ -211,9 +192,9 @@ and <code>expression</code></p>
 <span>  num_samples <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level4">
-<h4 id="making-predictions">Making Predictions<a class="anchor" aria-label="anchor" href="#making-predictions"></a>
-</h4>
+<div class="section level3">
+<h3 id="making-predictions">Making Predictions<a class="anchor" aria-label="anchor" href="#making-predictions"></a>
+</h3>
 <p>Once your query is ready, you can send it to the API to generate gene
 expression data.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -223,9 +204,9 @@ expression data.</p>
 the metadata and expression returned put
 <code>raw_response = TRUE</code>.</p>
 </div>
-<div class="section level4">
-<h4 id="working-with-results">Working with Results<a class="anchor" aria-label="anchor" href="#working-with-results"></a>
-</h4>
+<div class="section level3">
+<h3 id="working-with-results">Working with Results<a class="anchor" aria-label="anchor" href="#working-with-results"></a>
+</h3>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Access metadata and expression matrices</span></span>
 <span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">metadata</span></span>
@@ -249,9 +230,9 @@ use:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">expression</span>, <span class="st">"expression_matrix.csv"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">metadata</span>, <span class="st">"sample_metadata.csv"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level4">
-<h4 id="custom-validation">Custom Validation<a class="anchor" aria-label="anchor" href="#custom-validation"></a>
-</h4>
+<div class="section level3">
+<h3 id="custom-validation">Custom Validation<a class="anchor" aria-label="anchor" href="#custom-validation"></a>
+</h3>
 <p>You can validate your queries before sending them to the API:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Validate structure</span></span>
@@ -261,15 +242,15 @@ use:</p>
 <span><span class="fu"><a href="../reference/validate_modality.html">validate_modality</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-<div class="section level3">
-<h3 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
-</h3>
+<div class="section level2">
+<h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
+</h2>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="additional-resources">Additional Resources<a class="anchor" aria-label="anchor" href="#additional-resources"></a>
-</h3>
+<div class="section level2">
+<h2 id="additional-resources">Additional Resources<a class="anchor" aria-label="anchor" href="#additional-resources"></a>
+</h2>
 <ul>
 <li><a href="https://github.com/synthesizebio/rsynthbio" class="external-link">Package Source
 Code</a></li>
@@ -277,30 +258,22 @@ Code</a></li>
 Reports</a></li>
 </ul>
 </div>
-</div>
-  </div>
-
-  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-
-      </div>
-
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
 
-      <footer><div class="copyright">
-  <p></p>
-<p>Developed by Candace Savonen.</p>
+    <footer><div class="pkgdown-footer-left">
+  <p>Developed by Candace Savonen.</p>
 </div>
 
-<div class="pkgdown">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+<div class="pkgdown-footer-right">
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
-      </footer>
+    </footer>
 </div>
-
 
 
 
