@@ -1,0 +1,28 @@
+url: https://synthesizebio.github.io/rsynthbio/
+
+template:
+  assets: ["assets"]
+  bootstrap: 5
+  bslib:
+    pkgdown-nav-height: 64px
+    base_font: "{bslib::bs_font_google('Inter')}"
+    heading_font: "{bslib::bs_font_google('Inter')}"
+  includes:
+    in_header: |
+      <link rel="icon" type="image/png" href="https://github.com/synthesizebio/rsynthbio/tree/main/assets/logomark.png?raw=true">
+      <link rel="shortcut icon" type="image/png" href="https://github.com/synthesizebio/rsynthbio/tree/main/assets/logomark.png?raw=true">
+    before_title: <img src="https://github.com/synthesizebio/rsynthbio/tree/main/assets/whitelogo.png?raw=true", width = '200px'>
+
+navbar:
+  structure:
+    right: [github, synthesize_site]
+  components:
+    synthesize_site:
+      text: "Synthesize.bio main page"
+      href: https://www.synthesize.bio/
+    github:
+      icon: fa-github
+      aria-label: "GitHub repository"
+      href: https://github.com/synthesizebio/rsynthbio
+
+
