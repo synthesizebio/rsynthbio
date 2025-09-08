@@ -21,5 +21,5 @@ modalities <- get_valid_modalities()
 print(modalities)
 
 # Check if a specific modality is supported
-"bulk_rna-seq" \%in\% get_valid_modalities()
+"bulk" \%in\% get_valid_modalities()
 }
