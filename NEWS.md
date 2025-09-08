@@ -1,4 +1,6 @@
-# rsynthbio 2.2.0
+# rsynthbio 2.2.1
 
-- rsynthbio now works with the v2 models of Synthesize Bio.
-- If you wish to access v1 models, you must return to 1.x.x versions of this package.
+- rsynthbio now works with the GEM-1 model from Synthesize Bio.
+- older versions of Synthesize Bio models are no longer supported.
+- updated documentation to reflect the new model.
+- more flexibility for specifying the url for the Synthesize Bio API.
