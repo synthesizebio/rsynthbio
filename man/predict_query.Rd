@@ -4,7 +4,12 @@
 \alias{predict_query}
 \title{Predict Gene Expression}
 \usage{
-predict_query(query, raw_response = FALSE, as_counts = TRUE)
+predict_query(
+  query,
+  raw_response = FALSE,
+  as_counts = TRUE,
+  url = API_BASE_URL
+)
 }
 \arguments{
 \item{query}{A list representing the query data to send to the API.
@@ -15,6 +20,8 @@ response set this to FALSE. Default is to return only the expression and metadat
 
 \item{as_counts}{passed to extract_expression() function. Logical, if FALSE,
 transforms the predicted expression counts into logCPM (default is TRUE, returning raw counts).}
+
+\item{url}{The URL to send the API request to. Default is the API_BASE_URL.}
 }
 \value{
 A list with two data frames:
@@ -23,7 +30,7 @@ A list with two data frames:
 Throws an error If the API request fails or the response structure is invalid.
 }
 \description{
-Sends a query to the Synthesize Bio API (v2.0) for prediction
+Sends a query to the Synthesize Bio API for prediction
 and retrieves gene expression samples. This function validates the query, sends it
 to the API, and processes the response into usable data frames.
 }

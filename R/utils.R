@@ -1,5 +1,5 @@
 
-RELEASE_NUMBER <- "v2.2" 
+RELEASE_NUMBER <- "v2.2"
 
 #' @title API Base URL
 #' @description Base URL for the Synthesize Bio API

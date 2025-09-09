@@ -160,7 +160,7 @@ validate_modality <- function(query) {
 }
 
 #' @title Predict Gene Expression
-#' @description Sends a query to the Synthesize Bio API (v2.0) for prediction
+#' @description Sends a query to the Synthesize Bio API for prediction
 #' and retrieves gene expression samples. This function validates the query, sends it
 #' to the API, and processes the response into usable data frames.
 #'
@@ -170,6 +170,7 @@ validate_modality <- function(query) {
 #' response set this to FALSE. Default is to return only the expression and metadata.
 #' @param as_counts passed to extract_expression() function. Logical, if FALSE,
 #' transforms the predicted expression counts into logCPM (default is TRUE, returning raw counts).
+#' @param url The URL to send the API request to. Default is the API_BASE_URL.
 #' @return A list with two data frames:
 #'         - 'metadata': contains metadata for each sample
 #'         - 'expression': contains expression data for each sample
@@ -203,7 +204,7 @@ validate_modality <- function(query) {
 #' head(sort(expression[1, ], decreasing = TRUE))
 #' }
 #' @export
-predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
+predict_query <- function(query, raw_response = FALSE, as_counts = TRUE, url = API_BASE_URL) {
   if (!has_synthesize_token()) {
     stop("Please set your API key for synthesize Bio using set_synthesize_token()")
   }
@@ -219,7 +220,7 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
 
   # Make the API request
   response <- POST(
-    url = API_BASE_URL,
+    url = url,
     add_headers(
       Accept = "application/json",
       Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY")),
@@ -231,7 +232,7 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
 
   if (http_status(response)$category != "Success") {
     stop(paste0(
-      "API request to ", API_BASE_URL, " failed with status ",
+      "API request to ", url, " failed with status ",
       status_code(response), ": ", content(response, "text")
     ))
   }
