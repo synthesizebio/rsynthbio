@@ -107,7 +107,7 @@ The query consists of:
 We train our models with diverse multi-omics datasets. There are two model modes available today:
 
 + Mean estimation: These models create a distribution capturing the biological heterogeneity consistent with the supplied metadata. This distribution is then sampled to predict a gene expression distribution that captures measurement error. The mean of that distribution serves as the prediction
-+ Sample generation This model works identically to the mean estimation approach except that the final gene expression distribution is also sampled to generate realistic looking synthetic data that captures error associated with measurement
++ Sample generation: This model works identically to the mean estimation approach except that the final gene expression distribution is also sampled to generate realistic looking synthetic data that captures error associated with measurement
 
 ```{r predict, eval=FALSE}
 result <- predict_query(query)
