@@ -1,10 +1,14 @@
 # rsynthbio <img src="assets/logomark.png" style="width: 80px;" alt="Logomark">
 
-`rsynthbio` is an R package that provides a convenient interface to the [Synthesize Bio](https://www.synthesize.bio/) API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
+`rsynthbio` is an R package that provides a convenient interface to the [Synthesize Bio](https://www.synthesize.bio/) API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities, including bulk RNA-seq and single-cell RNA-seq.
 
-Alternatively, you can AI generate datasets from our [platform website](https://app.synthesize.bio/datasets/).
+To generate datasets without code, use our [web platform](https://app.synthesize.bio/datasets/).
 
-## How to install
+[See the full documentation here](https://synthesizebio.github.io/rsynthbio/).
+
+For questions, suggestions, and support, email us at [support@synthesize.bio](mailto:support@synthesize.bio).
+
+## How to Install
 
 You can install `rsynthbio` from CRAN:
 
@@ -12,7 +16,7 @@ You can install `rsynthbio` from CRAN:
 install.packages("rsynthbio")
 ```
 
-If you want the development version, you can install using the `remotes` package to install from GitHub:
+To install the development version from GitHub, use the `remotes` package:
 
 ```
 if (!("remotes" %in% installed.packages())) {
@@ -41,7 +45,7 @@ set_synthesize_token()
 set_synthesize_token(use_keyring = TRUE)
 ```
 
-Loading your API key for a session.
+Load your API token for a session:
 
 ```
 # In future sessions, load the stored token
@@ -69,6 +73,8 @@ Never hard-code your token in scripts that will be shared or committed to versio
 
 ## Basic Usage
 
+Please see the [Getting Started guide](https://synthesizebio.github.io/rsynthbio/articles/getting-started.html) for more details.
+
 ### Available Modalities
 
 The package supports various data modalities. You can view all available modalities with:
@@ -80,7 +86,7 @@ get_valid_modalities()
 
 ### Creating a Query
 
-The first step to generating AI-generated gene expression data is to create a query. The package provides a sample query that you can modify:
+The first step in obtaining AI-generated gene expression data is to create a query. The package provides a sample query that you can modify:
 
 ```
 # Get a sample query
@@ -104,17 +110,8 @@ result <- predict_query(query)
 result
 ```
 
-## Rate limits
+## Rate Limits
 
 Free usage of Synthesize Bio is limited.
-If you exceed this limit you may recieve an error message stating you've exceeded your limit.
-To generate more samples, please contact us at `info@synthesize.bio` for more information.
-
-## Releases
-
-These docs are specific to Version 2.x.x of the pysynthbio API.
-Note that the versioning for this package runs parallel to the versioning of the AI models from
-Synthesize Bio.
-
-The major releases indicate what model from the API is being used. So 2.x.x means v2.0 from the API is being used.
-Whereas the .x.x part is related to the package releases/bug fixes, etc.
+If you exceed this limit, you will receive an error message stating that you've exceeded your limit.
+To generate more samples, please contact us at [support@synthesize.bio](mailto:support@synthesize.bio).

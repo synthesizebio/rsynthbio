@@ -50,3 +50,5 @@ po/*~
 rsconnect/
 
 /.quarto/
+/doc/
+/Meta/

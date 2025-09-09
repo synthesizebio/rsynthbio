@@ -14,7 +14,7 @@ Invisibly returns TRUE if validation passes.
 Throws an error If the modality key is missing or if the selected modality is not allowed.
 }
 \description{
-Validates that the modality specified in the query is allowed for the v2.0 model.
+Validates that the modality specified in the query is allowed for the model.
 This function checks that the `modality` value is one of the supported modalities.
 }
 \examples{

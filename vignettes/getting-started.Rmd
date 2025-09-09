@@ -16,9 +16,10 @@ knitr::opts_chunk$set(
 ```
 
 
-`rsynthbio` is an R package that provides a convenient interface to the [Synthesize Bio](https://www.synthesize.bio/) API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
+`rsynthbio` is an R package that provides a convenient interface to the [Synthesize Bio](https://www.synthesize.bio/) API, allowing users to generate realistic gene expression data based on specified biological conditions. 
+This package enables researchers to easily access AI-generated transcriptomic data for various modalities including bulk RNA-seq and single-cell RNA-seq.
 
-Alternatively, you can AI generate datasets from our [platform website](https://app.synthesize.bio/datasets/).
+Alternatively, you can AI generate datasets from our [web platform](https://app.synthesize.bio/datasets/).
 
 ## How to install
 
@@ -103,15 +104,13 @@ The query consists of:
 2. `mode`: The prediction mode (e.g., "mean estimation" or "sample generation")
 3. `inputs`: A list of biological conditions to generate data for
 
-We train our models with diverse multi-omics datasets. There are two model types/modes available today:
+We train our models with diverse multi-omics datasets. There are two model modes available today:
 
-+ Sample generation: This runs in "diffusion" mode and generates different results for each sample requested. Use this mode to understand the distribution of expression across sample groups.
-
-+ Mean estimation: This is deterministic. For a given metadata specification, you will get the same values.
++ Mean estimation: These models create a distribution capturing the biological heterogeneity consistent with the supplied metadata. This distribution is then sampled to predict a gene expression distribution that captures measurement error. The mean of that distribution serves as the prediction
++ Sample generation: This model works identically to the mean estimation approach except that the final gene expression distribution is also sampled to generate realistic looking synthetic data that captures error associated with measurement
 
 ```{r predict, eval=FALSE}
-# Request raw counts data
-result <- predict_query(query, raw_response = TRUE)
+result <- predict_query(query)
 ```
 
 This result will be a list of two dataframes: `metadata` and `expression`
@@ -121,8 +120,6 @@ This result will be a list of two dataframes: `metadata` and `expression`
 You can customize the query to fit your specific research needs:
 
 ```{r modify-query}
-# Change output modality
-query$output_modality <- "single_cell_rna-seq"
 
 # Adjust number of samples
 query$inputs[[1]]$num_samples <- 10
@@ -137,12 +134,62 @@ query$inputs[[3]] <- list(
 )
 ```
 
+The input metadata is a list of lists.
+
+Here are the available metadata fields:
+
+__Biological:__  
+
+- ``age_years``
+- ``cell_line_ontology_id``
+- ``cell_type_ontology_id``
+- ``developmental_stage``
+- ``disease_ontology_id``
+- ``ethnicity``
+- ``genotype``
+- ``race``
+- ``sample_type`` ("cell line", "organoid", "other", "primary cells", "primary tissue", "xenograft")
+- ``sex`` ("male", "female")
+- ``tissue_ontology_id``
+
+__Perturbational:__  
+
+- ``perturbation_dose``
+- ``perturbation_ontology_id``
+- ``perturbation_time``
+- ``perturbation_type`` ("coculture","compound","control","crispr","genetic","infection","other","overexpression","peptide or biologic","shrna","sirna")
+
+__Technical:__  
+
+- ``study`` (Bioproject ID)
+- ``library_selection`` (e.g., "cDNA", "polyA", "Oligo-dT" - see https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-selection)
+- ``library_layout`` ("PAIRED", "SINGLE")
+- ``platform`` ("illumina")
+
+### Acceptable Metadata Values
+
+The following are the valid values or expected formats for selected metadata keys:
+
+| Metadata Field             | Requirement / Example                                                                                                                                                                                                 |
+|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `cell_line_ontology_id`    | Requires a [Cellosaurus ID](https://www.cellosaurus.org/).                                                                                                                                                           |
+| `cell_type_ontology_id`    | Requires a [CL ID](https://www.ebi.ac.uk/ols/ontologies/cl).                                                                                                                                                         |
+| `disease_ontology_id`      | Requires a [MONDO ID](https://www.ebi.ac.uk/ols/ontologies/mondo).                                                                                                                                                   |
+| `perturbation_ontology_id` | Must be a valid Ensembl gene ID (e.g., `ENSG00000156127`), [ChEBI ID](https://www.ebi.ac.uk/chebi/) (e.g., `CHEBI:16681`), [ChEMBL ID](https://www.ebi.ac.uk/chembl/) (e.g., `CHEMBL1234567`), or [NCBI Taxonomy ID](https://www.ncbi.nlm.nih.gov/taxonomy) (e.g., `9606`). |
+| `tissue_ontology_id`       | Requires a [UBERON ID](https://www.ebi.ac.uk/ols/ontologies/uberon).                                                                                                                                                 |
+
+
+To lookup ontology terms, we recommend using the [EMBL-EBI Ontology Lookup Service](https://www.ebi.ac.uk/ols4/).
+
+Models have a limited acceptable range of metadata input values. 
+If you provide a value that is not in the acceptable range, the API will return an error.
+
 ### Making Predictions
 
 Once your query is ready, you can send it to the API to generate gene expression data.
 
 ```{r predict-2, eval=FALSE}
-# Request raw counts data
+# Request counts data (not log-CPM)
 result <- predict_query(query, as_counts = TRUE)
 ```
 

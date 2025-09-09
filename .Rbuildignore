@@ -7,3 +7,5 @@ docs/*
 ^LICENSE\.md$
 CONTRIBUTING.md
 assets/*
+^doc$
+^Meta$

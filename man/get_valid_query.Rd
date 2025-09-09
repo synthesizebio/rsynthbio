@@ -7,10 +7,10 @@
 get_valid_query()
 }
 \value{
-A list representing a valid query structure for v2.0.
+A list representing a valid query structure.
 }
 \description{
-Generates a sample query for prediction and validation for the v2.0 model.
+Generates a sample query for prediction and validation for the model.
 This function provides an example query structure that can be modified for specific needs.
 The sample query contains two example inputs: one for a cell line with CRISPR perturbation
 and another for a primary tissue sample with disease information.
