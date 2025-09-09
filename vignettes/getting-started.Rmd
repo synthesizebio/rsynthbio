@@ -138,7 +138,7 @@ The input metadata is a list of lists.
 
 Here are the available metadata fields:
 
-Biological:  
+__Biological:__  
 
 - ``age_years``
 - ``cell_line_ontology_id``
@@ -152,14 +152,14 @@ Biological:
 - ``sex`` ("male", "female")
 - ``tissue_ontology_id``
 
-Perturbational:  
+__Perturbational:__  
 
 - ``perturbation_dose``
 - ``perturbation_ontology_id``
 - ``perturbation_time``
 - ``perturbation_type`` ("coculture","compound","control","crispr","genetic","infection","other","overexpression","peptide or biologic","shrna","sirna")
 
-Technical:  
+__Technical:__  
 
 - ``study`` (Bioproject ID)
 - ``library_selection`` (e.g., "cDNA", "polyA", "Oligo-dT" - see https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-selection)
@@ -170,15 +170,18 @@ Technical:
 
 The following are the valid values or expected formats for selected metadata keys:
 
-- ``cell_line_ontology_id``: Requires a [Cellosaurus ID](https://www.cellosaurus.org/).
-- ``cell_type_ontology_id``: Requires a [CL ID](https://www.ebi.ac.uk/ols/ontologies/cl).
-- ``disease_ontology_id``: Requires a [MONDO ID](https://www.ebi.ac.uk/ols/ontologies/mondo).
-- ``perturbation_ontology_id``: Must be a valid Ensembl gene ID (e.g., ``ENSG00000156127``), [ChEBI ID](https://www.ebi.ac.uk/chebi/) (e.g., ``CHEBI:16681``), [ChEMBL ID](https://www.ebi.ac.uk/chembl/) (e.g., ``CHEMBL1234567``), or [NCBI Taxonomy ID](https://www.ncbi.nlm.nih.gov/taxonomy) (e.g., ``9606``).
-- ``tissue_ontology_id``: Requires a [UBERON ID](https://www.ebi.ac.uk/ols/ontologies/uberon).
+| Metadata Field             | Requirement / Example                                                                                                                                                                                                 |
+|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `cell_line_ontology_id`    | Requires a [Cellosaurus ID](https://www.cellosaurus.org/).                                                                                                                                                           |
+| `cell_type_ontology_id`    | Requires a [CL ID](https://www.ebi.ac.uk/ols/ontologies/cl).                                                                                                                                                         |
+| `disease_ontology_id`      | Requires a [MONDO ID](https://www.ebi.ac.uk/ols/ontologies/mondo).                                                                                                                                                   |
+| `perturbation_ontology_id` | Must be a valid Ensembl gene ID (e.g., `ENSG00000156127`), [ChEBI ID](https://www.ebi.ac.uk/chebi/) (e.g., `CHEBI:16681`), [ChEMBL ID](https://www.ebi.ac.uk/chembl/) (e.g., `CHEMBL1234567`), or [NCBI Taxonomy ID](https://www.ncbi.nlm.nih.gov/taxonomy) (e.g., `9606`). |
+| `tissue_ontology_id`       | Requires a [UBERON ID](https://www.ebi.ac.uk/ols/ontologies/uberon).                                                                                                                                                 |
+
 
 To lookup ontology terms, we recommend using the [EMBL-EBI Ontology Lookup Service](https://www.ebi.ac.uk/ols4/).
 
-The GEM-1 model has a limited acceptable range of metadata input values. 
+Models have a limited acceptable range of metadata input values. 
 If you provide a value that is not in the acceptable range, the API will return an error.
 
 ### Making Predictions
