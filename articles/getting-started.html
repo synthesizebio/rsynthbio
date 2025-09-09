@@ -27,7 +27,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,9 +74,8 @@ interface to the <a href="https://www.synthesize.bio/" class="external-link">Syn
 Bio</a> API, allowing users to generate realistic gene expression data
 based on specified biological conditions. This package enables
 researchers to easily access AI-generated transcriptomic data for
-various modalities including bulk RNA-seq, single-cell RNA-seq,
-microarray data, and more.</p>
-<p>Alternatively, you can AI generate datasets from our <a href="https://app.synthesize.bio/datasets/" class="external-link">platform website</a>.</p>
+various modalities including bulk RNA-seq and single-cell RNA-seq.</p>
+<p>Alternatively, you can AI generate datasets from our <a href="https://app.synthesize.bio/datasets/" class="external-link">web platform</a>.</p>
 <div class="section level2">
 <h2 id="how-to-install">How to install<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
 </h2>
@@ -158,17 +157,20 @@ generate (see <code>get_valid_modalities</code>)</li>
 data for</li>
 </ol>
 <p>We train our models with diverse multi-omics datasets. There are two
-model types/modes available today:</p>
+model modes available today:</p>
 <ul>
-<li><p>Sample generation: This runs in “diffusion” mode and generates
-different results for each sample requested. Use this mode to understand
-the distribution of expression across sample groups.</p></li>
-<li><p>Mean estimation: This is deterministic. For a given metadata
-specification, you will get the same values.</p></li>
+<li>Mean estimation: These models create a distribution capturing the
+biological heterogeneity consistent with the supplied metadata. This
+distribution is then sampled to predict a gene expression distribution
+that captures measurement error. The mean of that distribution serves as
+the prediction</li>
+<li>Sample generation: This model works identically to the mean
+estimation approach except that the final gene expression distribution
+is also sampled to generate realistic looking synthetic data that
+captures error associated with measurement</li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Request raw counts data</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, raw_response <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></code></pre></div>
 <p>This result will be a list of two dataframes: <code>metadata</code>
 and <code>expression</code></p>
 </div>
@@ -177,9 +179,7 @@ and <code>expression</code></p>
 </h3>
 <p>You can customize the query to fit your specific research needs:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Change output modality</span></span>
-<span><span class="va">query</span><span class="op">$</span><span class="va">output_modality</span> <span class="op">&lt;-</span> <span class="st">"single_cell_rna-seq"</span></span>
-<span></span>
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Adjust number of samples</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">num_samples</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
 <span></span>
@@ -191,6 +191,96 @@ and <code>expression</code></p>
 <span>  <span class="op">)</span>,</span>
 <span>  num_samples <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>The input metadata is a list of lists.</p>
+<p>Here are the available metadata fields:</p>
+<p><strong>Biological:</strong></p>
+<ul>
+<li><code>age_years</code></li>
+<li><code>cell_line_ontology_id</code></li>
+<li><code>cell_type_ontology_id</code></li>
+<li><code>developmental_stage</code></li>
+<li><code>disease_ontology_id</code></li>
+<li><code>ethnicity</code></li>
+<li><code>genotype</code></li>
+<li><code>race</code></li>
+<li>
+<code>sample_type</code> (“cell line”, “organoid”, “other”, “primary
+cells”, “primary tissue”, “xenograft”)</li>
+<li>
+<code>sex</code> (“male”, “female”)</li>
+<li><code>tissue_ontology_id</code></li>
+</ul>
+<p><strong>Perturbational:</strong></p>
+<ul>
+<li><code>perturbation_dose</code></li>
+<li><code>perturbation_ontology_id</code></li>
+<li><code>perturbation_time</code></li>
+<li>
+<code>perturbation_type</code>
+(“coculture”,“compound”,“control”,“crispr”,“genetic”,“infection”,“other”,“overexpression”,“peptide
+or biologic”,“shrna”,“sirna”)</li>
+</ul>
+<p><strong>Technical:</strong></p>
+<ul>
+<li>
+<code>study</code> (Bioproject ID)</li>
+<li>
+<code>library_selection</code> (e.g., “cDNA”, “polyA”, “Oligo-dT” -
+see <a href="https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-selection" class="external-link uri">https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-selection</a>)</li>
+<li>
+<code>library_layout</code> (“PAIRED”, “SINGLE”)</li>
+<li>
+<code>platform</code> (“illumina”)</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="acceptable-metadata-values">Acceptable Metadata Values<a class="anchor" aria-label="anchor" href="#acceptable-metadata-values"></a>
+</h3>
+<p>The following are the valid values or expected formats for selected
+metadata keys:</p>
+<table class="table">
+<colgroup>
+<col width="11%">
+<col width="88%">
+</colgroup>
+<thead><tr class="header">
+<th>Metadata Field</th>
+<th>Requirement / Example</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>cell_line_ontology_id</code></td>
+<td>Requires a <a href="https://www.cellosaurus.org/" class="external-link">Cellosaurus
+ID</a>.</td>
+</tr>
+<tr class="even">
+<td><code>cell_type_ontology_id</code></td>
+<td>Requires a <a href="https://www.ebi.ac.uk/ols/ontologies/cl" class="external-link">CL
+ID</a>.</td>
+</tr>
+<tr class="odd">
+<td><code>disease_ontology_id</code></td>
+<td>Requires a <a href="https://www.ebi.ac.uk/ols/ontologies/mondo" class="external-link">MONDO ID</a>.</td>
+</tr>
+<tr class="even">
+<td><code>perturbation_ontology_id</code></td>
+<td>Must be a valid Ensembl gene ID (e.g.,
+<code>ENSG00000156127</code>), <a href="https://www.ebi.ac.uk/chebi/" class="external-link">ChEBI ID</a> (e.g.,
+<code>CHEBI:16681</code>), <a href="https://www.ebi.ac.uk/chembl/" class="external-link">ChEMBL ID</a> (e.g.,
+<code>CHEMBL1234567</code>), or <a href="https://www.ncbi.nlm.nih.gov/taxonomy" class="external-link">NCBI Taxonomy ID</a> (e.g.,
+<code>9606</code>).</td>
+</tr>
+<tr class="odd">
+<td><code>tissue_ontology_id</code></td>
+<td>Requires a <a href="https://www.ebi.ac.uk/ols/ontologies/uberon" class="external-link">UBERON ID</a>.</td>
+</tr>
+</tbody>
+</table>
+<p>To lookup ontology terms, we recommend using the <a href="https://www.ebi.ac.uk/ols4/" class="external-link">EMBL-EBI Ontology Lookup
+Service</a>.</p>
+<p>Models have a limited acceptable range of metadata input values. If
+you provide a value that is not in the acceptable range, the API will
+return an error.</p>
 </div>
 <div class="section level3">
 <h3 id="making-predictions">Making Predictions<a class="anchor" aria-label="anchor" href="#making-predictions"></a>
@@ -198,7 +288,7 @@ and <code>expression</code></p>
 <p>Once your query is ready, you can send it to the API to generate gene
 expression data.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Request raw counts data</span></span>
+<code class="sourceCode R"><span><span class="co"># Request counts data (not log-CPM)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, as_counts <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>If you want the full API response beyond just than just the result of
 the metadata and expression returned put
