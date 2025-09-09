@@ -175,7 +175,7 @@ validate_modality <- function(query) {
 #'         - 'metadata': contains metadata for each sample
 #'         - 'expression': contains expression data for each sample
 #' Throws an error If the API request fails or the response structure is invalid.
-#' @importFrom httr POST add_headers content http_status status_code
+#' @importFrom httr POST add_headers content http_status status_code timeout
 #' @importFrom jsonlite toJSON fromJSON
 #' @examples
 #' # Set your API key (in practice, use a more secure method)
@@ -209,6 +209,10 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE, url = A
     stop("Please set your API key for synthesize Bio using set_synthesize_token()")
   }
 
+  # validate url starts with https://app.synthesize.bio
+  if (!grepl("^https://app.synthesize.bio", url)) {
+    stop("The provided URL is not a valid synthesize.bio endpoint.")
+  }
   validate_query(query)
   validate_modality(query)
 
@@ -227,7 +231,8 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE, url = A
       `Content-Type` = "application/json"
     ),
     body = query_json,
-    encode = "json"
+    encode = "json",
+    timeout(30)
   )
 
   if (http_status(response)$category != "Success") {
