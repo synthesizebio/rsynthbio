@@ -14,7 +14,7 @@ Invisibly returns TRUE if validation passes.
 Throws an error If the query structure is invalid or missing required keys.
 }
 \description{
-Validates the structure and contents of the query based on the v2.0 model.
+Validates the structure and contents of the query based on the model.
 This function checks that the query is a list and contains all required keys.
 }
 \examples{

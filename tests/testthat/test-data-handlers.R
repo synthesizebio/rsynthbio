@@ -1,5 +1,5 @@
 
-# Updated mock API response to match the actual v2.0 structure
+# Updated mock API response to match the actual API structure
 mock_api_response <- list(
   # Model version
   model_version = 2,
