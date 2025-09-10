@@ -46,7 +46,12 @@ to the API, and processes the response into usable data frames.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">predict_query</span><span class="op">(</span><span class="va">query</span>, raw_response <span class="op">=</span> <span class="cn">FALSE</span>, as_counts <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">predict_query</span><span class="op">(</span></span>
+<span>  <span class="va">query</span>,</span>
+<span>  raw_response <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  as_counts <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  url <span class="op">=</span> <span class="va">API_BASE_URL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,6 +71,10 @@ response set this to FALSE. Default is to return only the expression and metadat
 <dt id="arg-as-counts">as_counts<a class="anchor" aria-label="anchor" href="#arg-as-counts"></a></dt>
 <dd><p>passed to extract_expression() function. Logical, if FALSE,
 transforms the predicted expression counts into logCPM (default is TRUE, returning raw counts).</p></dd>
+
+
+<dt id="arg-url">url<a class="anchor" aria-label="anchor" href="#arg-url"></a></dt>
+<dd><p>The URL to send the API request to. Default is the API_BASE_URL.</p></dd>
 
 </dl></div>
     <div class="section level2">
