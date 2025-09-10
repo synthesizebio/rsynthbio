@@ -169,11 +169,12 @@ validate_modality <- function(query) {
 #' response set this to FALSE. Default is to return only the expression and metadata.
 #' @param as_counts passed to extract_expression() function. Logical, if FALSE,
 #' transforms the predicted expression counts into logCPM (default is TRUE, returning raw counts).
+#' @param url The URL to send the API request to. Default is the API_BASE_URL.
 #' @return A list with two data frames:
 #'         - 'metadata': contains metadata for each sample
 #'         - 'expression': contains expression data for each sample
 #' Throws an error If the API request fails or the response structure is invalid.
-#' @importFrom httr POST add_headers content http_status status_code
+#' @importFrom httr POST add_headers content http_status status_code timeout
 #' @importFrom jsonlite toJSON fromJSON
 #' @examples
 #' # Set your API key (in practice, use a more secure method)
@@ -202,11 +203,15 @@ validate_modality <- function(query) {
 #' head(sort(expression[1, ], decreasing = TRUE))
 #' }
 #' @export
-predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
+predict_query <- function(query, raw_response = FALSE, as_counts = TRUE, url = API_BASE_URL) {
   if (!has_synthesize_token()) {
     stop("Please set your API key for synthesize Bio using set_synthesize_token()")
   }
 
+  # validate url starts with https://app.synthesize.bio
+  if (!grepl("^https://app.synthesize.bio", url)) {
+    stop("The provided URL is not a valid synthesize.bio endpoint.")
+  }
   validate_query(query)
   validate_modality(query)
 
@@ -218,19 +223,20 @@ predict_query <- function(query, raw_response = FALSE, as_counts = TRUE) {
 
   # Make the API request
   response <- POST(
-    url = API_BASE_URL,
+    url = url,
     add_headers(
       Accept = "application/json",
       Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY")),
       `Content-Type` = "application/json"
     ),
     body = query_json,
-    encode = "json"
+    encode = "json",
+    timeout(30)
   )
 
   if (http_status(response)$category != "Success") {
     stop(paste0(
-      "API request to ", API_BASE_URL, " failed with status ",
+      "API request to ", url, " failed with status ",
       status_code(response), ": ", content(response, "text")
     ))
   }
