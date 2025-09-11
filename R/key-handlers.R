@@ -26,12 +26,12 @@
 #' @export
 set_synthesize_token <- function(use_keyring = FALSE, token = NULL) {
   if (is.null(token)) {
-    message("Create an account at https://app.synthesize.bio/ then go to your profile.")
-    message("Click create token then click the copy button in the corner.")
+    message("Create an account at https://app.synthesize.bio/ then go to your account page.")
+    message("Click \"Create API key\" on the API keys tab.")
 
-    browseURL("https://app.synthesize.bio/profile")
+    browseURL("https://app.synthesize.bio/account/api-keys")
     token <- getPass::getPass(msg = paste(
-      "Create an account at https://app.synthesize.bio/ then go to your profile.",
+      "Create an account at https://app.synthesize.bio/ then go to your account page.",
       "Click create token then copy it.",
       "Paste token here and press enter: "
     ))
