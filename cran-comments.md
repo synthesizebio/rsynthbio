@@ -2,5 +2,4 @@
 
 0 errors | 0 warnings | 0 note
 
-* Release for Synthesize Bio model
-
+- Minor updates and bug fixes

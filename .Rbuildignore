@@ -9,3 +9,7 @@ CONTRIBUTING.md
 assets/*
 ^doc$
 ^Meta$
+.quarto/*
+.gemini/*
+_pkgdown.yml
+pkgdown/*
