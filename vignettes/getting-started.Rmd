@@ -173,10 +173,10 @@ The following are the valid values or expected formats for selected metadata key
 | Metadata Field             | Requirement / Example                                                                                                                                                                                                 |
 |----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `cell_line_ontology_id`    | Requires a [Cellosaurus ID](https://www.cellosaurus.org/).                                                                                                                                                           |
-| `cell_type_ontology_id`    | Requires a [CL ID](https://www.ebi.ac.uk/ols/ontologies/cl).                                                                                                                                                         |
-| `disease_ontology_id`      | Requires a [MONDO ID](https://www.ebi.ac.uk/ols/ontologies/mondo).                                                                                                                                                   |
+| `cell_type_ontology_id`    | Requires a [CL ID](https://www.ebi.ac.uk/ols4/ontologies/cl).                                                                                                                                                         |
+| `disease_ontology_id`      | Requires a [MONDO ID](https://www.ebi.ac.uk/ols4/ontologies/mondo).                                                                                                                                                   |
 | `perturbation_ontology_id` | Must be a valid Ensembl gene ID (e.g., `ENSG00000156127`), [ChEBI ID](https://www.ebi.ac.uk/chebi/) (e.g., `CHEBI:16681`), [ChEMBL ID](https://www.ebi.ac.uk/chembl/) (e.g., `CHEMBL1234567`), or [NCBI Taxonomy ID](https://www.ncbi.nlm.nih.gov/taxonomy) (e.g., `9606`). |
-| `tissue_ontology_id`       | Requires a [UBERON ID](https://www.ebi.ac.uk/ols/ontologies/uberon).                                                                                                                                                 |
+| `tissue_ontology_id`       | Requires a [UBERON ID](https://www.ebi.ac.uk/ols4/ontologies/uberon).                                                                                                                                                 |
 
 
 To lookup ontology terms, we recommend using the [EMBL-EBI Ontology Lookup Service](https://www.ebi.ac.uk/ols4/).
