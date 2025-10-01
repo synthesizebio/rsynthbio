@@ -541,11 +541,11 @@ predict_query <- function(query,
     payload <- poll_result$payload
 
     if (status == "failed") {
-      # payload contains errorUrl if available
-      err_url <- if (is.list(payload) && !is.null(payload$errorUrl)) payload$errorUrl else NULL
+      # payload contains message if available
+      err_msg <- if (is.list(payload) && !is.null(payload$message)) payload$message else NULL
       stop(paste0(
         "Model query failed. ",
-        if (!is.null(err_url)) paste0("See error details: ", err_url) else "No error URL."
+        if (!is.null(err_msg)) err_msg else "No error message provided."
       ))
     }
 

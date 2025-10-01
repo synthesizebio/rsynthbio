@@ -316,7 +316,7 @@ test_that("predict_query single-cell failure (mocked)", {
       status = "failed",
       payload = list(
         status = "failed",
-        errorUrl = "https://example.com/error.json"
+        message = "Invalid metadata: missing required field 'cell_type_ontology_id'"
       )
     ),
     cycle = TRUE
@@ -330,7 +330,7 @@ test_that("predict_query single-cell failure (mocked)", {
 
   expect_error(
     predict_query(query),
-    "Model query failed"
+    "Model query failed.*missing required field"
   )
 })
 
