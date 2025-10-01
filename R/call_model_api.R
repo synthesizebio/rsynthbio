@@ -273,7 +273,7 @@ start_model_query <- function(api_base_url, api_slug, query) {
 #' @keywords internal
 poll_model_query <- function(api_base_url, model_query_id, poll_interval, timeout_seconds) {
   start_time <- Sys.time()
-  status_url <- paste0(api_base_url, "/api/model-query/", model_query_id, "/status")
+  status_url <- paste0(api_base_url, "/api/model-queries/", model_query_id, "/status")
   last_payload <- list()
 
   while (TRUE) {
