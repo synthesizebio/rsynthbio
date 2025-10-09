@@ -49,7 +49,7 @@
 - Added tests for invalid metadata validation
 - Added mocked async workflow tests (success, failure, timeout scenarios)
 
-# rsynthbio 2.2.1
+# rsynthbio 3.0.0
 
 - rsynthbio now works with the GEM-1 model from Synthesize Bio.
 - older versions of Synthesize Bio models are no longer supported.
