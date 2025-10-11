@@ -39,8 +39,11 @@ test_that("predict_query mocked call success (bulk async)", {
     gene_order = c("gene1", "gene2", "gene3")
   )
 
-  # Apply mocks
-  apply_predict_query_stubs(mocks)
+  # Apply stubs directly
+  stub(predict_query, "has_synthesize_token", mocks$has_token)
+  stub(predict_query, "start_model_query", mocks$start_query)
+  stub(predict_query, "poll_model_query", mocks$poll)
+  stub(predict_query, "get_json", mocks$get_json)
 
   test_query <- get_valid_query()
   results <- predict_query(query = test_query, as_counts = TRUE)
@@ -95,7 +98,10 @@ test_that("predict_query new API structure handling (bulk)", {
     gene_order = gene_order
   )
 
-  apply_predict_query_stubs(mocks)
+  stub(predict_query, "has_synthesize_token", mocks$has_token)
+  stub(predict_query, "start_model_query", mocks$start_query)
+  stub(predict_query, "poll_model_query", mocks$poll)
+  stub(predict_query, "get_json", mocks$get_json)
 
   query <- get_valid_query()
   results <- predict_query(query, as_counts = TRUE)
@@ -131,7 +137,10 @@ test_that("predict_query single-cell success (mocked)", {
     gene_order = c("gene1", "gene2", "gene3")
   )
 
-  apply_predict_query_stubs(mocks)
+  stub(predict_query, "has_synthesize_token", mocks$has_token)
+  stub(predict_query, "start_model_query", mocks$start_query)
+  stub(predict_query, "poll_model_query", mocks$poll)
+  stub(predict_query, "get_json", mocks$get_json)
 
   query <- get_valid_query(modality = "czi")
   result <- predict_query(query)
@@ -153,7 +162,9 @@ test_that("predict_query single-cell failure (mocked)", {
     error_message = "Invalid metadata: missing required field 'cell_type_ontology_id'"
   )
 
-  apply_predict_query_stubs(mocks)
+  stub(predict_query, "has_synthesize_token", mocks$has_token)
+  stub(predict_query, "start_model_query", mocks$start_query)
+  stub(predict_query, "poll_model_query", mocks$poll)
 
   query <- get_valid_query(modality = "czi")
 
@@ -169,7 +180,9 @@ test_that("predict_query single-cell timeout (mocked)", {
 
   mocks <- create_timeout_mocks(query_id = "abc123")
 
-  apply_predict_query_stubs(mocks)
+  stub(predict_query, "has_synthesize_token", mocks$has_token)
+  stub(predict_query, "start_model_query", mocks$start_query)
+  stub(predict_query, "poll_model_query", mocks$poll)
 
   query <- get_valid_query(modality = "czi")
 
@@ -354,7 +367,7 @@ test_that("predict_query passes as_counts parameter correctly", {
   )
 
   # Add mock for log_cpm to track if it's called
-  mocks$log_cpm <- mock(
+  m_log_cpm <- mock(
     data.frame(
       gene1 = log1p(100),
       gene2 = log1p(200),
@@ -363,15 +376,19 @@ test_that("predict_query passes as_counts parameter correctly", {
     cycle = TRUE
   )
 
-  apply_predict_query_stubs(mocks)
+  stub(predict_query, "has_synthesize_token", mocks$has_token)
+  stub(predict_query, "start_model_query", mocks$start_query)
+  stub(predict_query, "poll_model_query", mocks$poll)
+  stub(predict_query, "get_json", mocks$get_json)
+  stub(predict_query, "log_cpm", m_log_cpm)
 
   query <- get_valid_query()
 
   # Test with as_counts = TRUE (log_cpm should not be called)
   result_counts <- predict_query(query, as_counts = TRUE)
-  expect_called(mocks$log_cpm, 0)
+  expect_called(m_log_cpm, 0)
 
   # Test with as_counts = FALSE (log_cpm should be called)
   result_log <- predict_query(query, as_counts = FALSE)
-  expect_called(mocks$log_cpm, 1)
+  expect_called(m_log_cpm, 1)
 })

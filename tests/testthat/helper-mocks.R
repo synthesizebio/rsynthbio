@@ -102,27 +102,10 @@ create_timeout_mocks <- function(query_id = "test-id") {
     )
 }
 
-#' Apply standard stubs to predict_query
-#'
-#' @param mocks A list of mocks (e.g., from create_success_mocks)
-apply_predict_query_stubs <- function(mocks) {
-    mockery::stub(rsynthbio::predict_query, "has_synthesize_token", mocks$has_token)
-    mockery::stub(rsynthbio::predict_query, "start_model_query", mocks$start_query)
-    mockery::stub(rsynthbio::predict_query, "poll_model_query", mocks$poll)
-
-    if (!is.null(mocks$get_json)) {
-        mockery::stub(rsynthbio::predict_query, "get_json", mocks$get_json)
-    }
-
-    if (!is.null(mocks$log_cpm)) {
-        mockery::stub(rsynthbio::predict_query, "log_cpm", mocks$log_cpm)
-    }
-}
-
-#' Helper to setup environment for a test (without applying stubs)
+#' Helper to setup environment for a test
 #'
 #' @param api_key The API key to set
 #' @return The original API key (for cleanup)
 setup_test_environment <- function(api_key = "mock-api-key") {
-    setup_mock_api_key(api_key)
+  setup_mock_api_key(api_key)
 }
