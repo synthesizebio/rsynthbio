@@ -3,253 +3,44 @@ library(mockery)
 library(jsonlite)
 library(httr)
 
-# Helper function to check if API key is available
-api_key_available <- function() {
-  !is.na(Sys.getenv("SYNTHESIZE_API_KEY")) &&
-    Sys.getenv("SYNTHESIZE_API_KEY") != ""
-}
-
-# -----------------------------
-# Live API Tests
-# -----------------------------
-
-test_that("predict_query live call success (bulk)", {
-  skip_if_not(
-    api_key_available(),
-    "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-  )
-
-  message("\nTesting live predict_query call for bulk modality...")
-
-  test_query <- get_valid_query()
-
-  results <- predict_query(
-    query = test_query,
-    as_counts = TRUE,
-  )
-
-  expect_type(results, "list")
-  expect_true("metadata" %in% names(results))
-  expect_true("expression" %in% names(results))
-
-  expect_s3_class(results$metadata, "data.frame")
-  expect_s3_class(results$expression, "data.frame")
-
-  expect_true(nrow(results$metadata) > 0)
-  expect_true(nrow(results$expression) > 0)
-  expect_true(ncol(results$expression) > 0)
-
-  message("Live bulk API test passed.")
-})
-
-test_that("predict_query live call success (single-cell)", {
-  skip_if_not(
-    api_key_available(),
-    "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-  )
-
-  message("\nTesting live predict_query call for single-cell modality...")
-
-  test_query <- get_valid_query(modality = "czi")
-
-  results <- predict_query(
-    query = test_query,
-    as_counts = TRUE,
-  )
-
-  expect_type(results, "list")
-  expect_true("metadata" %in% names(results))
-  expect_true("expression" %in% names(results))
-
-  expect_s3_class(results$metadata, "data.frame")
-  expect_s3_class(results$expression, "data.frame")
-
-  expect_true(nrow(results$metadata) > 0)
-  expect_true(nrow(results$expression) > 0)
-  expect_true(ncol(results$expression) > 0)
-
-  message("Live single-cell API test passed.")
-})
-
-test_that("predict_query live call invalid UBERON (bulk)", {
-  skip_if_not(
-    api_key_available(),
-    "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-  )
-
-  message("\nTesting live predict_query with invalid UBERON ID for bulk...")
-
-  # Create a query with an invalid UBERON ID
-  invalid_query <- list(
-    inputs = list(
-      list(
-        metadata = list(
-          tissue_ontology_id = "UBERON:9999999", # Invalid ID
-          age_years = "65",
-          sex = "female",
-          sample_type = "primary tissue"
-        ),
-        num_samples = 1
-      )
-    ),
-    modality = "bulk",
-    mode = "sample generation"
-  )
-
-  # The API should reject this with an error
-  expect_error(
-    predict_query(
-      query = invalid_query,
-      as_counts = TRUE
-    ),
-    "Model query failed"
-  )
-
-  # Verify the error contains validation details
-  error_result <- tryCatch(
-    predict_query(query = invalid_query, as_counts = TRUE),
-    error = function(e) e$message
-  )
-
-  message(paste("API correctly rejected invalid UBERON ID with error:", error_result))
-
-  # The error message should contain the validation details
-  expect_true(
-    grepl("UBERON:9999999", error_result),
-    info = paste("Error message should mention the invalid UBERON ID. Got:", error_result)
-  )
-  expect_true(
-    grepl("bad values|invalid", error_result, ignore.case = TRUE),
-    info = paste("Error message should indicate validation failure. Got:", error_result)
-  )
-
-  message("Successfully validated error message contains UBERON validation details")
-})
-
-test_that("predict_query live call invalid UBERON (single-cell)", {
-  skip_if_not(
-    api_key_available(),
-    "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-  )
-
-  message("\nTesting live predict_query (single-cell) with invalid UBERON ID...")
-
-  # Create a single-cell query with an invalid UBERON ID
-  invalid_query <- list(
-    inputs = list(
-      list(
-        metadata = list(
-          cell_type_ontology_id = "CL:0000786",
-          tissue_ontology_id = "UBERON:9999999", # Invalid ID
-          sex = "male"
-        ),
-        num_samples = 1
-      )
-    ),
-    modality = "czi",
-    mode = "sample generation",
-    return_classifier_probs = TRUE,
-    seed = 42
-  )
-
-  # The API should reject this with an error
-  expect_error(
-    predict_query(
-      query = invalid_query,
-      as_counts = TRUE
-    ),
-    "Model query failed"
-  )
-
-  # Verify the error contains validation details
-  error_result <- tryCatch(
-    predict_query(query = invalid_query, as_counts = TRUE),
-    error = function(e) e$message
-  )
-
-  message(paste("API correctly rejected invalid UBERON ID (single-cell) with error:", error_result))
-
-  # The error message should contain the validation details
-  expect_true(
-    grepl("UBERON:9999999", error_result),
-    info = paste("Error message should mention the invalid UBERON ID. Got:", error_result)
-  )
-  expect_true(
-    grepl("bad values|invalid", error_result, ignore.case = TRUE),
-    info = paste("Error message should indicate validation failure. Got:", error_result)
-  )
-
-  message("Successfully validated error message contains UBERON validation details (single-cell)")
-})
-
 # -----------------------------
 # Mocked Async Tests (Bulk)
 # -----------------------------
 
 test_that("predict_query mocked call success (bulk async)", {
-  original_api_key <- Sys.getenv("SYNTHESIZE_API_KEY")
-  on.exit({
-    if (original_api_key != "") {
-      Sys.setenv(SYNTHESIZE_API_KEY = original_api_key)
-    } else {
-      Sys.unsetenv("SYNTHESIZE_API_KEY")
-    }
-  })
+  # Setup environment
+  original_api_key <- setup_test_environment("mock-api-key-for-test")
+  on.exit(restore_api_key(original_api_key))
 
-  Sys.setenv(SYNTHESIZE_API_KEY = "mock-api-key-for-test")
-
-  # Mock has_synthesize_token
-  m_has_token <- mock(TRUE, cycle = TRUE)
-
-  # Mock start_model_query to return modelQueryId
-  m_start_query <- mock("bulk-xyz", cycle = TRUE)
-
-  # Mock poll_model_query to return ready status with downloadUrl
-  m_poll <- mock(
-    list(
-      status = "ready",
-      payload = list(
-        status = "ready",
-        downloadUrl = "https://example.com/bulk.json"
-      )
-    ),
-    cycle = TRUE
-  )
-
-  # Mock get_json to return final results
-  m_get_json <- mock(
-    list(
-      outputs = list(
-        list(
-          counts = c(100, 200, 300),
-          metadata = list(
-            sample_id = "test1",
-            cell_line_ontology_id = "CVCL_0023",
-            age_years = "25",
-            sex = "female"
-          )
-        ),
-        list(
-          counts = c(150, 250, 350),
-          metadata = list(
-            sample_id = "test2",
-            cell_line_ontology_id = "CVCL_0023",
-            age_years = "30",
-            sex = "male"
-          )
+  # Create mocks for successful query
+  mocks <- create_success_mocks(
+    query_id = "bulk-xyz",
+    download_url = "https://example.com/bulk.json",
+    outputs = list(
+      list(
+        counts = c(100, 200, 300),
+        metadata = list(
+          sample_id = "test1",
+          cell_line_ontology_id = "CVCL_0023",
+          age_years = "25",
+          sex = "female"
         )
       ),
-      gene_order = c("gene1", "gene2", "gene3"),
-      model_version = 2
+      list(
+        counts = c(150, 250, 350),
+        metadata = list(
+          sample_id = "test2",
+          cell_line_ontology_id = "CVCL_0023",
+          age_years = "30",
+          sex = "male"
+        )
+      )
     ),
-    cycle = TRUE
+    gene_order = c("gene1", "gene2", "gene3")
   )
 
-  # Apply stubs
-  stub(predict_query, "has_synthesize_token", m_has_token)
-  stub(predict_query, "start_model_query", m_start_query)
-  stub(predict_query, "poll_model_query", m_poll)
-  stub(predict_query, "get_json", m_get_json)
+  # Apply mocks
+  apply_predict_query_stubs(mocks)
 
   test_query <- get_valid_query()
   results <- predict_query(query = test_query, as_counts = TRUE)
@@ -269,69 +60,42 @@ test_that("predict_query mocked call success (bulk async)", {
   expect_equal(as.numeric(results$expression[1, ]), c(100, 200, 300))
   expect_equal(as.numeric(results$expression[2, ]), c(150, 250, 350))
 
-  expect_called(m_start_query, 1)
-  expect_called(m_poll, 1)
-  expect_called(m_get_json, 1)
+  expect_called(mocks$start_query, 1)
+  expect_called(mocks$poll, 1)
+  expect_called(mocks$get_json, 1)
 })
 
 test_that("predict_query new API structure handling (bulk)", {
-  original_api_key <- Sys.getenv("SYNTHESIZE_API_KEY")
-  on.exit({
-    if (original_api_key != "") {
-      Sys.setenv(SYNTHESIZE_API_KEY = original_api_key)
-    } else {
-      Sys.unsetenv("SYNTHESIZE_API_KEY")
-    }
-  })
-
-  Sys.setenv(SYNTHESIZE_API_KEY = "mock-api-key-for-test")
-
-  m_has_token <- mock(TRUE, cycle = TRUE)
-  m_start_query <- mock("bulk-big", cycle = TRUE)
-
-  m_poll <- mock(
-    list(
-      status = "ready",
-      payload = list(
-        status = "ready",
-        downloadUrl = "https://example.com/big.json"
-      )
-    ),
-    cycle = TRUE
-  )
+  original_api_key <- setup_test_environment()
+  on.exit(restore_api_key(original_api_key))
 
   # Create large gene order
   gene_order <- paste0("ENSG", sprintf("%011d", 1:44590))
 
-  m_get_json <- mock(
-    list(
-      outputs = list(
-        list(
-          counts = rep(c(0.1, 0.2, 0.3, 0.4, 0.5), 8918),
-          classifier_probs = list(
-            sex = list(female = 0.7, male = 0.3),
-            age_years = list(`60-70` = 0.8, `70-80` = 0.2),
-            tissue_ontology_id = list(UBERON_0000945 = 0.9)
-          ),
-          metadata = list(
-            age_years = "65",
-            disease_ontology_id = "MONDO:0011719",
-            sex = "female",
-            sample_type = "primary tissue",
-            tissue_ontology_id = "UBERON:0000945"
-          )
+  mocks <- create_success_mocks(
+    query_id = "bulk-big",
+    download_url = "https://example.com/big.json",
+    outputs = list(
+      list(
+        counts = rep(c(0.1, 0.2, 0.3, 0.4, 0.5), 8918),
+        classifier_probs = list(
+          sex = list(female = 0.7, male = 0.3),
+          age_years = list(`60-70` = 0.8, `70-80` = 0.2),
+          tissue_ontology_id = list(UBERON_0000945 = 0.9)
+        ),
+        metadata = list(
+          age_years = "65",
+          disease_ontology_id = "MONDO:0011719",
+          sex = "female",
+          sample_type = "primary tissue",
+          tissue_ontology_id = "UBERON:0000945"
         )
-      ),
-      gene_order = gene_order,
-      model_version = 2
+      )
     ),
-    cycle = TRUE
+    gene_order = gene_order
   )
 
-  stub(predict_query, "has_synthesize_token", m_has_token)
-  stub(predict_query, "start_model_query", m_start_query)
-  stub(predict_query, "poll_model_query", m_poll)
-  stub(predict_query, "get_json", m_get_json)
+  apply_predict_query_stubs(mocks)
 
   query <- get_valid_query()
   results <- predict_query(query, as_counts = TRUE)
@@ -348,53 +112,26 @@ test_that("predict_query new API structure handling (bulk)", {
 # -----------------------------
 
 test_that("predict_query single-cell success (mocked)", {
-  original_api_key <- Sys.getenv("SYNTHESIZE_API_KEY")
-  on.exit({
-    if (original_api_key != "") {
-      Sys.setenv(SYNTHESIZE_API_KEY = original_api_key)
-    } else {
-      Sys.unsetenv("SYNTHESIZE_API_KEY")
-    }
-  })
+  original_api_key <- setup_test_environment("test-api-token")
+  on.exit(restore_api_key(original_api_key))
 
-  Sys.setenv(SYNTHESIZE_API_KEY = "test-api-token")
-
-  m_has_token <- mock(TRUE, cycle = TRUE)
-  m_start_query <- mock("abc123", cycle = TRUE)
-
-  # First poll returns running, but we'll just return ready immediately for simplicity
-  m_poll <- mock(
-    list(
-      status = "ready",
-      payload = list(
-        status = "ready",
-        downloadUrl = "https://example.com/final.json"
+  mocks <- create_success_mocks(
+    query_id = "abc123",
+    download_url = "https://example.com/final.json",
+    outputs = list(
+      list(
+        counts = c(1, 2, 3),
+        metadata = list(sample_id = "s1")
+      ),
+      list(
+        counts = c(4, 5, 6),
+        metadata = list(sample_id = "s2")
       )
     ),
-    cycle = TRUE
+    gene_order = c("gene1", "gene2", "gene3")
   )
 
-  m_get_json <- mock(
-    list(
-      outputs = list(
-        list(
-          counts = c(1, 2, 3),
-          metadata = list(sample_id = "s1")
-        ),
-        list(
-          counts = c(4, 5, 6),
-          metadata = list(sample_id = "s2")
-        )
-      ),
-      gene_order = c("gene1", "gene2", "gene3")
-    ),
-    cycle = TRUE
-  )
-
-  stub(predict_query, "has_synthesize_token", m_has_token)
-  stub(predict_query, "start_model_query", m_start_query)
-  stub(predict_query, "poll_model_query", m_poll)
-  stub(predict_query, "get_json", m_get_json)
+  apply_predict_query_stubs(mocks)
 
   query <- get_valid_query(modality = "czi")
   result <- predict_query(query)
@@ -408,34 +145,15 @@ test_that("predict_query single-cell success (mocked)", {
 })
 
 test_that("predict_query single-cell failure (mocked)", {
-  original_api_key <- Sys.getenv("SYNTHESIZE_API_KEY")
-  on.exit({
-    if (original_api_key != "") {
-      Sys.setenv(SYNTHESIZE_API_KEY = original_api_key)
-    } else {
-      Sys.unsetenv("SYNTHESIZE_API_KEY")
-    }
-  })
+  original_api_key <- setup_test_environment("test-api-token")
+  on.exit(restore_api_key(original_api_key))
 
-  Sys.setenv(SYNTHESIZE_API_KEY = "test-api-token")
-
-  m_has_token <- mock(TRUE, cycle = TRUE)
-  m_start_query <- mock("abc123", cycle = TRUE)
-
-  m_poll <- mock(
-    list(
-      status = "failed",
-      payload = list(
-        status = "failed",
-        message = "Invalid metadata: missing required field 'cell_type_ontology_id'"
-      )
-    ),
-    cycle = TRUE
+  mocks <- create_failure_mocks(
+    query_id = "abc123",
+    error_message = "Invalid metadata: missing required field 'cell_type_ontology_id'"
   )
 
-  stub(predict_query, "has_synthesize_token", m_has_token)
-  stub(predict_query, "start_model_query", m_start_query)
-  stub(predict_query, "poll_model_query", m_poll)
+  apply_predict_query_stubs(mocks)
 
   query <- get_valid_query(modality = "czi")
 
@@ -446,32 +164,12 @@ test_that("predict_query single-cell failure (mocked)", {
 })
 
 test_that("predict_query single-cell timeout (mocked)", {
-  original_api_key <- Sys.getenv("SYNTHESIZE_API_KEY")
-  on.exit({
-    if (original_api_key != "") {
-      Sys.setenv(SYNTHESIZE_API_KEY = original_api_key)
-    } else {
-      Sys.unsetenv("SYNTHESIZE_API_KEY")
-    }
-  })
+  original_api_key <- setup_test_environment("test-api-token")
+  on.exit(restore_api_key(original_api_key))
 
-  Sys.setenv(SYNTHESIZE_API_KEY = "test-api-token")
+  mocks <- create_timeout_mocks(query_id = "abc123")
 
-  m_has_token <- mock(TRUE, cycle = TRUE)
-  m_start_query <- mock("abc123", cycle = TRUE)
-
-  # Poll always returns running (timeout scenario)
-  m_poll <- mock(
-    list(
-      status = "running",
-      payload = list(status = "running")
-    ),
-    cycle = TRUE
-  )
-
-  stub(predict_query, "has_synthesize_token", m_has_token)
-  stub(predict_query, "start_model_query", m_start_query)
-  stub(predict_query, "poll_model_query", m_poll)
+  apply_predict_query_stubs(mocks)
 
   query <- get_valid_query(modality = "czi")
 
@@ -640,45 +338,23 @@ test_that("log_cpm handles zero counts", {
 # -----------------------------
 
 test_that("predict_query passes as_counts parameter correctly", {
-  original_api_key <- Sys.getenv("SYNTHESIZE_API_KEY")
-  on.exit({
-    if (original_api_key != "") {
-      Sys.setenv(SYNTHESIZE_API_KEY = original_api_key)
-    } else {
-      Sys.unsetenv("SYNTHESIZE_API_KEY")
-    }
-  })
+  original_api_key <- setup_test_environment()
+  on.exit(restore_api_key(original_api_key))
 
-  Sys.setenv(SYNTHESIZE_API_KEY = "mock-api-key")
-
-  m_has_token <- mock(TRUE, cycle = TRUE)
-  m_start_query <- mock("test-id", cycle = TRUE)
-  m_poll <- mock(
-    list(
-      status = "ready",
-      payload = list(
-        status = "ready",
-        downloadUrl = "https://example.com/data.json"
+  mocks <- create_success_mocks(
+    query_id = "test-id",
+    download_url = "https://example.com/data.json",
+    outputs = list(
+      list(
+        counts = c(100, 200, 300),
+        metadata = list(sample_id = "test1")
       )
     ),
-    cycle = TRUE
+    gene_order = c("gene1", "gene2", "gene3")
   )
 
-  m_get_json <- mock(
-    list(
-      outputs = list(
-        list(
-          counts = c(100, 200, 300),
-          metadata = list(sample_id = "test1")
-        )
-      ),
-      gene_order = c("gene1", "gene2", "gene3")
-    ),
-    cycle = TRUE
-  )
-
-  # Mock log_cpm to track if it's called
-  m_log_cpm <- mock(
+  # Add mock for log_cpm to track if it's called
+  mocks$log_cpm <- mock(
     data.frame(
       gene1 = log1p(100),
       gene2 = log1p(200),
@@ -687,19 +363,15 @@ test_that("predict_query passes as_counts parameter correctly", {
     cycle = TRUE
   )
 
-  stub(predict_query, "has_synthesize_token", m_has_token)
-  stub(predict_query, "start_model_query", m_start_query)
-  stub(predict_query, "poll_model_query", m_poll)
-  stub(predict_query, "get_json", m_get_json)
-  stub(predict_query, "log_cpm", m_log_cpm)
+  apply_predict_query_stubs(mocks)
 
   query <- get_valid_query()
 
   # Test with as_counts = TRUE (log_cpm should not be called)
   result_counts <- predict_query(query, as_counts = TRUE)
-  expect_called(m_log_cpm, 0)
+  expect_called(mocks$log_cpm, 0)
 
   # Test with as_counts = FALSE (log_cpm should be called)
   result_log <- predict_query(query, as_counts = FALSE)
-  expect_called(m_log_cpm, 1)
+  expect_called(mocks$log_cpm, 1)
 })

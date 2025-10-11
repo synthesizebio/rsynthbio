@@ -462,9 +462,9 @@ transform_result_to_frames <- function(content) {
 #'        Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).
 #' @param return_download_url Logical, if TRUE, returns a list containing the signed
 #'        download URL instead of parsing into data frames. Default is FALSE.
-#' @return A list with two data frames:
-#'         - 'metadata': contains metadata for each sample
-#'         - 'expression': contains expression data for each sample
+#' @return A list. If `return_download_url` is `FALSE` (default), the list contains
+#'         two data frames: `metadata` and `expression`. If `TRUE`, the list
+#'         contains `download_url` and empty `metadata` and `expression` data frames.
 #' @importFrom httr POST GET add_headers content http_status status_code timeout
 #' @importFrom jsonlite toJSON fromJSON
 #' @examples
@@ -505,8 +505,8 @@ predict_query <- function(query,
   }
 
   # Validate base URL
-  if (!grepl("^http", api_base_url)) {
-    stop(paste0("Invalid api_base_url: ", api_base_url))
+  if (!grepl("^https?://", api_base_url)) {
+    stop(paste0("Invalid api_base_url: ", api_base_url, ". Must start with http:// or https://"))
   }
 
   # Validate the query
@@ -576,8 +576,8 @@ predict_query <- function(query,
 
     result <- transform_result_to_frames(final_json)
 
-    # Convert expression to integer
-    result$expression <- as.data.frame(lapply(result$expression, as.integer))
+    # Ensure expression values are numeric
+    result$expression <- as.data.frame(lapply(result$expression, as.numeric))
 
     if (!as_counts) {
       result$expression <- log_cpm(result$expression)

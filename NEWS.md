@@ -1,4 +1,4 @@
-# rsynthbio 2.3.0 (Development)
+# rsynthbio 3.0.0 (Development)
 
 ## Major Changes
 
