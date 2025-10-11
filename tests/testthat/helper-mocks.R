@@ -107,5 +107,5 @@ create_timeout_mocks <- function(query_id = "test-id") {
 #' @param api_key The API key to set
 #' @return The original API key (for cleanup)
 setup_test_environment <- function(api_key = "mock-api-key") {
-  setup_mock_api_key(api_key)
+    setup_mock_api_key(api_key)
 }
