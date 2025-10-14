@@ -41,7 +41,7 @@ get_valid_modes <- function() {
 #' The sample query contains two example inputs: one for a cell line with CRISPR perturbation
 #' and another for a primary tissue sample with disease information.
 #'
-#' @param modality Character string specifying the modality. Either "bulk" or "czi".
+#' @param modality Character string specifying the modality. Either "bulk" or "single-cell".
 #'        Default is "bulk".
 #' @return A list representing a valid query structure.
 #' @examples
@@ -49,15 +49,15 @@ get_valid_modes <- function() {
 #' query <- get_valid_query()
 #'
 #' # Get a sample query for single-cell RNA-seq
-#' query_czi <- get_valid_query(modality = "czi")
+#' query_sc <- get_valid_query(modality = "single-cell")
 #'
 #' # Modify the query
 #' query$inputs[[1]]$num_samples <- 10
 #' @export
 get_valid_query <- function(modality = "bulk") {
-  if (modality == "czi") {
+  if (modality == "single-cell") {
     return(list(
-      modality = "czi",
+      modality = "single-cell",
       mode = "sample generation",
       return_classifier_probs = TRUE,
       seed = 11,
@@ -190,11 +190,11 @@ validate_modality <- function(query) {
 
 #' @title Resolve API Slug
 #' @description Internal function to resolve the API slug based on modality
-#' @param modality The modality string ("bulk" or "czi")
+#' @param modality The modality string ("bulk" or "single-cell")
 #' @return The API slug string
 #' @keywords internal
 resolve_api_slug <- function(modality) {
-  if (modality == "czi") {
+  if (modality == "single-cell") {
     return("gem-1-sc")
   }
   if (modality == "bulk") {
@@ -518,7 +518,7 @@ predict_query <- function(query,
   # Add source field for reporting
   query$source <- "rsynthbio"
 
-  if (modality %in% c("bulk", "czi")) {
+  if (modality %in% c("bulk", "single-cell")) {
     # Resolve internal API slug based on modality
     api_slug <- resolve_api_slug(modality)
 

@@ -14,6 +14,6 @@ MODEL_MODALITIES
 A nested list containing supported modalities for different
 model versions
 + bulk = bulk RNA-seq
-+ czi = single-cell RNA-seq
++ single-cell = single-cell RNA-seq
 }
 \keyword{datasets}

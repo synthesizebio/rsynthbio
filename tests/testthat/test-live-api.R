@@ -49,7 +49,7 @@ test_that("predict_query live call success (single-cell)", {
 
     message("\nTesting live predict_query call for single-cell modality...")
 
-    test_query <- get_valid_query(modality = "czi")
+    test_query <- get_valid_query(modality = "single-cell")
 
     results <- predict_query(
         query = test_query,
@@ -145,7 +145,7 @@ test_that("predict_query live call invalid UBERON (single-cell)", {
                 num_samples = 1
             )
         ),
-        modality = "czi",
+        modality = "single-cell",
         mode = "sample generation",
         return_classifier_probs = TRUE,
         seed = 42

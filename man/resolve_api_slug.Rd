@@ -7,7 +7,7 @@
 resolve_api_slug(modality)
 }
 \arguments{
-\item{modality}{The modality string ("bulk" or "czi")}
+\item{modality}{The modality string ("bulk" or "single-cell")}
 }
 \value{
 The API slug string

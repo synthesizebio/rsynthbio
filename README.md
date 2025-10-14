@@ -82,13 +82,13 @@ The package supports multiple data modalities. You can view all available modali
 ```
 # Check available modalities
 get_valid_modalities()
-# Returns: "bulk" "czi"
+# Returns: "bulk" "single-cell"
 ```
 
 Currently supported modalities:
 
 - **`bulk`**: Bulk RNA-seq data
-- **`czi`**: Single-cell RNA-seq data
+- **`single-cell`**: Single-cell RNA-seq data
 
 ### Creating a Query
 
@@ -99,7 +99,7 @@ The first step in obtaining AI-generated gene expression data is to create a que
 query <- get_valid_query(modality = "bulk")
 
 # Get a sample query for single-cell RNA-seq
-query_sc <- get_valid_query(modality = "czi")
+query_sc <- get_valid_query(modality = "single-cell")
 
 # Inspect the query structure
 str(query)
@@ -107,7 +107,7 @@ str(query)
 
 The query consists of:
 
-1. `modality`: The type of gene expression data to generate ("bulk" or "czi")
+1. `modality`: The type of gene expression data to generate ("bulk" or "single-cell")
 2. `mode`: The prediction mode (e.g., "sample generation", "mean estimation")
 3. `inputs`: A list of biological conditions to generate data for
 

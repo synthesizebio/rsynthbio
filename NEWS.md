@@ -6,9 +6,9 @@
   - `predict_query()` now uses an asynchronous workflow: submit → poll → download
   - Added automatic status polling with configurable intervals and timeouts
   - New parameters: `poll_interval_seconds` (default: 2), `poll_timeout_seconds` (default: 900)
-- **Single-Cell Support**: Added support for single-cell RNA-seq data via the "czi" modality
-  - `get_valid_query()` now accepts a `modality` parameter ("bulk" or "czi")
-  - `get_valid_modalities()` now returns both "bulk" and "czi"
+- **Single-Cell Support**: Added support for single-cell RNA-seq data via the "single-cell" modality
+  - `get_valid_query()` now accepts a `modality` parameter ("bulk" or "single-cell")
+  - `get_valid_modalities()` now returns both "bulk" and "single-cell"
   - Updated `MODEL_MODALITIES` to include both modalities
 
 ## Breaking Changes

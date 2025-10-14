@@ -7,7 +7,7 @@
 get_valid_query(modality = "bulk")
 }
 \arguments{
-\item{modality}{Character string specifying the modality. Either "bulk" or "czi".
+\item{modality}{Character string specifying the modality. Either "bulk" or "single-cell".
 Default is "bulk".}
 }
 \value{
@@ -24,7 +24,7 @@ and another for a primary tissue sample with disease information.
 query <- get_valid_query()
 
 # Get a sample query for single-cell RNA-seq
-query_czi <- get_valid_query(modality = "czi")
+query_sc <- get_valid_query(modality = "single-cell")
 
 # Modify the query
 query$inputs[[1]]$num_samples <- 10

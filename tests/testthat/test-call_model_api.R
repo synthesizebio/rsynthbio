@@ -142,7 +142,7 @@ test_that("predict_query single-cell success (mocked)", {
   stub(predict_query, "poll_model_query", mocks$poll)
   stub(predict_query, "get_json", mocks$get_json)
 
-  query <- get_valid_query(modality = "czi")
+  query <- get_valid_query(modality = "single-cell")
   result <- predict_query(query)
 
   expect_true("metadata" %in% names(result))
@@ -166,7 +166,7 @@ test_that("predict_query single-cell failure (mocked)", {
   stub(predict_query, "start_model_query", mocks$start_query)
   stub(predict_query, "poll_model_query", mocks$poll)
 
-  query <- get_valid_query(modality = "czi")
+  query <- get_valid_query(modality = "single-cell")
 
   expect_error(
     predict_query(query),
@@ -184,7 +184,7 @@ test_that("predict_query single-cell timeout (mocked)", {
   stub(predict_query, "start_model_query", mocks$start_query)
   stub(predict_query, "poll_model_query", mocks$poll)
 
-  query <- get_valid_query(modality = "czi")
+  query <- get_valid_query(modality = "single-cell")
 
   expect_error(
     predict_query(
@@ -204,7 +204,7 @@ test_that("get_valid_modalities returns correct structure", {
   modalities <- get_valid_modalities()
   expect_type(modalities, "character")
   expect_true("bulk" %in% modalities)
-  expect_true("czi" %in% modalities)
+  expect_true("single-cell" %in% modalities)
 })
 
 test_that("get_valid_query returns correct structure", {
@@ -220,8 +220,8 @@ test_that("get_valid_query supports modality parameter", {
   query_bulk <- get_valid_query(modality = "bulk")
   expect_equal(query_bulk$modality, "bulk")
 
-  query_czi <- get_valid_query(modality = "czi")
-  expect_equal(query_czi$modality, "czi")
+  query_sc <- get_valid_query(modality = "single-cell")
+  expect_equal(query_sc$modality, "single-cell")
 })
 
 test_that("validate_query passes for valid query", {

@@ -9,11 +9,11 @@ API_BASE_URL <- "https://app.synthesize.bio"
 #' @description A nested list containing supported modalities for different
 #' model versions
 #' + bulk = bulk RNA-seq
-#' + czi = single-cell RNA-seq
+#' + single-cell = single-cell RNA-seq
 #' @format A nested list with structure: model type > version > modalities
 #' @export
 MODEL_MODALITIES <- list()
-MODEL_MODALITIES[[RELEASE_NUMBER]] <- c("bulk", "czi")
+MODEL_MODALITIES[[RELEASE_NUMBER]] <- c("bulk", "single-cell")
 
 #' @title Default Timeout
 #' @description Default timeout (seconds) for outbound HTTP requests

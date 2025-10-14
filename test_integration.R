@@ -22,7 +22,7 @@ if (has_synthesize_token()) {
 cat("3. Testing get_valid_modalities()...\n")
 modalities <- get_valid_modalities()
 cat("   Available modalities:", paste(modalities, collapse = ", "), "\n")
-if (all(c("bulk", "czi") %in% modalities)) {
+if (all(c("bulk", "single-cell") %in% modalities)) {
     cat("   ✓ Both modalities available\n\n")
 } else {
     stop("   ✗ Expected modalities not found")
@@ -69,7 +69,7 @@ if (nrow(bulk_result$metadata) > 0 && nrow(bulk_result$expression) > 0) {
 # Test single-cell query
 cat("6. Testing single-cell RNA-seq query...\n")
 cat("   Creating single-cell query...\n")
-sc_query <- get_valid_query(modality = "czi")
+sc_query <- get_valid_query(modality = "single-cell")
 cat("   Query modality:", sc_query$modality, "\n")
 cat("   Query mode:", sc_query$mode, "\n")
 cat("   Number of input conditions:", length(sc_query$inputs), "\n")
