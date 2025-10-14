@@ -12,7 +12,7 @@ and another for a primary tissue sample with disease information."><meta propert
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,9 +49,18 @@ and another for a primary tissue sample with disease information.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_valid_query</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_valid_query</span><span class="op">(</span>modality <span class="op">=</span> <span class="st">"bulk"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+
+
+<dl><dt id="arg-modality">modality<a class="anchor" aria-label="anchor" href="#arg-modality"></a></dt>
+<dd><p>Character string specifying the modality. Either "bulk" or "single-cell".
+Default is "bulk".</p></dd>
+
+</dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list representing a valid query structure.</p>
@@ -59,13 +68,13 @@ and another for a primary tissue sample with disease information.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Get a sample query</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Get a sample query for bulk RNA-seq</span></span></span>
 <span class="r-in"><span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu">get_valid_query</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Modify the query for a different modality</span></span></span>
-<span class="r-in"><span><span class="va">query</span><span class="op">$</span><span class="va">modality</span> <span class="op">&lt;-</span> <span class="st">"bulk_rna-seq"</span></span></span>
+<span class="r-in"><span><span class="co"># Get a sample query for single-cell RNA-seq</span></span></span>
+<span class="r-in"><span><span class="va">query_sc</span> <span class="op">&lt;-</span> <span class="fu">get_valid_query</span><span class="op">(</span>modality <span class="op">=</span> <span class="st">"single-cell"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Adjust the number of samples to generate</span></span></span>
+<span class="r-in"><span><span class="co"># Modify the query</span></span></span>
 <span class="r-in"><span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">num_samples</span> <span class="op">&lt;-</span> <span class="fl">10</span></span></span>
 </code></pre></div>
     </div>

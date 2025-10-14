@@ -10,7 +10,7 @@ to the API, and processes the response into usable data frames."><meta property=
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,9 +48,11 @@ to the API, and processes the response into usable data frames.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">predict_query</span><span class="op">(</span></span>
 <span>  <span class="va">query</span>,</span>
-<span>  raw_response <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  as_counts <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  url <span class="op">=</span> <span class="va">API_BASE_URL</span></span>
+<span>  api_base_url <span class="op">=</span> <span class="va">API_BASE_URL</span>,</span>
+<span>  poll_interval_seconds <span class="op">=</span> <span class="va">DEFAULT_POLL_INTERVAL_SECONDS</span>,</span>
+<span>  poll_timeout_seconds <span class="op">=</span> <span class="va">DEFAULT_POLL_TIMEOUT_SECONDS</span>,</span>
+<span>  return_download_url <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -63,26 +65,35 @@ to the API, and processes the response into usable data frames.</p>
 Use `get_valid_query()` to generate an example.</p></dd>
 
 
-<dt id="arg-raw-response">raw_response<a class="anchor" aria-label="anchor" href="#arg-raw-response"></a></dt>
-<dd><p>If you do not want the gene expression data extracted from the JSON
-response set this to FALSE. Default is to return only the expression and metadata.</p></dd>
-
-
 <dt id="arg-as-counts">as_counts<a class="anchor" aria-label="anchor" href="#arg-as-counts"></a></dt>
-<dd><p>passed to extract_expression() function. Logical, if FALSE,
-transforms the predicted expression counts into logCPM (default is TRUE, returning raw counts).</p></dd>
+<dd><p>Logical, if FALSE, transforms the predicted expression counts
+into logCPM (default is TRUE, returning raw counts).</p></dd>
 
 
-<dt id="arg-url">url<a class="anchor" aria-label="anchor" href="#arg-url"></a></dt>
-<dd><p>The URL to send the API request to. Default is the API_BASE_URL.</p></dd>
+<dt id="arg-api-base-url">api_base_url<a class="anchor" aria-label="anchor" href="#arg-api-base-url"></a></dt>
+<dd><p>The base URL for the API server. Default is API_BASE_URL.</p></dd>
+
+
+<dt id="arg-poll-interval-seconds">poll_interval_seconds<a class="anchor" aria-label="anchor" href="#arg-poll-interval-seconds"></a></dt>
+<dd><p>Seconds between polling attempts of the status endpoint.
+Default is DEFAULT_POLL_INTERVAL_SECONDS (2).</p></dd>
+
+
+<dt id="arg-poll-timeout-seconds">poll_timeout_seconds<a class="anchor" aria-label="anchor" href="#arg-poll-timeout-seconds"></a></dt>
+<dd><p>Maximum total seconds to wait before timing out.
+Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).</p></dd>
+
+
+<dt id="arg-return-download-url">return_download_url<a class="anchor" aria-label="anchor" href="#arg-return-download-url"></a></dt>
+<dd><p>Logical, if TRUE, returns a list containing the signed
+download URL instead of parsing into data frames. Default is FALSE.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with two data frames:
         - 'metadata': contains metadata for each sample
-        - 'expression': contains expression data for each sample
-Throws an error If the API request fails or the response structure is invalid.</p>
+        - 'expression': contains expression data for each sample</p>
     </div>
 
     <div class="section level2">
@@ -90,10 +101,10 @@ Throws an error If the API request fails or the response structure is invalid.</
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Set your API key (in practice, use a more secure method)</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># To start using pysynthbio, first you need to have an account with synthesize.bio.</span></span></span>
+<span class="r-in"><span><span class="co"># To start using rsynthbio, first you need to have an account with synthesize.bio.</span></span></span>
 <span class="r-in"><span><span class="co"># Go here to create one: https://app.synthesize.bio/</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>SYNTHESIZE_API_KEY <span class="op">=</span> <span class="st">"your_api_key_here"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="set_synthesize_token.html">set_synthesize_token</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a query</span></span></span>
 <span class="r-in"><span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_valid_query.html">get_valid_query</a></span><span class="op">(</span><span class="op">)</span></span></span>

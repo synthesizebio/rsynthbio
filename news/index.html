@@ -6,7 +6,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,13 +34,81 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="2.2.1" id="rsynthbio-221">rsynthbio 2.2.1<a class="anchor" aria-label="anchor" href="#rsynthbio-221"></a></h2><p class="text-muted">CRAN release: 2025-09-12</p>
+<h2 class="pkg-version" data-toc-text="3.0.0" id="rsynthbio-300-development">rsynthbio 3.0.0 (Development)<a class="anchor" aria-label="anchor" href="#rsynthbio-300-development"></a></h2>
+<div class="section level3">
+<h3 id="major-changes-3-0-0">Major Changes<a class="anchor" aria-label="anchor" href="#major-changes-3-0-0"></a></h3>
+<ul><li>
+<strong>Async API Support</strong>: Migrated to async API model matching the Python <code>pysynthbio</code> implementation
+<ul><li>
+<code><a href="../reference/predict_query.html">predict_query()</a></code> now uses an asynchronous workflow: submit → poll → download</li>
+<li>Added automatic status polling with configurable intervals and timeouts</li>
+<li>New parameters: <code>poll_interval_seconds</code> (default: 2), <code>poll_timeout_seconds</code> (default: 900)</li>
+</ul></li>
+<li>
+<strong>Single-Cell Support</strong>: Added support for single-cell RNA-seq data via the “single-cell” modality
+<ul><li>
+<code><a href="../reference/get_valid_query.html">get_valid_query()</a></code> now accepts a <code>modality</code> parameter (“bulk” or “single-cell”)</li>
+<li>
+<code><a href="../reference/get_valid_modalities.html">get_valid_modalities()</a></code> now returns both “bulk” and “single-cell”</li>
+<li>Updated <code>MODEL_MODALITIES</code> to include both modalities</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="breaking-changes-3-0-0">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-3-0-0"></a></h3>
+<ul><li>
+<strong>API Base URL Changed</strong>: <code>API_BASE_URL</code> is now <code>https://app.synthesize.bio</code> (base URL only, not versioned endpoint)</li>
+<li>
+<strong>Parameter Changes in <code><a href="../reference/predict_query.html">predict_query()</a></code></strong>:
+<ul><li>Removed <code>raw_response</code> parameter</li>
+<li>Removed <code>url</code> parameter (replaced with <code>api_base_url</code>)</li>
+<li>Added <code>poll_interval_seconds</code> parameter</li>
+<li>Added <code>poll_timeout_seconds</code> parameter</li>
+<li>Added <code>return_download_url</code> parameter</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-functions-3-0-0">New Functions<a class="anchor" aria-label="anchor" href="#new-functions-3-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/resolve_api_slug.html">resolve_api_slug()</a></code>: Maps modality to API endpoint slug (internal)</li>
+<li>
+<code><a href="../reference/start_model_query.html">start_model_query()</a></code>: Initiates async model query (internal)</li>
+<li>
+<code><a href="../reference/poll_model_query.html">poll_model_query()</a></code>: Polls status endpoint until completion (internal)</li>
+<li>
+<code><a href="../reference/get_json.html">get_json()</a></code>: Fetches results from signed download URL (internal)</li>
+<li>
+<code><a href="../reference/transform_result_to_frames.html">transform_result_to_frames()</a></code>: Converts JSON to data frames (internal)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-3-0-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-3-0-0"></a></h3>
+<ul><li>Fixed metadata handling for queries with empty metadata fields</li>
+<li>Improved error messages for failed queries (now shows error message instead of error URL)</li>
+<li>Better handling of single-cell count data format (dict vs list)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-3-0-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-3-0-0"></a></h3>
+<ul><li>Updated README.md to explain async API behavior</li>
+<li>Updated vignettes with async workflow examples</li>
+<li>Added examples for both bulk and single-cell modalities</li>
+<li>Clarified polling timeout and interval configuration</li>
+</ul></div>
+<div class="section level3">
+<h3 id="tests-3-0-0">Tests<a class="anchor" aria-label="anchor" href="#tests-3-0-0"></a></h3>
+<ul><li>Added comprehensive test suite mirroring Python implementation</li>
+<li>Added live API tests for both bulk and single-cell modalities</li>
+<li>Added tests for invalid metadata validation</li>
+<li>Added mocked async workflow tests (success, failure, timeout scenarios)</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="3.0.0" id="rsynthbio-300">rsynthbio 3.0.0<a class="anchor" aria-label="anchor" href="#rsynthbio-300"></a></h2>
 <ul><li>rsynthbio now works with the GEM-1 model from Synthesize Bio.</li>
 <li>older versions of Synthesize Bio models are no longer supported.</li>
 <li>updated documentation to reflect the new model.</li>
 <li>more flexibility for specifying the url for the Synthesize Bio API.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
