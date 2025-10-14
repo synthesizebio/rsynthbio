@@ -11,7 +11,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = FALSE  # Set to FALSE since API calls require credentials
+  eval = FALSE # Set to FALSE since API calls require credentials
 )
 ```
 
@@ -86,13 +86,30 @@ Never hard-code your token in scripts that will be shared or committed to versio
 
 ## Basic Usage
 
+### Available Modalities
+
+The package supports multiple data modalities:
+
+```{r modalities}
+# Check available modalities
+get_valid_modalities()
+```
+
+Currently supported modalities:
+
+- **`bulk`**: Bulk RNA-seq data
+- **`single-cell`**: Single-cell RNA-seq data
+
 ### Creating a Query
 
-The first step to generating AI-generated gene expression data is to create a query. The package provides a sample query that you can modify:
+The first step to generating AI-generated gene expression data is to create a query. The package provides sample queries for each modality:
 
 ```{r query}
-# Get a sample query
-query <- get_valid_query()
+# Get a sample query for bulk RNA-seq
+query <- get_valid_query(modality = "bulk")
+
+# Get a sample query for single-cell RNA-seq
+query_sc <- get_valid_query(modality = "single-cell")
 
 # Inspect the query structure
 str(query)
@@ -100,27 +117,54 @@ str(query)
 
 The query consists of:
 
-1. `output_modality`: The type of gene expression data to generate (see `get_valid_modalities`)
+1. `modality`: The type of gene expression data to generate ("bulk" or "single-cell")
 2. `mode`: The prediction mode (e.g., "mean estimation" or "sample generation")
 3. `inputs`: A list of biological conditions to generate data for
 
 We train our models with diverse multi-omics datasets. There are two model modes available today:
 
-+ Mean estimation: These models create a distribution capturing the biological heterogeneity consistent with the supplied metadata. This distribution is then sampled to predict a gene expression distribution that captures measurement error. The mean of that distribution serves as the prediction
-+ Sample generation: This model works identically to the mean estimation approach except that the final gene expression distribution is also sampled to generate realistic looking synthetic data that captures error associated with measurement
++ **Mean estimation**: These models create a distribution capturing the biological heterogeneity consistent with the supplied metadata. This distribution is then sampled to predict a gene expression distribution that captures measurement error. The mean of that distribution serves as the prediction
++ **Sample generation**: This model works identically to the mean estimation approach except that the final gene expression distribution is also sampled to generate realistic looking synthetic data that captures error associated with measurement
+
+### Making a Prediction
+
+Once your query is ready, you can send it to the API to generate gene expression data:
 
 ```{r predict, eval=FALSE}
-result <- predict_query(query)
+result <- predict_query(query, as_counts = TRUE)
 ```
 
 This result will be a list of two dataframes: `metadata` and `expression`
+
+### Understanding the Async API
+
+Behind the scenes, the API uses an **asynchronous model** to handle queries efficiently:
+
+1. Your query is submitted to the API, which returns a query ID
+2. The function automatically polls the status endpoint (default: every 2 seconds)
+3. When the query completes, results are downloaded from a signed URL
+4. Data is parsed and returned as R data frames
+
+All of this happens automatically when you call `predict_query()`.
+
+### Controlling Async Behavior
+
+You can customize the polling behavior if needed:
+
+```{r async-options, eval=FALSE}
+# Increase timeout for large queries (default: 900 seconds = 15 minutes)
+result <- predict_query(
+  query,
+  poll_timeout_seconds = 1800, # 30 minutes
+  poll_interval_seconds = 5 # Check every 5 seconds instead of 2
+)
+```
 
 ### Modifying a Query
 
 You can customize the query to fit your specific research needs:
 
 ```{r modify-query}
-
 # Adjust number of samples
 query$inputs[[1]]$num_samples <- 10
 
@@ -184,16 +228,14 @@ To lookup ontology terms, we recommend using the [EMBL-EBI Ontology Lookup Servi
 Models have a limited acceptable range of metadata input values. 
 If you provide a value that is not in the acceptable range, the API will return an error.
 
-### Making Predictions
+### Additional Prediction Options
 
-Once your query is ready, you can send it to the API to generate gene expression data.
+You can also request log-transformed CPM instead of raw counts:
 
 ```{r predict-2, eval=FALSE}
-# Request counts data (not log-CPM)
-result <- predict_query(query, as_counts = TRUE)
+# Request log-transformed CPM instead of raw counts
+result_log <- predict_query(query, as_counts = FALSE)
 ```
-
-If you want the full API response beyond just than just the result of the metadata and expression returned put `raw_response = TRUE`.
 
 ### Working with Results
 

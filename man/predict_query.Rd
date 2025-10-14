@@ -6,28 +6,35 @@
 \usage{
 predict_query(
   query,
-  raw_response = FALSE,
   as_counts = TRUE,
-  url = API_BASE_URL
+  api_base_url = API_BASE_URL,
+  poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
+  poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
+  return_download_url = FALSE
 )
 }
 \arguments{
 \item{query}{A list representing the query data to send to the API.
 Use `get_valid_query()` to generate an example.}
 
-\item{raw_response}{If you do not want the gene expression data extracted from the JSON
-response set this to FALSE. Default is to return only the expression and metadata.}
+\item{as_counts}{Logical, if FALSE, transforms the predicted expression counts
+into logCPM (default is TRUE, returning raw counts).}
 
-\item{as_counts}{passed to extract_expression() function. Logical, if FALSE,
-transforms the predicted expression counts into logCPM (default is TRUE, returning raw counts).}
+\item{api_base_url}{The base URL for the API server. Default is API_BASE_URL.}
 
-\item{url}{The URL to send the API request to. Default is the API_BASE_URL.}
+\item{poll_interval_seconds}{Seconds between polling attempts of the status endpoint.
+Default is DEFAULT_POLL_INTERVAL_SECONDS (2).}
+
+\item{poll_timeout_seconds}{Maximum total seconds to wait before timing out.
+Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).}
+
+\item{return_download_url}{Logical, if TRUE, returns a list containing the signed
+download URL instead of parsing into data frames. Default is FALSE.}
 }
 \value{
 A list with two data frames:
         - 'metadata': contains metadata for each sample
         - 'expression': contains expression data for each sample
-Throws an error If the API request fails or the response structure is invalid.
 }
 \description{
 Sends a query to the Synthesize Bio API for prediction
@@ -38,10 +45,10 @@ to the API, and processes the response into usable data frames.
 # Set your API key (in practice, use a more secure method)
 \dontrun{
 
-# To start using pysynthbio, first you need to have an account with synthesize.bio.
+# To start using rsynthbio, first you need to have an account with synthesize.bio.
 # Go here to create one: https://app.synthesize.bio/
 
-Sys.setenv(SYNTHESIZE_API_KEY = "your_api_key_here")
+set_synthesize_token()
 
 # Create a query
 query <- get_valid_query()

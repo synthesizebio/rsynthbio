@@ -4,7 +4,11 @@
 \alias{get_valid_query}
 \title{Get Valid Query Example}
 \usage{
-get_valid_query()
+get_valid_query(modality = "bulk")
+}
+\arguments{
+\item{modality}{Character string specifying the modality. Either "bulk" or "single-cell".
+Default is "bulk".}
 }
 \value{
 A list representing a valid query structure.
@@ -16,12 +20,12 @@ The sample query contains two example inputs: one for a cell line with CRISPR pe
 and another for a primary tissue sample with disease information.
 }
 \examples{
-# Get a sample query
+# Get a sample query for bulk RNA-seq
 query <- get_valid_query()
 
-# Modify the query for a different modality
-query$modality <- "bulk_rna-seq"
+# Get a sample query for single-cell RNA-seq
+query_sc <- get_valid_query(modality = "single-cell")
 
-# Adjust the number of samples to generate
+# Modify the query
 query$inputs[[1]]$num_samples <- 10
 }

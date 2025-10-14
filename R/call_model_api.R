@@ -41,18 +41,48 @@ get_valid_modes <- function() {
 #' The sample query contains two example inputs: one for a cell line with CRISPR perturbation
 #' and another for a primary tissue sample with disease information.
 #'
+#' @param modality Character string specifying the modality. Either "bulk" or "single-cell".
+#'        Default is "bulk".
 #' @return A list representing a valid query structure.
 #' @examples
-#' # Get a sample query
+#' # Get a sample query for bulk RNA-seq
 #' query <- get_valid_query()
 #'
-#' # Modify the query for a different modality
-#' query$modality <- "bulk_rna-seq"
+#' # Get a sample query for single-cell RNA-seq
+#' query_sc <- get_valid_query(modality = "single-cell")
 #'
-#' # Adjust the number of samples to generate
+#' # Modify the query
 #' query$inputs[[1]]$num_samples <- 10
 #' @export
-get_valid_query <- function() {
+get_valid_query <- function(modality = "bulk") {
+  if (modality == "single-cell") {
+    return(list(
+      modality = "single-cell",
+      mode = "sample generation",
+      return_classifier_probs = TRUE,
+      seed = 11,
+      inputs = list(
+        list(
+          metadata = list(
+            cell_type_ontology_id = "CL:0000786",
+            tissue_ontology_id = "UBERON:0001155",
+            sex = "male"
+          ),
+          num_samples = 1
+        ),
+        list(
+          metadata = list(
+            cell_type_ontology_id = "CL:0000763",
+            tissue_ontology_id = "UBERON:0001155",
+            sex = "male"
+          ),
+          num_samples = 1
+        )
+      )
+    ))
+  }
+
+  # Default: bulk
   list(
     modality = "bulk",
     mode = "sample generation",
@@ -158,6 +188,264 @@ validate_modality <- function(query) {
   invisible(TRUE)
 }
 
+#' @title Resolve API Slug
+#' @description Internal function to resolve the API slug based on modality
+#' @param modality The modality string ("bulk" or "single-cell")
+#' @return The API slug string
+#' @keywords internal
+resolve_api_slug <- function(modality) {
+  if (modality == "single-cell") {
+    return("gem-1-sc")
+  }
+  if (modality == "bulk") {
+    return("gem-1-bulk")
+  }
+  return("")
+}
+
+#' @title Start Model Query
+#' @description Internal function to start an async model query
+#' @param api_base_url The base URL for the API
+#' @param api_slug The API slug for the specific model
+#' @param query The query list
+#' @return The model query ID
+#' @importFrom httr POST add_headers content status_code timeout
+#' @importFrom jsonlite toJSON fromJSON
+#' @keywords internal
+start_model_query <- function(api_base_url, api_slug, query) {
+  url <- paste0(api_base_url, "/api/models/", api_slug, "/predict")
+  query_json <- toJSON(query, auto_unbox = TRUE)
+
+  response <- tryCatch(
+    {
+      POST(
+        url = url,
+        add_headers(
+          Accept = "application/json",
+          Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY")),
+          `Content-Type` = "application/json"
+        ),
+        body = query_json,
+        encode = "json",
+        timeout(DEFAULT_TIMEOUT)
+      )
+    },
+    error = function(e) {
+      stop(paste0("Predict request failed due to a network issue: ", e$message))
+    }
+  )
+
+  if (status_code(response) >= 400) {
+    stop(paste0(
+      "Predict request failed with status ",
+      status_code(response), ": ", content(response, "text")
+    ))
+  }
+
+  parsed_content <- tryCatch(
+    {
+      fromJSON(content(response, "text"), simplifyDataFrame = TRUE)
+    },
+    error = function(e) {
+      stop(paste0("Failed to decode JSON from predict response: ", e$message))
+    }
+  )
+
+  if (!is.list(parsed_content) || is.null(parsed_content$modelQueryId)) {
+    stop(paste0(
+      "Unexpected response from predict endpoint: ",
+      paste(names(parsed_content), collapse = ", ")
+    ))
+  }
+
+  return(as.character(parsed_content$modelQueryId))
+}
+
+#' @title Poll Model Query
+#' @description Internal function to poll the status endpoint until ready/failed or timeout
+#' @param api_base_url The base URL for the API
+#' @param model_query_id The model query ID to poll
+#' @param poll_interval Seconds between polling attempts
+#' @param timeout_seconds Maximum total seconds to wait
+#' @return A list with status and payload
+#' @importFrom httr GET add_headers content status_code timeout
+#' @importFrom jsonlite fromJSON
+#' @keywords internal
+poll_model_query <- function(api_base_url, model_query_id, poll_interval, timeout_seconds) {
+  start_time <- Sys.time()
+  status_url <- paste0(api_base_url, "/api/model-queries/", model_query_id, "/status")
+  last_payload <- list()
+
+  while (TRUE) {
+    response <- tryCatch(
+      {
+        GET(
+          url = status_url,
+          add_headers(
+            Accept = "application/json",
+            Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY"))
+          ),
+          timeout(DEFAULT_TIMEOUT)
+        )
+      },
+      error = function(e) {
+        stop(paste0("Status request failed due to a network issue: ", e$message))
+      }
+    )
+
+    if (status_code(response) >= 400) {
+      stop(paste0(
+        "Status request failed with status ",
+        status_code(response), ": ", content(response, "text")
+      ))
+    }
+
+    payload <- tryCatch(
+      {
+        fromJSON(content(response, "text"), simplifyDataFrame = TRUE)
+      },
+      error = function(e) {
+        stop(paste0("Failed to decode JSON from status response: ", e$message))
+      }
+    )
+
+    if (!is.list(payload) || is.null(payload$status)) {
+      stop(paste0(
+        "Unexpected status response: ",
+        paste(names(payload), collapse = ", ")
+      ))
+    }
+
+    status <- as.character(payload$status)
+    last_payload <- payload
+
+    if (status %in% c("ready", "failed")) {
+      return(list(status = status, payload = payload))
+    }
+
+    elapsed <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+    if (elapsed > timeout_seconds) {
+      return(list(status = status, payload = last_payload))
+    }
+
+    Sys.sleep(max(1, as.integer(poll_interval)))
+  }
+}
+
+#' @title Get JSON from URL
+#' @description Internal function to fetch JSON from a URL
+#' @param url The URL to fetch from
+#' @return The parsed JSON content
+#' @importFrom httr GET content status_code timeout
+#' @importFrom jsonlite fromJSON
+#' @keywords internal
+get_json <- function(url) {
+  response <- tryCatch(
+    {
+      GET(url, timeout(DEFAULT_TIMEOUT))
+    },
+    error = function(e) {
+      stop(paste0("Failed to fetch download URL due to a network issue: ", e$message))
+    }
+  )
+
+  if (status_code(response) >= 400) {
+    stop(paste0(
+      "Download URL fetch failed with status ",
+      status_code(response), ": ", content(response, "text")
+    ))
+  }
+
+  parsed_content <- tryCatch(
+    {
+      fromJSON(content(response, "text"), simplifyDataFrame = TRUE)
+    },
+    error = function(e) {
+      stop(paste0("Failed to decode JSON from download URL response: ", e$message))
+    }
+  )
+
+  return(parsed_content)
+}
+
+#' @title Transform Result to Frames
+#' @description Internal function to transform the final JSON result into data frames
+#' @param content The parsed JSON content
+#' @return A list with expression and metadata data frames
+#' @keywords internal
+transform_result_to_frames <- function(content) {
+  # Check for errors
+  if (!is.null(content$error)) {
+    stop(paste0("Error in result payload: ", content$error))
+  }
+  if (!is.null(content$errors)) {
+    stop(paste0("Errors in result payload: ", paste(content$errors, collapse = "; ")))
+  }
+
+  if (is.null(content$outputs) || is.null(content$gene_order)) {
+    stop(paste0(
+      "Unexpected result JSON structure (expected 'outputs' and 'gene_order'): ",
+      paste(names(content), collapse = ", ")
+    ))
+  }
+
+  gene_order <- content$gene_order
+
+  # Build expression data frame
+  expression_rows <- list()
+  metadata_rows <- list()
+
+  for (i in seq_along(content$outputs)) {
+    output <- content$outputs[[i]]
+    counts <- output$counts
+
+    # Single-cell returns dict/named list, bulk returns vector
+    if (is.list(counts) && !is.null(names(counts))) {
+      # Convert named list to vector aligned with gene_order
+      counts_vec <- sapply(gene_order, function(gene) {
+        if (gene %in% names(counts)) counts[[gene]] else 0
+      })
+    } else {
+      # Already a vector
+      counts_vec <- unlist(counts)
+    }
+
+    expression_rows[[i]] <- counts_vec
+    metadata_rows[[i]] <- if (!is.null(output$metadata)) output$metadata else list()
+  }
+
+  # Create expression data frame
+  expression <- as.data.frame(do.call(rbind, expression_rows))
+  colnames(expression) <- gene_order
+
+  # Create metadata data frame
+  if (length(metadata_rows) > 0) {
+    # Filter out empty metadata rows
+    non_empty_metadata <- Filter(function(x) length(x) > 0, metadata_rows)
+
+    if (length(non_empty_metadata) > 0) {
+      # Get all unique metadata keys
+      all_keys <- unique(unlist(lapply(non_empty_metadata, names)))
+
+      # Build metadata data frame
+      metadata_list <- lapply(all_keys, function(key) {
+        sapply(metadata_rows, function(row) {
+          if (length(row) > 0 && key %in% names(row)) row[[key]] else NA
+        })
+      })
+      names(metadata_list) <- all_keys
+      metadata <- as.data.frame(metadata_list, stringsAsFactors = FALSE)
+    } else {
+      # All metadata rows are empty, create empty df with correct number of rows
+      metadata <- data.frame(matrix(ncol = 0, nrow = length(metadata_rows)))
+    }
+  } else {
+    metadata <- data.frame()
+  }
+
+  return(list(expression = expression, metadata = metadata))
+}
+
 #' @title Predict Gene Expression
 #' @description Sends a query to the Synthesize Bio API for prediction
 #' and retrieves gene expression samples. This function validates the query, sends it
@@ -165,25 +453,28 @@ validate_modality <- function(query) {
 #'
 #' @param query A list representing the query data to send to the API.
 #'        Use `get_valid_query()` to generate an example.
-#' @param raw_response If you do not want the gene expression data extracted from the JSON
-#' response set this to FALSE. Default is to return only the expression and metadata.
-#' @param as_counts passed to extract_expression() function. Logical, if FALSE,
-#' transforms the predicted expression counts into logCPM (default is TRUE, returning raw counts).
-#' @param url The URL to send the API request to. Default is the API_BASE_URL.
-#' @return A list with two data frames:
-#'         - 'metadata': contains metadata for each sample
-#'         - 'expression': contains expression data for each sample
-#' Throws an error If the API request fails or the response structure is invalid.
-#' @importFrom httr POST add_headers content http_status status_code timeout
+#' @param as_counts Logical, if FALSE, transforms the predicted expression counts
+#'        into logCPM (default is TRUE, returning raw counts).
+#' @param api_base_url The base URL for the API server. Default is API_BASE_URL.
+#' @param poll_interval_seconds Seconds between polling attempts of the status endpoint.
+#'        Default is DEFAULT_POLL_INTERVAL_SECONDS (2).
+#' @param poll_timeout_seconds Maximum total seconds to wait before timing out.
+#'        Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).
+#' @param return_download_url Logical, if TRUE, returns a list containing the signed
+#'        download URL instead of parsing into data frames. Default is FALSE.
+#' @return A list. If `return_download_url` is `FALSE` (default), the list contains
+#'         two data frames: `metadata` and `expression`. If `TRUE`, the list
+#'         contains `download_url` and empty `metadata` and `expression` data frames.
+#' @importFrom httr POST GET add_headers content http_status status_code timeout
 #' @importFrom jsonlite toJSON fromJSON
 #' @examples
 #' # Set your API key (in practice, use a more secure method)
 #' \dontrun{
 #'
-#' # To start using pysynthbio, first you need to have an account with synthesize.bio.
+#' # To start using rsynthbio, first you need to have an account with synthesize.bio.
 #' # Go here to create one: https://app.synthesize.bio/
 #'
-#' Sys.setenv(SYNTHESIZE_API_KEY = "your_api_key_here")
+#' set_synthesize_token()
 #'
 #' # Create a query
 #' query <- get_valid_query()
@@ -203,76 +494,100 @@ validate_modality <- function(query) {
 #' head(sort(expression[1, ], decreasing = TRUE))
 #' }
 #' @export
-predict_query <- function(query, raw_response = FALSE, as_counts = TRUE, url = API_BASE_URL) {
+predict_query <- function(query,
+                          as_counts = TRUE,
+                          api_base_url = API_BASE_URL,
+                          poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
+                          poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
+                          return_download_url = FALSE) {
   if (!has_synthesize_token()) {
-    stop("Please set your API key for synthesize Bio using set_synthesize_token()")
+    stop("Please set your API key for Synthesize Bio using set_synthesize_token()")
   }
 
-  # validate url starts with https://app.synthesize.bio
-  if (!grepl("^https://app.synthesize.bio", url)) {
-    stop("The provided URL is not a valid synthesize.bio endpoint.")
+  # Validate base URL
+  if (!grepl("^https?://", api_base_url)) {
+    stop(paste0("Invalid api_base_url: ", api_base_url, ". Must start with http:// or https://"))
   }
+
+  # Validate the query
   validate_query(query)
   validate_modality(query)
+
+  modality <- query$modality
 
   # Add source field for reporting
   query$source <- "rsynthbio"
 
-  # Convert the query list to JSON
-  query_json <- toJSON(query, auto_unbox = TRUE)
+  if (modality %in% c("bulk", "single-cell")) {
+    # Resolve internal API slug based on modality
+    api_slug <- resolve_api_slug(modality)
 
-  # Make the API request
-  response <- POST(
-    url = url,
-    add_headers(
-      Accept = "application/json",
-      Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY")),
-      `Content-Type` = "application/json"
-    ),
-    body = query_json,
-    encode = "json",
-    timeout(30)
-  )
-
-  if (http_status(response)$category != "Success") {
-    stop(paste0(
-      "API request to ", url, " failed with status ",
-      status_code(response), ": ", content(response, "text")
-    ))
-  }
-
-  # Parse JSON response and handle errors
-  parsed_content <- tryCatch(
-    {
-      json_text <- content(response, "text")
-      parsed_content <- fromJSON(json_text, simplifyDataFrame = TRUE)
-    },
-    error = function(e) {
-      stop(paste0("Failed to decode JSON from API response: ", e$message))
-    }
-  )
-
-  # If response is a single-item list, use its contents
-  if (is.list(parsed_content) && length(parsed_content) == 1 && is.list(parsed_content[[1]])) {
-    parsed_content <- parsed_content[[1]]
-  }
-
-  # Check for API-reported errors
-  if (!is.null(parsed_content$error)) {
-    stop(paste0("API error: ", parsed_content$error))
-  }
-  if (!is.null(parsed_content$errors)) {
-    stop(paste0("API errors: ", paste(parsed_content$errors, collapse = "; ")))
-  }
-
-  if (!raw_response) {
-    result <- extract_expression_data(
-      parsed_content,
-      as_counts = as_counts
+    # Start async query
+    model_query_id <- start_model_query(
+      api_base_url = api_base_url,
+      api_slug = api_slug,
+      query = query
     )
-  } else {
-    result <- parsed_content
+
+    # Poll for completion
+    poll_result <- poll_model_query(
+      api_base_url = api_base_url,
+      model_query_id = model_query_id,
+      poll_interval = poll_interval_seconds,
+      timeout_seconds = poll_timeout_seconds
+    )
+
+    status <- poll_result$status
+    payload <- poll_result$payload
+
+    if (status == "failed") {
+      # payload contains message if available
+      err_msg <- if (is.list(payload) && !is.null(payload$message)) payload$message else NULL
+      stop(paste0(
+        "Model query failed. ",
+        if (!is.null(err_msg)) err_msg else "No error message provided."
+      ))
+    }
+
+    if (status != "ready") {
+      stop(paste0(
+        "Model query did not complete in time (status=", status, "). ",
+        "Consider increasing poll_timeout_seconds."
+      ))
+    }
+
+    # When ready, payload should contain a signed downloadUrl to the final JSON
+    download_url <- if (is.list(payload) && !is.null(payload$downloadUrl)) payload$downloadUrl else NULL
+    if (is.null(download_url)) {
+      stop("Response missing downloadUrl when status=ready")
+    }
+
+    if (return_download_url) {
+      # Caller wants the URL only; return in a structured payload
+      return(list(
+        metadata = data.frame(),
+        expression = data.frame(),
+        download_url = download_url
+      ))
+    }
+
+    # Fetch the final results JSON and transform to data frames
+    final_json <- get_json(download_url)
+
+    result <- transform_result_to_frames(final_json)
+
+    # Ensure expression values are numeric
+    result$expression <- as.data.frame(lapply(result$expression, as.numeric))
+
+    if (!as_counts) {
+      result$expression <- log_cpm(result$expression)
+    }
+
+    return(result)
   }
 
-  return(result)
+  stop(paste0(
+    "Unsupported modality '", modality, "'. Expected one of: ",
+    paste(get_valid_modalities(), collapse = ", ")
+  ))
 }

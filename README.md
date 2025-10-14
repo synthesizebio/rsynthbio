@@ -77,20 +77,29 @@ Please see the [Getting Started guide](https://synthesizebio.github.io/rsynthbio
 
 ### Available Modalities
 
-The package supports various data modalities. You can view all available modalities with:
+The package supports multiple data modalities. You can view all available modalities with:
 
 ```
 # Check available modalities
 get_valid_modalities()
+# Returns: "bulk" "single-cell"
 ```
+
+Currently supported modalities:
+
+- **`bulk`**: Bulk RNA-seq data
+- **`single-cell`**: Single-cell RNA-seq data
 
 ### Creating a Query
 
-The first step in obtaining AI-generated gene expression data is to create a query. The package provides a sample query that you can modify:
+The first step in obtaining AI-generated gene expression data is to create a query. The package provides sample queries for each modality:
 
 ```
-# Get a sample query
-query <- get_valid_query()
+# Get a sample query for bulk RNA-seq
+query <- get_valid_query(modality = "bulk")
+
+# Get a sample query for single-cell RNA-seq
+query_sc <- get_valid_query(modality = "single-cell")
 
 # Inspect the query structure
 str(query)
@@ -98,16 +107,43 @@ str(query)
 
 The query consists of:
 
-1. `output_modality`: The type of gene expression data to generate
-2. `mode`: The prediction mode (e.g., "mean estimation")
+1. `modality`: The type of gene expression data to generate ("bulk" or "single-cell")
+2. `mode`: The prediction mode (e.g., "sample generation", "mean estimation")
 3. `inputs`: A list of biological conditions to generate data for
+
+### Making Predictions
+
+The API uses an **asynchronous model**: the query is submitted, the system polls for completion, and results are downloaded when ready. This happens automatically:
 
 ```
 # Request raw counts data
-result <- predict_query(query)
+result <- predict_query(query, as_counts = TRUE)
 
-# Structure of the result
-result
+# The function will automatically:
+# 1. Submit your query to the API
+# 2. Poll for completion (default: checks every 2 seconds)
+# 3. Download and parse results when ready
+# 4. Return formatted data frames
+
+# Access the results
+metadata <- result$metadata
+expression <- result$expression
+```
+
+### Advanced Options
+
+You can customize the polling behavior:
+
+```
+# Adjust polling timeout (default: 15 minutes)
+result <- predict_query(
+  query,
+  poll_timeout_seconds = 1800,  # 30 minutes
+  poll_interval_seconds = 5      # Check every 5 seconds
+)
+
+# Get log-transformed CPM instead of raw counts
+result_log <- predict_query(query, as_counts = FALSE)
 ```
 
 ## Rate Limits

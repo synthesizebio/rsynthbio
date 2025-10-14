@@ -13,6 +13,7 @@ MODEL_MODALITIES
 \description{
 A nested list containing supported modalities for different
 model versions
-+ sra = this is bulk RNA-seq
++ bulk = bulk RNA-seq
++ single-cell = single-cell RNA-seq
 }
 \keyword{datasets}
