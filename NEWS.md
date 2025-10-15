@@ -1,4 +1,4 @@
-# rsynthbio 3.0.0 (Development)
+# rsynthbio 3.0.0
 
 ## Major Changes
 
@@ -10,6 +10,8 @@
   - `get_valid_query()` now accepts a `modality` parameter ("bulk" or "single-cell")
   - `get_valid_modalities()` now returns both "bulk" and "single-cell"
   - Updated `MODEL_MODALITIES` to include both modalities
+- **GEM-1 Model**: rsynthbio now works with the GEM-1 model from Synthesize Bio
+  - Older versions of Synthesize Bio models are no longer supported
 
 ## Breaking Changes
 
@@ -48,10 +50,3 @@
 - Added live API tests for both bulk and single-cell modalities
 - Added tests for invalid metadata validation
 - Added mocked async workflow tests (success, failure, timeout scenarios)
-
-# rsynthbio 3.0.0
-
-- rsynthbio now works with the GEM-1 model from Synthesize Bio.
-- older versions of Synthesize Bio models are no longer supported.
-- updated documentation to reflect the new model.
-- more flexibility for specifying the url for the Synthesize Bio API.
