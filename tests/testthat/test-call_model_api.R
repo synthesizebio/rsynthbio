@@ -16,25 +16,15 @@ test_that("predict_query mocked call success (bulk async)", {
   mocks <- create_success_mocks(
     query_id = "bulk-xyz",
     download_url = "https://example.com/bulk.json",
-    outputs = list(
-      list(
-        counts = c(100, 200, 300),
-        metadata = list(
-          sample_id = "test1",
-          cell_line_ontology_id = "CVCL_0023",
-          age_years = "25",
-          sex = "female"
-        )
-      ),
-      list(
-        counts = c(150, 250, 350),
-        metadata = list(
-          sample_id = "test2",
-          cell_line_ontology_id = "CVCL_0023",
-          age_years = "30",
-          sex = "male"
-        )
-      )
+    counts_list = list(
+      c(100, 200, 300),
+      c(150, 250, 350)
+    ),
+    metadata_df = data.frame(
+      sample_id = c("test1", "test2"),
+      cell_line_ontology_id = c("CVCL_0023", "CVCL_0023"),
+      age_years = c("25", "30"),
+      sex = c("female", "male")
     ),
     gene_order = c("gene1", "gene2", "gene3")
   )
@@ -78,22 +68,15 @@ test_that("predict_query new API structure handling (bulk)", {
   mocks <- create_success_mocks(
     query_id = "bulk-big",
     download_url = "https://example.com/big.json",
-    outputs = list(
-      list(
-        counts = rep(c(0.1, 0.2, 0.3, 0.4, 0.5), 8918),
-        classifier_probs = list(
-          sex = list(female = 0.7, male = 0.3),
-          age_years = list(`60-70` = 0.8, `70-80` = 0.2),
-          tissue_ontology_id = list(UBERON_0000945 = 0.9)
-        ),
-        metadata = list(
-          age_years = "65",
-          disease_ontology_id = "MONDO:0011719",
-          sex = "female",
-          sample_type = "primary tissue",
-          tissue_ontology_id = "UBERON:0000945"
-        )
-      )
+    counts_list = list(
+      rep(c(0.1, 0.2, 0.3, 0.4, 0.5), 8918)
+    ),
+    metadata_df = data.frame(
+      age_years = "65",
+      disease_ontology_id = "MONDO:0011719",
+      sex = "female",
+      sample_type = "primary tissue",
+      tissue_ontology_id = "UBERON:0000945"
     ),
     gene_order = gene_order
   )
@@ -124,15 +107,12 @@ test_that("predict_query single-cell success (mocked)", {
   mocks <- create_success_mocks(
     query_id = "abc123",
     download_url = "https://example.com/final.json",
-    outputs = list(
-      list(
-        counts = c(1, 2, 3),
-        metadata = list(sample_id = "s1")
-      ),
-      list(
-        counts = c(4, 5, 6),
-        metadata = list(sample_id = "s2")
-      )
+    counts_list = list(
+      c(1, 2, 3),
+      c(4, 5, 6)
+    ),
+    metadata_df = data.frame(
+      sample_id = c("s1", "s2")
     ),
     gene_order = c("gene1", "gene2", "gene3")
   )
@@ -357,40 +337,32 @@ test_that("predict_query passes as_counts parameter correctly", {
   mocks <- create_success_mocks(
     query_id = "test-id",
     download_url = "https://example.com/data.json",
-    outputs = list(
-      list(
-        counts = c(100, 200, 300),
-        metadata = list(sample_id = "test1")
-      )
+    counts_list = list(
+      c(100, 200, 300)
+    ),
+    metadata_df = data.frame(
+      sample_id = "test1"
     ),
     gene_order = c("gene1", "gene2", "gene3")
-  )
-
-  # Add mock for log_cpm to track if it's called
-  m_log_cpm <- mock(
-    data.frame(
-      gene1 = log1p(100),
-      gene2 = log1p(200),
-      gene3 = log1p(300)
-    ),
-    cycle = TRUE
   )
 
   stub(predict_query, "has_synthesize_token", mocks$has_token)
   stub(predict_query, "start_model_query", mocks$start_query)
   stub(predict_query, "poll_model_query", mocks$poll)
   stub(predict_query, "get_json", mocks$get_json)
-  stub(predict_query, "log_cpm", m_log_cpm)
 
   query <- get_valid_query()
 
-  # Test with as_counts = TRUE (log_cpm should not be called)
+  # Test with as_counts = TRUE (should return raw counts)
   result_counts <- predict_query(query, as_counts = TRUE)
-  expect_called(m_log_cpm, 0)
+  expect_equal(as.numeric(result_counts$expression[1, ]), c(100, 200, 300))
 
-  # Test with as_counts = FALSE (log_cpm should be called)
+  # Test with as_counts = FALSE (should return log CPM transformed data)
   result_log <- predict_query(query, as_counts = FALSE)
-  expect_called(m_log_cpm, 1)
+  # Verify transformation was applied - values should be different from raw counts
+  expect_false(all(as.numeric(result_log$expression[1, ]) == c(100, 200, 300)))
+  # Values should be positive (log1p of positive numbers)
+  expect_true(all(result_log$expression >= 0))
 })
 
 # -----------------------------

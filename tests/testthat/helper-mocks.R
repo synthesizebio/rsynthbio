@@ -25,17 +25,14 @@ restore_api_key <- function(original_api_key) {
 #'
 #' @param query_id The query ID to return from start_model_query
 #' @param download_url The download URL to return from poll
-#' @param outputs The outputs data structure to return from get_json
+#' @param counts_list A list of count vectors, one per sample
+#' @param metadata_df A data frame of metadata, one row per sample
 #' @param gene_order The gene order to return from get_json
 #' @return A list of mocks: has_token, start_query, poll, get_json
 create_success_mocks <- function(query_id = "test-id",
                                  download_url = "https://example.com/data.json",
-                                 outputs = list(
-                                     list(
-                                         counts = c(100, 200, 300),
-                                         metadata = list(sample_id = "test1")
-                                     )
-                                 ),
+                                 counts_list = list(c(100, 200, 300)),
+                                 metadata_df = data.frame(sample_id = "test1"),
                                  gene_order = c("gene1", "gene2", "gene3")) {
     list(
         has_token = mockery::mock(TRUE, cycle = TRUE),
@@ -52,7 +49,10 @@ create_success_mocks <- function(query_id = "test-id",
         ),
         get_json = mockery::mock(
             list(
-                outputs = outputs,
+                outputs = list(
+                    counts = list(counts = counts_list),
+                    metadata = metadata_df
+                ),
                 gene_order = gene_order,
                 model_version = 2
             ),

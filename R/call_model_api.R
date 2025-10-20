@@ -55,31 +55,50 @@ get_valid_modes <- function() {
 #' query$inputs[[1]]$num_samples <- 10
 #' @export
 get_valid_query <- function(modality = "bulk") {
+  # Build metadata based on modality
+  if (modality == "single-cell") {
+    # Single-cell metadata (no sample_type field)
+    metadata1 <- list(
+      cell_type_ontology_id = "CL:0000786",
+      tissue_ontology_id = "UBERON:0001155",
+      sex = "male"
+    )
+    metadata2 <- list(
+      cell_type_ontology_id = "CL:0000763",
+      tissue_ontology_id = "UBERON:0001155",
+      sex = "male"
+    )
+  } else {
+    # Bulk metadata (includes sample_type)
+    metadata1 <- list(
+      cell_type_ontology_id = "CL:0000786",
+      tissue_ontology_id = "UBERON:0001155",
+      sex = "male",
+      sample_type = "primary tissue"
+    )
+    metadata2 <- list(
+      cell_type_ontology_id = "CL:0000763",
+      tissue_ontology_id = "UBERON:0001155",
+      sex = "male",
+      sample_type = "primary tissue"
+    )
+  }
+
   list(
-      modality = modality,
-      mode = "sample generation",
-      seed = 11,
-      inputs = list(
-        list(
-          metadata = list(
-            cell_type_ontology_id = "CL:0000786",
-            tissue_ontology_id = "UBERON:0001155",
-            sex = "male",
-            sample_type = "primary tissue"
-          ),
-          num_samples = 5
-        ),
-        list(
-          metadata = list(
-            cell_type_ontology_id = "CL:0000763",
-            tissue_ontology_id = "UBERON:0001155",
-            sex = "male",
-            sample_type = "primary tissue"
-          ),
-          num_samples = 5
-        )
+    modality = modality,
+    mode = "sample generation",
+    seed = 11,
+    inputs = list(
+      list(
+        metadata = metadata1,
+        num_samples = 5
+      ),
+      list(
+        metadata = metadata2,
+        num_samples = 5
       )
     )
+  )
 }
 
 
