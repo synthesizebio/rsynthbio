@@ -77,16 +77,24 @@ log_cpm <- function(expression) {
 #' @param parsed_content The parsed API response list
 #' @param as_counts Logical, if FALSE, transforms the predicted expression counts into logCPM
 #'        (default is TRUE, returning raw counts).
-#' @return A list with two components:
-#'         - metadata: tibble containing sample metadata
-#'         - expression: tibble containing combined gene expression data
+#' @return A list with:
+#'         - metadata: data.frame containing sample metadata
+#'         - expression: data.frame containing combined gene expression data
+#'         - latents: data.frame containing embeddings (if requested)
 #'
-#' @export
 extract_expression_data <- function(parsed_content, as_counts = TRUE) {
 
   # Extract the expression matrices and combine them
-  expression_list <- parsed_content$outputs$counts
+  expression_list <- lapply(parsed_content$outputs$counts$counts, function(x) as.data.frame(t(x)))
   expression <- do.call(rbind, expression_list)
+
+  # Set gene names as column names (excluding sample_id column)
+  colnames(expression) <- parsed_content$gene_order
+
+  # Apply log CPM transformation if requested
+  if (!as_counts) {
+    expression <- log_cpm(expression)
+  }
 
   # Get metadata dataframe
   metadata <- parsed_content$outputs$metadata
@@ -97,21 +105,19 @@ extract_expression_data <- function(parsed_content, as_counts = TRUE) {
     metadata
   )
 
-  # Add sample identifiers
-  expression <- data.frame(sample_id = metadata$sample_id,
-                           expression)
-
-  # Set gene names as column names (excluding sample_id column)
-  colnames(expression)[-1] <- parsed_content$gene_order
-
-  # Apply log CPM transformation if requested
-  if (!as_counts) {
-    expression <- log_cpm(expression)
+  # if latents - add those too
+  if ("latents" %in% names(parsed_content$outputs)) {
+    final_list <- list(
+      metadata = metadata,
+      expression = expression,
+      latents = parsed_content$outputs$latents
+    )
+  } else {
+    final_list <- list(
+      metadata = metadata,
+      expression = expression
+    )
   }
-
   # Return both components
-  return(list(
-    metadata = metadata,
-    expression = expression
-  ))
+  return(final_list)
 }

@@ -55,63 +55,33 @@ get_valid_modes <- function() {
 #' query$inputs[[1]]$num_samples <- 10
 #' @export
 get_valid_query <- function(modality = "bulk") {
-  if (modality == "single-cell") {
-    return(list(
-      modality = "single-cell",
+  list(
+      modality = modality,
       mode = "sample generation",
-      return_classifier_probs = TRUE,
       seed = 11,
       inputs = list(
         list(
           metadata = list(
             cell_type_ontology_id = "CL:0000786",
             tissue_ontology_id = "UBERON:0001155",
-            sex = "male"
+            sex = "male",
+            sample_type = "primary tissue"
           ),
-          num_samples = 1
+          num_samples = 5
         ),
         list(
           metadata = list(
             cell_type_ontology_id = "CL:0000763",
             tissue_ontology_id = "UBERON:0001155",
-            sex = "male"
+            sex = "male",
+            sample_type = "primary tissue"
           ),
-          num_samples = 1
+          num_samples = 5
         )
       )
-    ))
-  }
-
-  # Default: bulk
-  list(
-    modality = "bulk",
-    mode = "sample generation",
-    return_classifier_probs = TRUE,
-    seed = 11,
-    inputs = list(
-      list(
-        metadata = list(
-          cell_line_ontology_id = "CVCL_0023",
-          perturbation_ontology_id = "ENSG00000156127",
-          perturbation_type = "crispr",
-          perturbation_time = "96 hours",
-          sample_type = "cell line"
-        ),
-        num_samples = 5
-      ),
-      list(
-        metadata = list(
-          disease_ontology_id = "MONDO:0011719",
-          age_years = "65",
-          sex = "female",
-          sample_type = "primary tissue",
-          tissue_ontology_id = "UBERON:0000945"
-        ),
-        num_samples = 5
-      )
     )
-  )
 }
+
 
 #' @title Validate Query Structure
 #' @description Validates the structure and contents of the query based on the model.
@@ -368,83 +338,6 @@ get_json <- function(url) {
   return(parsed_content)
 }
 
-#' @title Transform Result to Frames
-#' @description Internal function to transform the final JSON result into data frames
-#' @param content The parsed JSON content
-#' @return A list with expression and metadata data frames
-#' @keywords internal
-transform_result_to_frames <- function(content) {
-  # Check for errors
-  if (!is.null(content$error)) {
-    stop(paste0("Error in result payload: ", content$error))
-  }
-  if (!is.null(content$errors)) {
-    stop(paste0("Errors in result payload: ", paste(content$errors, collapse = "; ")))
-  }
-
-  if (is.null(content$outputs) || is.null(content$gene_order)) {
-    stop(paste0(
-      "Unexpected result JSON structure (expected 'outputs' and 'gene_order'): ",
-      paste(names(content), collapse = ", ")
-    ))
-  }
-
-  gene_order <- content$gene_order
-
-  # Build expression data frame
-  expression_rows <- list()
-  metadata_rows <- list()
-
-  for (i in seq_along(content$outputs)) {
-    output <- content$outputs[[i]]
-    counts <- output$counts
-
-    # Single-cell returns dict/named list, bulk returns vector
-    if (is.list(counts) && !is.null(names(counts))) {
-      # Convert named list to vector aligned with gene_order
-      counts_vec <- sapply(gene_order, function(gene) {
-        if (gene %in% names(counts)) counts[[gene]] else 0
-      })
-    } else {
-      # Already a vector
-      counts_vec <- unlist(counts)
-    }
-
-    expression_rows[[i]] <- counts_vec
-    metadata_rows[[i]] <- if (!is.null(output$metadata)) output$metadata else list()
-  }
-
-  # Create expression data frame
-  expression <- as.data.frame(do.call(rbind, expression_rows))
-  colnames(expression) <- gene_order
-
-  # Create metadata data frame
-  if (length(metadata_rows) > 0) {
-    # Filter out empty metadata rows
-    non_empty_metadata <- Filter(function(x) length(x) > 0, metadata_rows)
-
-    if (length(non_empty_metadata) > 0) {
-      # Get all unique metadata keys
-      all_keys <- unique(unlist(lapply(non_empty_metadata, names)))
-
-      # Build metadata data frame
-      metadata_list <- lapply(all_keys, function(key) {
-        sapply(metadata_rows, function(row) {
-          if (length(row) > 0 && key %in% names(row)) row[[key]] else NA
-        })
-      })
-      names(metadata_list) <- all_keys
-      metadata <- as.data.frame(metadata_list, stringsAsFactors = FALSE)
-    } else {
-      # All metadata rows are empty, create empty df with correct number of rows
-      metadata <- data.frame(matrix(ncol = 0, nrow = length(metadata_rows)))
-    }
-  } else {
-    metadata <- data.frame()
-  }
-
-  return(list(expression = expression, metadata = metadata))
-}
 
 #' @title Predict Gene Expression
 #' @description Sends a query to the Synthesize Bio API for prediction
@@ -574,20 +467,13 @@ predict_query <- function(query,
     # Fetch the final results JSON and transform to data frames
     final_json <- get_json(download_url)
 
-    result <- transform_result_to_frames(final_json)
-
-    # Ensure expression values are numeric
-    result$expression <- as.data.frame(lapply(result$expression, as.numeric))
-
-    if (!as_counts) {
-      result$expression <- log_cpm(result$expression)
-    }
+    result <- extract_expression_data(final_json, as_counts = as_counts)
 
     return(result)
+  } else {
+    stop(paste0(
+      "Unsupported modality '", modality, "'. Expected one of: ",
+      paste(get_valid_modalities(), collapse = ", ")
+    ))
   }
-
-  stop(paste0(
-    "Unsupported modality '", modality, "'. Expected one of: ",
-    paste(get_valid_modalities(), collapse = ", ")
-  ))
 }
