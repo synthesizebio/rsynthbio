@@ -399,7 +399,13 @@ predict_query <- function(query,
 
   # Validate base URL
   if (!grepl("^https?://", api_base_url)) {
-    stop(paste0("Invalid api_base_url: ", api_base_url, ". Must start with http:// or https://"))
+    stop(
+      paste0(
+        "Invalid api_base_url: ",
+        api_base_url,
+        ". Must start with http:// or https://"
+      )
+    )
   }
 
   # Validate the query
@@ -411,69 +417,70 @@ predict_query <- function(query,
   # Add source field for reporting
   query$source <- "rsynthbio"
 
-  if (modality %in% c("bulk", "single-cell")) {
-    # Resolve internal API slug based on modality
-    api_slug <- resolve_api_slug(modality)
+  # Resolve internal API slug based on modality
+  api_slug <- resolve_api_slug(modality)
 
-    # Start async query
-    model_query_id <- start_model_query(
-      api_base_url = api_base_url,
-      api_slug = api_slug,
-      query = query
-    )
+  # Start async query
+  model_query_id <- start_model_query(
+    api_base_url = api_base_url,
+    api_slug = api_slug,
+    query = query
+  )
 
-    # Poll for completion
-    poll_result <- poll_model_query(
-      api_base_url = api_base_url,
-      model_query_id = model_query_id,
-      poll_interval = poll_interval_seconds,
-      timeout_seconds = poll_timeout_seconds
-    )
+  # Poll for completion
+  poll_result <- poll_model_query(
+    api_base_url = api_base_url,
+    model_query_id = model_query_id,
+    poll_interval = poll_interval_seconds,
+    timeout_seconds = poll_timeout_seconds
+  )
 
-    status <- poll_result$status
-    payload <- poll_result$payload
+  status <- poll_result$status
+  payload <- poll_result$payload
 
-    if (status == "failed") {
-      # payload contains message if available
-      err_msg <- if (is.list(payload) && !is.null(payload$message)) payload$message else NULL
-      stop(paste0(
-        "Model query failed. ",
-        if (!is.null(err_msg)) err_msg else "No error message provided."
-      ))
+  if (status == "failed") {
+    # payload contains message if available
+    err_msg <- if (is.list(payload) && !is.null(payload$message)) {
+      payload$message
+    } else {
+      NULL
     }
-
-    if (status != "ready") {
-      stop(paste0(
-        "Model query did not complete in time (status=", status, "). ",
-        "Consider increasing poll_timeout_seconds."
-      ))
-    }
-
-    # When ready, payload should contain a signed downloadUrl to the final JSON
-    download_url <- if (is.list(payload) && !is.null(payload$downloadUrl)) payload$downloadUrl else NULL
-    if (is.null(download_url)) {
-      stop("Response missing downloadUrl when status=ready")
-    }
-
-    if (return_download_url) {
-      # Caller wants the URL only; return in a structured payload
-      return(list(
-        metadata = data.frame(),
-        expression = data.frame(),
-        download_url = download_url
-      ))
-    }
-
-    # Fetch the final results JSON and transform to data frames
-    final_json <- get_json(download_url)
-
-    result <- extract_expression_data(final_json, as_counts = as_counts)
-
-    return(result)
-  } else {
     stop(paste0(
-      "Unsupported modality '", modality, "'. Expected one of: ",
-      paste(get_valid_modalities(), collapse = ", ")
+      "Model query failed. ",
+      if (!is.null(err_msg)) err_msg else "No error message provided."
     ))
   }
+
+  if (status != "ready") {
+    stop(paste0(
+      "Model query did not complete in time (status=", status, "). ",
+      "Consider increasing poll_timeout_seconds."
+    ))
+  }
+
+  # When ready, payload should contain a signed downloadUrl to the final JSON
+  download_url <- if (is.list(payload) && !is.null(payload$downloadUrl)) {
+    payload$downloadUrl
+  } else {
+    NULL
+  }
+  if (is.null(download_url)) {
+    stop("Response missing downloadUrl when status=ready")
+  }
+
+  if (return_download_url) {
+    # Caller wants the URL only; return in a structured payload
+    return(list(
+      metadata = data.frame(),
+      expression = data.frame(),
+      download_url = download_url
+    ))
+  }
+
+  # Fetch the final results JSON and transform to data frames
+  final_json <- get_json(download_url)
+
+  result <- extract_expression_data(final_json, as_counts = as_counts)
+
+  return(result)
 }
