@@ -475,9 +475,10 @@ test_that("predict_query returns biologically valid single-cell expression data 
     fold_changes <- log2((mean_group2 + pseudocount) / (mean_group1 + pseudocount))
     
     # 4. Perform Wilcoxon rank-sum tests (better for sparse/non-normal single-cell data)
+    # Use exact = FALSE to avoid warnings about ties (common with sparse data)
     p_values <- sapply(1:n_genes, function(i) {
         tryCatch({
-            wilcox.test(expr_group1[, i], expr_group2[, i])$p.value
+            wilcox.test(expr_group1[, i], expr_group2[, i], exact = FALSE)$p.value
         }, error = function(e) {
             NA
         })
