@@ -13,6 +13,7 @@
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/DEFAULT_POLL_TIMEOUT_SECONDS.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/DEFAULT_TIMEOUT.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/MODEL_MODALITIES.html</loc></url>
+<url><loc>https://synthesizebio.github.io/rsynthbio/reference/MODEL_MODES.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/clear_synthesize_token.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/extract_expression_data.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/get_json.html</loc></url>
@@ -28,7 +29,6 @@
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/resolve_api_slug.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/set_synthesize_token.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/start_model_query.html</loc></url>
-<url><loc>https://synthesizebio.github.io/rsynthbio/reference/transform_result_to_frames.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/validate_modality.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/validate_query.html</loc></url>
 </urlset>
