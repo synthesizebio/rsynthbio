@@ -328,7 +328,9 @@ get_json <- function(url) {
 
   parsed_content <- tryCatch(
     {
-      fromJSON(content(response, "text"), simplifyDataFrame = TRUE)
+      fromJSON(
+        content(response, "text", encoding = "UTF-8"), simplifyDataFrame = TRUE
+      )
     },
     error = function(e) {
       stop(paste0("Failed to decode JSON from download URL response: ", e$message))
