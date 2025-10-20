@@ -24,5 +24,5 @@ modes <- get_valid_modes(modality = "bulk")
 print(modes)
 
 # Check if a specific mode is supported
-"sample generation" \%in\% get_valid_modes()
+"sample generation" \%in\% get_valid_modes(modality = "single-cell")
 }

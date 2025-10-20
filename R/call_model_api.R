@@ -29,7 +29,7 @@ get_valid_modalities <- function() {
 #' print(modes)
 #'
 #' # Check if a specific mode is supported
-#' "sample generation" %in% get_valid_modes()
+#' "sample generation" %in% get_valid_modes(modality = "single-cell")
 #' @export
 get_valid_modes <- function(modality) {
   if (is.null(modality)) stop("modality is required input")
