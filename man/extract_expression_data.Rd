@@ -13,9 +13,10 @@ extract_expression_data(parsed_content, as_counts = TRUE)
 (default is TRUE, returning raw counts).}
 }
 \value{
-A list with two components:
-        - metadata: tibble containing sample metadata
-        - expression: tibble containing combined gene expression data
+A list with:
+        - metadata: data.frame containing sample metadata
+        - expression: data.frame containing combined gene expression data
+        - latents: data.frame containing embeddings (if requested)
 }
 \description{
 Extracts and combines gene expression data from a complex API response,

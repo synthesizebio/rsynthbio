@@ -32,9 +32,9 @@ Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).}
 download URL instead of parsing into data frames. Default is FALSE.}
 }
 \value{
-A list with two data frames:
-        - 'metadata': contains metadata for each sample
-        - 'expression': contains expression data for each sample
+A list. If `return_download_url` is `FALSE` (default), the list contains
+        two data frames: `metadata` and `expression`. If `TRUE`, the list
+        contains `download_url` and empty `metadata` and `expression` data frames.
 }
 \description{
 Sends a query to the Synthesize Bio API for prediction

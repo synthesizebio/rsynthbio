@@ -10,24 +10,26 @@ mock_api_response <- list(
                  # Add more genes to reach 44,592 total
                  paste0("ENSG", sprintf("%011d", 1:44586))),
 
-  # NEW STRUCTURE: outputs is now a data.frame with list columns
-  outputs = data.frame(
-    # counts column - list of integer vectors (one per sample)
-    counts = I(list(
-      as.integer(c(904, 0, 539, 115, 239, 0, 1976, 817, 2422, 372, runif(44582, 0, 2000))),
-      as.integer(c(1350, 0, 343, 120, 151, 5, 937, 947, 1439, 344, runif(44582, 0, 2000))),
-      as.integer(c(1082, 0, 471, 144, 230, 4, 924, 861, 2093, 179, runif(44582, 0, 2000))),
-      as.integer(c(851, 5, 423, 147, 139, 3, 725, 1592, 5669, 407, runif(44582, 0, 2000))),
-      as.integer(c(339, 0, 356, 170, 91, 0, 1119, 748, 2459, 314, runif(44582, 0, 2000))),
-      as.integer(c(337, 0, 545, 174, 106, 28, 734, 770, 570, 651, runif(44582, 0, 2000))),
-      as.integer(c(822, 0, 440, 578, 60, 20, 1411, 915, 1004, 500, runif(44582, 0, 2000))),
-      as.integer(c(591, 0, 360, 212, 104, 53, 883, 1021, 826, 1439, runif(44582, 0, 2000))),
-      as.integer(c(999, 0, 844, 228, 61, 30, 786, 977, 446, 516, runif(44582, 0, 2000))),
-      as.integer(c(638, 1, 578, 194, 92, 64, 828, 416, 605, 613, runif(44582, 0, 2000)))
-    )),
+  # NEW STRUCTURE: outputs is now a list (not data.frame)
+  outputs = list(
+    # counts - list with counts element containing list of integer vectors
+    counts = list(
+      counts = list(
+        as.integer(c(904, 0, 539, 115, 239, 0, 1976, 817, 2422, 372, runif(44582, 0, 2000))),
+        as.integer(c(1350, 0, 343, 120, 151, 5, 937, 947, 1439, 344, runif(44582, 0, 2000))),
+        as.integer(c(1082, 0, 471, 144, 230, 4, 924, 861, 2093, 179, runif(44582, 0, 2000))),
+        as.integer(c(851, 5, 423, 147, 139, 3, 725, 1592, 5669, 407, runif(44582, 0, 2000))),
+        as.integer(c(339, 0, 356, 170, 91, 0, 1119, 748, 2459, 314, runif(44582, 0, 2000))),
+        as.integer(c(337, 0, 545, 174, 106, 28, 734, 770, 570, 651, runif(44582, 0, 2000))),
+        as.integer(c(822, 0, 440, 578, 60, 20, 1411, 915, 1004, 500, runif(44582, 0, 2000))),
+        as.integer(c(591, 0, 360, 212, 104, 53, 883, 1021, 826, 1439, runif(44582, 0, 2000))),
+        as.integer(c(999, 0, 844, 228, 61, 30, 786, 977, 446, 516, runif(44582, 0, 2000))),
+        as.integer(c(638, 1, 578, 194, 92, 64, 828, 416, 605, 613, runif(44582, 0, 2000)))
+      )
+    ),
 
     # classifier_probs - data.frame with nested data.frames for each classifier
-    classifier_probs = I(data.frame(
+    classifier_probs = data.frame(
       # Sex probabilities
       sex = I(data.frame(
         female = c(0.0734, 0.1465, 0.1251, 0.0948, 0.2374, 0.1897, 0.2156, 0.1634, 0.0892, 0.1749),
@@ -78,10 +80,10 @@ mock_api_response <- list(
         matrix(runif(10 * 762, 0, 1e-3), nrow = 10, ncol = 762,
                dimnames = list(NULL, paste0("CVCL_", sprintf("%04d", 1:762))))
       ))
-    )),
+    ),
 
     # latents - data.frame with list columns for each latent type
-    latents = I(data.frame(
+    latents = data.frame(
       biological = I(list(
         runif(1024, -3, 3), runif(1024, -3, 3), runif(1024, -3, 3), runif(1024, -3, 3), runif(1024, -3, 3),
         runif(1024, -3, 3), runif(1024, -3, 3), runif(1024, -3, 3), runif(1024, -3, 3), runif(1024, -3, 3)
@@ -102,10 +104,10 @@ mock_api_response <- list(
         runif(512, -2, 2), runif(512, -2, 2), runif(512, -2, 2), runif(512, -2, 2), runif(512, -2, 2),
         runif(512, -2, 2), runif(512, -2, 2), runif(512, -2, 2), runif(512, -2, 2), runif(512, -2, 2)
       ))
-    )),
+    ),
 
     # metadata - data.frame with sample metadata
-    metadata = I(data.frame(
+    metadata = data.frame(
       age_years = c("", "", "", "", "", "65", "65", "65", "65", "65"),
       cell_line_ontology_id = c(rep("CVCL_0023", 5), rep("", 5)),
       cell_type_ontology_id = rep("", 10),
@@ -127,9 +129,7 @@ mock_api_response <- list(
       study = rep("", 10),
       tissue_ontology_id = c(rep("", 5), rep("UBERON:0000945", 5)),
       stringsAsFactors = FALSE
-    )),
-
-    stringsAsFactors = FALSE
+    )
   )
 )
 
@@ -218,7 +218,7 @@ test_that("extract_expression_data processes API response correctly", {
 
   # Check structure
   expect_type(result_counts, "list")
-  expect_named(result_counts, c("metadata", "expression"))
+  expect_named(result_counts, c("metadata", "expression", "latents"))
 
   # Check metadata
   expect_s3_class(result_counts$metadata, "data.frame")
@@ -228,7 +228,7 @@ test_that("extract_expression_data processes API response correctly", {
   expect_s3_class(result_counts$expression, "data.frame")
   expect_equal(nrow(result_counts$expression), 10)
   expect_equal(colnames(result_counts$expression)[1:4],
-               c("sample_id", "ENSG00000000003", "ENSG00000000005", "ENSG00000000419"))
+               c("ENSG00000000003", "ENSG00000000005", "ENSG00000000419", "ENSG00000000457"))
 
   # Test with as_counts = FALSE (log CPM transformation)
   result_logcpm <- extract_expression_data(mock_api_response, as_counts = FALSE)
@@ -248,7 +248,8 @@ test_that("extract_expression_data correctly assigns sample IDs", {
     nrow(result$metadata),
     nrow(result$expression))
 
-  # sample ids should match
-  expect_equal(result$metadata$sample_id, result$expression$sample_id)
+  # Metadata should have sample_id column
+  expect_true("sample_id" %in% colnames(result$metadata))
+  expect_equal(length(result$metadata$sample_id), 10)
 })
 
