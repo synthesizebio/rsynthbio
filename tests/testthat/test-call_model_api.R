@@ -392,3 +392,173 @@ test_that("predict_query passes as_counts parameter correctly", {
   result_log <- predict_query(query, as_counts = FALSE)
   expect_called(m_log_cpm, 1)
 })
+
+# -----------------------------
+# get_json Tests
+# -----------------------------
+
+test_that("get_json successfully fetches and parses JSON", {
+  test_data <- list(
+    outputs = list(
+      list(counts = c(1, 2, 3), metadata = list(sample_id = "test"))
+    ),
+    gene_order = c("gene1", "gene2", "gene3")
+  )
+
+  # Mock successful HTTP response
+  mock_response <- mock(
+    structure(
+      list(
+        url = "https://example.com/data.json",
+        status_code = 200,
+        content = charToRaw(toJSON(test_data, auto_unbox = TRUE))
+      ),
+      class = "response"
+    ),
+    cycle = TRUE
+  )
+
+  get_json_fn <- rsynthbio:::get_json
+  stub(get_json_fn, "GET", mock_response)
+  stub(get_json_fn, "status_code", function(x) 200)
+  stub(get_json_fn, "content", function(x, type, encoding) {
+    toJSON(test_data, auto_unbox = TRUE)
+  })
+
+  result <- get_json_fn("https://example.com/data.json")
+
+  expect_type(result, "list")
+  expect_true("outputs" %in% names(result))
+  expect_true("gene_order" %in% names(result))
+  expect_equal(result$gene_order, c("gene1", "gene2", "gene3"))
+})
+
+test_that("get_json handles network errors", {
+  # Mock network error
+  mock_get_error <- mock(stop("Connection timeout"), cycle = TRUE)
+
+  get_json_fn <- rsynthbio:::get_json
+  stub(get_json_fn, "GET", mock_get_error)
+
+  expect_error(
+    get_json_fn("https://example.com/data.json"),
+    "Failed to fetch download URL due to a network issue.*Connection timeout"
+  )
+})
+
+test_that("get_json handles HTTP 404 errors", {
+  mock_response <- mock(
+    structure(
+      list(
+        url = "https://example.com/data.json",
+        status_code = 404,
+        content = charToRaw("Not Found")
+      ),
+      class = "response"
+    ),
+    cycle = TRUE
+  )
+
+  get_json_fn <- rsynthbio:::get_json
+  stub(get_json_fn, "GET", mock_response)
+  stub(get_json_fn, "status_code", function(x) 404)
+  stub(get_json_fn, "content", function(x, type) "Not Found")
+
+  expect_error(
+    get_json_fn("https://example.com/data.json"),
+    "Download URL fetch failed with status 404.*Not Found"
+  )
+})
+
+test_that("get_json handles HTTP 500 errors", {
+  mock_response <- mock(
+    structure(
+      list(
+        url = "https://example.com/data.json",
+        status_code = 500,
+        content = charToRaw("Internal Server Error")
+      ),
+      class = "response"
+    ),
+    cycle = TRUE
+  )
+
+  get_json_fn <- rsynthbio:::get_json
+  stub(get_json_fn, "GET", mock_response)
+  stub(get_json_fn, "status_code", function(x) 500)
+  stub(get_json_fn, "content", function(x, type) "Internal Server Error")
+
+  expect_error(
+    get_json_fn("https://example.com/data.json"),
+    "Download URL fetch failed with status 500.*Internal Server Error"
+  )
+})
+
+test_that("get_json handles JSON parsing errors", {
+  mock_response <- mock(
+    structure(
+      list(
+        url = "https://example.com/data.json",
+        status_code = 200,
+        content = charToRaw("invalid json content {{{")
+      ),
+      class = "response"
+    ),
+    cycle = TRUE
+  )
+
+  get_json_fn <- rsynthbio:::get_json
+  stub(get_json_fn, "GET", mock_response)
+  stub(get_json_fn, "status_code", function(x) 200)
+  stub(get_json_fn, "content", function(x, type, encoding) "invalid json content {{{")
+  stub(get_json_fn, "fromJSON", function(x, ...) stop("JSON parsing error"))
+
+  expect_error(
+    get_json_fn("https://example.com/data.json"),
+    "Failed to decode JSON from download URL response.*JSON parsing error"
+  )
+})
+
+test_that("get_json preserves UTF-8 encoding", {
+  # Test data with special characters
+  test_data <- list(
+    outputs = list(
+      list(
+        counts = c(1, 2, 3),
+        metadata = list(
+          sample_id = "test-utf8-\u00e9\u00f1\u00fc",
+          description = "Test with \u2764\ufe0f"
+        )
+      )
+    ),
+    gene_order = c("gene1", "gene2", "gene3")
+  )
+
+  # Create JSON string
+  json_string <- toJSON(test_data, auto_unbox = TRUE)
+
+  mock_response <- mock(
+    structure(
+      list(
+        url = "https://example.com/data.json",
+        status_code = 200,
+        content = charToRaw(json_string)
+      ),
+      class = "response"
+    ),
+    cycle = TRUE
+  )
+
+  get_json_fn <- rsynthbio:::get_json
+  stub(get_json_fn, "GET", mock_response)
+  stub(get_json_fn, "status_code", function(x) 200)
+  stub(get_json_fn, "content", function(x, type, encoding) json_string)
+
+  result <- get_json_fn("https://example.com/data.json")
+
+  expect_true("outputs" %in% names(result))
+  expect_true("gene_order" %in% names(result))
+  # Verify the data structure was parsed
+  expect_true(length(result$outputs) >= 1)
+  expect_equal(result$gene_order, c("gene1", "gene2", "gene3"))
+})
