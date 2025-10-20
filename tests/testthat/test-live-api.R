@@ -282,3 +282,275 @@ test_that("predict_query download URL flow works correctly", {
 
     message("Download URL flow and get_json validation passed.")
 })
+
+test_that("predict_query returns biologically valid expression data (differential expression)", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting biological validity with simple differential expression analysis...")
+
+    # Create query with two distinct conditions
+    de_query <- list(
+        inputs = list(
+            # Condition 1: One cell type
+            list(
+                metadata = list(
+                    cell_type_ontology_id = "CL:0000786",  # Plasmacytoid dendritic cell
+                    tissue_ontology_id = "UBERON:0002371",  # bone marrow
+                    sex = "female",
+                    sample_type = "primary tissue"
+                ),
+                num_samples = 5
+            ),
+            # Condition 2: Different cell type
+            list(
+                metadata = list(
+                    cell_type_ontology_id = "CL:0000763",  # Myeloid cell
+                    tissue_ontology_id = "UBERON:0002371",  # bone marrow
+                    sex = "female",
+                    sample_type = "primary tissue"
+                ),
+                num_samples = 5
+            )
+        ),
+        modality = "bulk",
+        mode = "sample generation",
+        seed = 42
+    )
+
+    results <- predict_query(query = de_query, as_counts = TRUE)
+
+    # Split samples by condition
+    group1_idx <- 1:5
+    group2_idx <- 6:10
+    
+    expr_group1 <- results$expression[group1_idx, ]
+    expr_group2 <- results$expression[group2_idx, ]
+
+    # Calculate basic statistics for each gene
+    n_genes <- ncol(results$expression)
+    
+    # Calculate mean expression for each group
+    mean_group1 <- colMeans(expr_group1)
+    mean_group2 <- colMeans(expr_group2)
+    
+    # Calculate fold changes (using pseudocount to avoid division by zero)
+    pseudocount <- 1
+    fold_changes <- log2((mean_group2 + pseudocount) / (mean_group1 + pseudocount))
+    
+    # Perform t-tests for each gene
+    p_values <- sapply(1:n_genes, function(i) {
+        tryCatch({
+            t.test(expr_group1[, i], expr_group2[, i])$p.value
+        }, error = function(e) {
+            NA
+        })
+    })
+    
+    # Basic validation of differential expression results
+    message("Validating differential expression statistics...")
+    
+    # 1. Check that we have valid p-values
+    valid_pvals <- !is.na(p_values)
+    expect_true(sum(valid_pvals) > n_genes * 0.9,
+                info = "At least 90% of genes should have valid p-values")
+    
+    # 2. P-values should be distributed between 0 and 1
+    expect_true(all(p_values[valid_pvals] >= 0 & p_values[valid_pvals] <= 1),
+                info = "All p-values should be between 0 and 1")
+    
+    # 3. Not all p-values should be identical (showing variation)
+    expect_true(length(unique(p_values[valid_pvals])) > 100,
+                info = "P-values should show variation across genes")
+    
+    # 4. Fold changes should be reasonable (not all zero, not all extreme)
+    expect_true(sd(fold_changes, na.rm = TRUE) > 0,
+                info = "Fold changes should show variation")
+    expect_true(abs(median(fold_changes, na.rm = TRUE)) < 10,
+                info = "Median fold change should be reasonable (|log2FC| < 10)")
+    
+    # 5. Check for differentially expressed genes (p < 0.05)
+    de_genes <- which(p_values < 0.05)
+    expect_true(length(de_genes) > 0,
+                info = "Should detect some differentially expressed genes")
+    expect_true(length(de_genes) < n_genes * 0.5,
+                info = "Not all genes should be differentially expressed")
+    
+    # 6. Variance should exist within groups (biological variation)
+    var_group1 <- apply(expr_group1, 2, var)
+    var_group2 <- apply(expr_group2, 2, var)
+    expect_true(median(var_group1, na.rm = TRUE) > 0,
+                info = "Group 1 should show within-group variance")
+    expect_true(median(var_group2, na.rm = TRUE) > 0,
+                info = "Group 2 should show within-group variance")
+    
+    # 7. Expression levels should be reasonable for count data
+    overall_mean <- mean(as.matrix(results$expression), na.rm = TRUE)
+    expect_true(overall_mean > 0,
+                info = "Mean expression should be positive")
+    expect_true(overall_mean < 1e6,
+                info = "Mean expression should be in reasonable range")
+    
+    message(sprintf("DE analysis complete: %d DE genes (p<0.05) out of %d tested",
+                    length(de_genes), sum(valid_pvals)))
+    message(sprintf("Median fold change: %.3f (log2)", median(fold_changes, na.rm = TRUE)))
+    message(sprintf("Expression range: %.1f to %.1f",
+                    min(results$expression, na.rm = TRUE),
+                    max(results$expression, na.rm = TRUE)))
+    
+    message("Biological validity tests passed!")
+})
+
+test_that("predict_query returns biologically valid single-cell expression data (differential expression)", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting single-cell biological validity with differential expression analysis...")
+
+    # Create query with two distinct cell types
+    sc_de_query <- list(
+        inputs = list(
+            # Condition 1: T cells
+            list(
+                metadata = list(
+                    cell_type_ontology_id = "CL:0000084",  # T cell
+                    tissue_ontology_id = "UBERON:0002371",  # bone marrow
+                    sex = "female"
+                ),
+                num_samples = 10
+            ),
+            # Condition 2: B cells
+            list(
+                metadata = list(
+                    cell_type_ontology_id = "CL:0000236",  # B cell
+                    tissue_ontology_id = "UBERON:0002371",  # bone marrow
+                    sex = "female"
+                ),
+                num_samples = 10
+            )
+        ),
+        modality = "single-cell",
+        mode = "sample generation",
+        seed = 123
+    )
+
+    results <- predict_query(query = sc_de_query, as_counts = TRUE)
+
+    # Split samples by condition
+    group1_idx <- 1:10
+    group2_idx <- 11:20
+    
+    expr_group1 <- results$expression[group1_idx, ]
+    expr_group2 <- results$expression[group2_idx, ]
+
+    # Calculate basic statistics for each gene
+    n_genes <- ncol(results$expression)
+    n_cells <- nrow(results$expression)
+    
+    message(sprintf("Analyzing %d cells across %d genes...", n_cells, n_genes))
+    
+    # Single-cell specific metrics
+    # 1. Calculate sparsity (proportion of zeros)
+    sparsity_group1 <- sum(expr_group1 == 0) / (nrow(expr_group1) * ncol(expr_group1))
+    sparsity_group2 <- sum(expr_group2 == 0) / (nrow(expr_group2) * ncol(expr_group2))
+    
+    expect_true(sparsity_group1 > 0.3,
+                info = "Single-cell data should show sparsity (>30% zeros)")
+    expect_true(sparsity_group1 < 0.95,
+                info = "Single-cell data should not be too sparse (<95% zeros)")
+    
+    message(sprintf("Sparsity: Group1 = %.1f%%, Group2 = %.1f%%",
+                    sparsity_group1 * 100, sparsity_group2 * 100))
+    
+    # 2. Calculate mean expression for each gene
+    mean_group1 <- colMeans(expr_group1)
+    mean_group2 <- colMeans(expr_group2)
+    
+    # 3. Calculate fold changes (using pseudocount for sparse data)
+    pseudocount <- 0.1
+    fold_changes <- log2((mean_group2 + pseudocount) / (mean_group1 + pseudocount))
+    
+    # 4. Perform Wilcoxon rank-sum tests (better for sparse/non-normal single-cell data)
+    p_values <- sapply(1:n_genes, function(i) {
+        tryCatch({
+            wilcox.test(expr_group1[, i], expr_group2[, i])$p.value
+        }, error = function(e) {
+            NA
+        })
+    })
+    
+    # Validation of single-cell differential expression results
+    message("Validating single-cell differential expression statistics...")
+    
+    # 1. Check that we have valid p-values
+    valid_pvals <- !is.na(p_values)
+    expect_true(sum(valid_pvals) > n_genes * 0.8,
+                info = "At least 80% of genes should have valid p-values")
+    
+    # 2. P-values should be distributed between 0 and 1
+    expect_true(all(p_values[valid_pvals] >= 0 & p_values[valid_pvals] <= 1),
+                info = "All p-values should be between 0 and 1")
+    
+    # 3. P-values should show variation (not all the same)
+    expect_true(length(unique(p_values[valid_pvals])) > 100,
+                info = "P-values should show variation across genes")
+    
+    # 4. Fold changes should show variation
+    expect_true(sd(fold_changes, na.rm = TRUE) > 0,
+                info = "Fold changes should show variation")
+    expect_true(abs(median(fold_changes, na.rm = TRUE)) < 15,
+                info = "Median fold change should be reasonable for single-cell")
+    
+    # 5. Check for differentially expressed genes
+    de_genes <- which(p_values < 0.05)
+    expect_true(length(de_genes) > 0,
+                info = "Should detect some differentially expressed genes")
+    expect_true(length(de_genes) < n_genes * 0.6,
+                info = "Not all genes should be differentially expressed")
+    
+    # 6. Check for genes with expression in at least some cells
+    genes_expressed <- colSums(results$expression > 0)
+    expect_true(median(genes_expressed) > 1,
+                info = "Genes should be expressed in multiple cells")
+    
+    # 7. Single-cell specific: check for high-variance genes
+    var_group1 <- apply(expr_group1, 2, var)
+    var_group2 <- apply(expr_group2, 2, var)
+    
+    # Coefficient of variation (CV) is often high in single-cell
+    cv_group1 <- sqrt(var_group1) / (mean_group1 + 1e-6)
+    cv_group2 <- sqrt(var_group2) / (mean_group2 + 1e-6)
+    
+    expect_true(median(cv_group1, na.rm = TRUE) > 0.5,
+                info = "Single-cell data should show high coefficient of variation")
+    
+    # 8. Expression levels should be reasonable for single-cell count data
+    overall_mean <- mean(as.matrix(results$expression), na.rm = TRUE)
+    expect_true(overall_mean > 0,
+                info = "Mean expression should be positive")
+    expect_true(overall_mean < 1e5,
+                info = "Mean expression should be in reasonable single-cell range")
+    
+    # 9. Check that cell type markers might be differential
+    # For T cells vs B cells, we'd expect some strong differences
+    strong_de <- sum(abs(fold_changes) > 2 & p_values < 0.01, na.rm = TRUE)
+    expect_true(strong_de > 10,
+                info = "Should detect some strongly DE genes between T and B cells")
+    
+    message(sprintf("DE analysis complete: %d DE genes (p<0.05) out of %d tested",
+                    length(de_genes), sum(valid_pvals)))
+    message(sprintf("Strongly DE genes (|log2FC|>2, p<0.01): %d", strong_de))
+    message(sprintf("Median fold change: %.3f (log2)", median(fold_changes, na.rm = TRUE)))
+    message(sprintf("Median CV: %.2f (Group1), %.2f (Group2)",
+                    median(cv_group1, na.rm = TRUE),
+                    median(cv_group2, na.rm = TRUE)))
+    message(sprintf("Expression range: %.1f to %.1f",
+                    min(results$expression, na.rm = TRUE),
+                    max(results$expression, na.rm = TRUE)))
+    
+    message("Single-cell biological validity tests passed!")
+})
