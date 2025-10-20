@@ -275,7 +275,7 @@ test_that("validate_modality fails for missing modality key", {
 
   expect_error(
     validate_modality(query),
-    "Query requires 'modality' key"
+    "Query requires `modality` key"
   )
 })
 
