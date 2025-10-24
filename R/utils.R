@@ -31,7 +31,7 @@ MODEL_MODES[[RELEASE_NUMBER]] <- list(
 #' @title Default Timeout
 #' @description Default timeout (seconds) for outbound HTTP requests
 #' @export
-DEFAULT_TIMEOUT <- 30
+DEFAULT_TIMEOUT <- 300
 
 #' @title Default Poll Interval
 #' @description Default polling interval (seconds) for async model queries
