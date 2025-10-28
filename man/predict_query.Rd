@@ -9,7 +9,6 @@ predict_query(
   as_counts = TRUE,
   total_count = NULL,
   deterministic_latents = NULL,
-  fixed_total_count = NULL,
   api_base_url = API_BASE_URL,
   poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
   poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
@@ -24,20 +23,13 @@ Use `get_valid_query()` to generate an example.}
 into logCPM (default is TRUE, returning raw counts).}
 
 \item{total_count}{Integer, library size used when converting predicted log CPM back to
-raw counts. Higher values scale counts up proportionally. If a reference expression
-is supplied (reference-conditioned endpoint) and `fixed_total_count` is FALSE,
-the model will ignore this value and use the reference's observed total counts instead.
+raw counts. Higher values scale counts up proportionally.
 Default: 10,000,000 for bulk; 10,000 for single-cell (when not specified).}
 
 \item{deterministic_latents}{Logical, if TRUE, the model uses the mean of each latent
 distribution (p(z|metadata) or q(z|x)) instead of sampling. This removes randomness
 from latent sampling and produces deterministic outputs for the same inputs.
 Default is NULL (uses API default behavior).}
-
-\item{fixed_total_count}{Logical, controls whether to preserve the reference's library size
-(reference-conditioned only). If FALSE, `total_count` is taken from the reference
-sample(s). If TRUE, `total_count` is taken from the request (or default), even when
-a reference is provided. Default is NULL (uses API default behavior).}
 
 \item{api_base_url}{The base URL for the API server. Default is API_BASE_URL.}
 

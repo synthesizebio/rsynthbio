@@ -250,10 +250,6 @@ result_det <- predict_query(query, deterministic_latents = TRUE)
 # Default: 10,000,000 for bulk; 10,000 for single-cell
 result_custom <- predict_query(query, total_count = 5000000)
 
-# Control library size behavior for reference-conditioned queries
-# (forces use of specified total_count even with a reference)
-result_fixed <- predict_query(query, fixed_total_count = TRUE)
-
 # Combine multiple options
 result_combined <- predict_query(
   query,
@@ -267,9 +263,7 @@ result_combined <- predict_query(
 
 - **`deterministic_latents`** (logical): If `TRUE`, the model uses the mean of each latent distribution (p(z|metadata) or q(z|x)) instead of sampling. This removes randomness from latent sampling and produces deterministic outputs for the same inputs. Useful for ensuring reproducibility in your analyses.
 
-- **`total_count`** (integer): Library size used when converting predicted log CPM back to raw counts. Higher values scale counts up proportionally. If a reference expression is supplied (reference-conditioned endpoint) and `fixed_total_count` is `FALSE`, the model will ignore this value and use the reference's observed total counts instead.
-
-- **`fixed_total_count`** (logical): Controls whether to preserve the reference's library size (reference-conditioned queries only). If `FALSE`, `total_count` is taken from the reference sample(s). If `TRUE`, `total_count` is taken from the request parameter, even when a reference is provided.
+- **`total_count`** (integer): Library size used when converting predicted log CPM back to raw counts. Higher values scale counts up proportionally.
 
 ### Working with Results
 
