@@ -132,7 +132,7 @@ expression <- result$expression
 
 ### Advanced Options
 
-You can customize the polling behavior:
+You can customize the polling behavior and model parameters:
 
 ```
 # Adjust polling timeout (default: 15 minutes)
@@ -144,7 +144,35 @@ result <- predict_query(
 
 # Get log-transformed CPM instead of raw counts
 result_log <- predict_query(query, as_counts = FALSE)
+
+# Use deterministic latents for reproducible results
+# (removes randomness from latent sampling)
+result_det <- predict_query(query, deterministic_latents = TRUE)
+
+# Specify custom library size (total count)
+# Default: 10,000,000 for bulk; 10,000 for single-cell
+result_custom <- predict_query(query, total_count = 5000000)
+
+# Control library size behavior for reference-conditioned queries
+# (forces use of specified total_count even with a reference)
+result_fixed <- predict_query(query, fixed_total_count = TRUE)
+
+# Combine multiple options
+result_combined <- predict_query(
+  query,
+  total_count = 8000000,
+  deterministic_latents = TRUE,
+  as_counts = TRUE
+)
 ```
+
+#### Parameter Details
+
+- **`deterministic_latents`** (logical): If `TRUE`, the model uses the mean of each latent distribution instead of sampling, producing deterministic outputs for the same inputs. Useful for reproducibility.
+
+- **`total_count`** (integer): Library size used when converting predicted log CPM back to raw counts. Higher values scale counts up proportionally. If a reference expression is supplied and `fixed_total_count` is `FALSE`, the model will use the reference's observed total counts instead.
+
+- **`fixed_total_count`** (logical): Controls whether to preserve the reference's library size (reference-conditioned queries only). If `FALSE`, `total_count` is taken from the reference sample(s). If `TRUE`, `total_count` is taken from the request parameter even when a reference is provided.
 
 ## Rate Limits
 

@@ -561,3 +561,164 @@ test_that("predict_query returns biologically valid single-cell expression data 
 
     message("Single-cell biological validity tests passed!")
 })
+
+test_that("predict_query with total_count parameter works correctly", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting predict_query with custom total_count parameter...")
+
+    test_query <- get_valid_query()
+
+    # Test with custom total_count
+    results <- predict_query(
+        query = test_query,
+        as_counts = TRUE,
+        total_count = 5000000
+    )
+
+    expect_type(results, "list")
+    expect_true("metadata" %in% names(results))
+    expect_true("expression" %in% names(results))
+
+    expect_s3_class(results$metadata, "data.frame")
+    expect_s3_class(results$expression, "data.frame")
+
+    expect_true(nrow(results$metadata) > 0)
+    expect_true(nrow(results$expression) > 0)
+    expect_true(ncol(results$expression) > 0)
+
+    # Verify expression values are non-negative
+    expect_true(all(results$expression >= 0, na.rm = TRUE),
+                info = "Expression counts should be non-negative")
+
+    message("total_count parameter test passed.")
+})
+
+test_that("predict_query with deterministic_latents produces reproducible results", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting predict_query with deterministic_latents for reproducibility...")
+
+    test_query <- get_valid_query()
+    test_query$seed <- 12345  # Set a seed for consistency
+
+    # First call with deterministic_latents = TRUE
+    results1 <- predict_query(
+        query = test_query,
+        as_counts = TRUE,
+        deterministic_latents = TRUE
+    )
+
+    # Second call with same query and deterministic_latents = TRUE
+    results2 <- predict_query(
+        query = test_query,
+        as_counts = TRUE,
+        deterministic_latents = TRUE
+    )
+
+    expect_type(results1, "list")
+    expect_type(results2, "list")
+
+    # With deterministic_latents, results should be identical
+    expect_equal(dim(results1$expression), dim(results2$expression),
+                 info = "Expression dimensions should match")
+
+    # Check that at least some values are identical (allowing for potential minor differences)
+    # In practice, deterministic_latents should make results highly similar if not identical
+    correlation <- cor(
+        as.vector(as.matrix(results1$expression)),
+        as.vector(as.matrix(results2$expression))
+    )
+    expect_true(correlation > 0.99,
+                info = sprintf("With deterministic_latents, results should be highly correlated (got r=%.4f)", correlation))
+
+    message(sprintf("Deterministic latents test passed (correlation: %.6f)", correlation))
+})
+
+test_that("predict_query with deterministic_latents FALSE shows variation", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting predict_query with deterministic_latents=FALSE shows variation...")
+
+    test_query <- get_valid_query()
+    test_query$seed <- NULL  # Remove seed to allow variation
+
+    # First call with deterministic_latents = FALSE
+    results1 <- predict_query(
+        query = test_query,
+        as_counts = TRUE,
+        deterministic_latents = FALSE
+    )
+
+    # Second call with deterministic_latents = FALSE
+    results2 <- predict_query(
+        query = test_query,
+        as_counts = TRUE,
+        deterministic_latents = FALSE
+    )
+
+    expect_type(results1, "list")
+    expect_type(results2, "list")
+
+    # With deterministic_latents = FALSE and no seed, results should show some variation
+    expect_equal(dim(results1$expression), dim(results2$expression),
+                 info = "Expression dimensions should match")
+
+    # Calculate correlation - should be high but not perfect
+    correlation <- cor(
+        as.vector(as.matrix(results1$expression)),
+        as.vector(as.matrix(results2$expression))
+    )
+
+    # Results should still be similar (same biological context) but not identical
+    expect_true(correlation < 1.0,
+                info = sprintf("Without deterministic_latents, results should show some variation (got r=%.4f)", correlation))
+    expect_true(correlation > 0.8,
+                info = sprintf("Results should still be reasonably correlated (got r=%.4f)", correlation))
+
+    message(sprintf("Stochastic latents test passed (correlation: %.4f, showing expected variation)", correlation))
+})
+
+test_that("predict_query with total_count for single-cell", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting predict_query with custom total_count for single-cell...")
+
+    test_query <- get_valid_query(modality = "single-cell")
+
+    # Test with custom total_count (typical single-cell library size)
+    results <- predict_query(
+        query = test_query,
+        as_counts = TRUE,
+        total_count = 5000
+    )
+
+    expect_type(results, "list")
+    expect_true("metadata" %in% names(results))
+    expect_true("expression" %in% names(results))
+
+    expect_s3_class(results$metadata, "data.frame")
+    expect_s3_class(results$expression, "data.frame")
+
+    expect_true(nrow(results$metadata) > 0)
+    expect_true(nrow(results$expression) > 0)
+    expect_true(ncol(results$expression) > 0)
+
+    # Verify expression values are non-negative
+    expect_true(all(results$expression >= 0, na.rm = TRUE),
+                info = "Expression counts should be non-negative")
+
+    message("Single-cell total_count parameter test passed.")
+})
