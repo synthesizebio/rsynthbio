@@ -43,6 +43,20 @@ get_valid_modes <- function(modality) {
 #' The sample query contains two example inputs: one for a cell line with CRISPR perturbation
 #' and another for a primary tissue sample with disease information.
 #'
+#' The returned query includes:
+#' \itemize{
+#'   \item \code{modality}: The data type ("bulk" or "single-cell")
+#'   \item \code{mode}: The prediction mode ("sample generation" for bulk, "mean estimation" for single-cell)
+#'   \item \code{inputs}: A list of biological conditions with metadata and num_samples
+#' }
+#'
+#' Optional fields can be added to control model behavior:
+#' \itemize{
+#'   \item \code{total_count}: Library size
+#'   \item \code{deterministic_latents}: If TRUE, produces deterministic outputs
+#'   \item \code{seed}: Random seed for reproducibility
+#' }
+#'
 #' @param modality Character string specifying the modality. Either "bulk" or "single-cell".
 #'        Default is "bulk".
 #' @return A list representing a valid query structure.
@@ -53,8 +67,12 @@ get_valid_modes <- function(modality) {
 #' # Get a sample query for single-cell RNA-seq
 #' query_sc <- get_valid_query(modality = "single-cell")
 #'
-#' # Modify the query
+#' # Modify the query structure
 #' query$inputs[[1]]$num_samples <- 10
+#'
+#' # Add optional parameters
+#' query$deterministic_latents <- TRUE
+#' query$total_count <- 5000000
 #' @export
 get_valid_query <- function(modality = "bulk") {
   # Build metadata based on modality
@@ -392,7 +410,6 @@ get_json <- function(url) {
 #'        \itemize{
 #'          \item `total_count` (integer): Library size used when converting predicted log CPM
 #'                back to raw counts. Higher values scale counts up proportionally.
-#'                Default: 10,000,000 for bulk; 10,000 for single-cell.
 #'          \item `deterministic_latents` (logical): If TRUE, the model uses the mean of each
 #'                latent distribution instead of sampling, producing deterministic outputs for
 #'                the same inputs. Useful for reproducibility.

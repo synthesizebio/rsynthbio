@@ -20,7 +20,6 @@ optional fields:
 \itemize{
   \item `total_count` (integer): Library size used when converting predicted log CPM
         back to raw counts. Higher values scale counts up proportionally.
-        Default: 10,000,000 for bulk; 10,000 for single-cell.
   \item `deterministic_latents` (logical): If TRUE, the model uses the mean of each
         latent distribution instead of sampling, producing deterministic outputs for
         the same inputs. Useful for reproducibility.
