@@ -18,6 +18,20 @@ Generates a sample query for prediction and validation for the model.
 This function provides an example query structure that can be modified for specific needs.
 The sample query contains two example inputs: one for a cell line with CRISPR perturbation
 and another for a primary tissue sample with disease information.
+
+The returned query includes:
+\itemize{
+  \item \code{modality}: The data type ("bulk" or "single-cell")
+  \item \code{mode}: The prediction mode ("sample generation" for bulk, "mean estimation" for single-cell)
+  \item \code{inputs}: A list of biological conditions with metadata and num_samples
+}
+
+Optional fields can be added to control model behavior:
+\itemize{
+  \item \code{total_count}: Library size
+  \item \code{deterministic_latents}: If TRUE, produces deterministic outputs
+  \item \code{seed}: Random seed for reproducibility
+}
 }
 \examples{
 # Get a sample query for bulk RNA-seq
@@ -26,6 +40,10 @@ query <- get_valid_query()
 # Get a sample query for single-cell RNA-seq
 query_sc <- get_valid_query(modality = "single-cell")
 
-# Modify the query
+# Modify the query structure
 query$inputs[[1]]$num_samples <- 10
+
+# Add optional parameters
+query$deterministic_latents <- TRUE
+query$total_count <- 5000000
 }

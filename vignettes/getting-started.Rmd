@@ -84,47 +84,57 @@ clear_synthesize_token(remove_from_keyring = TRUE)
 
 Never hard-code your token in scripts that will be shared or committed to version control.
 
-## Basic Usage
+## Designing Queries for Models
 
-### Available Modalities
+### Choosing a Modality
 
-The package supports multiple data modalities:
+The modality (data type to generate) is specified in the query using `get_valid_query()`:
+
+- **`bulk`**: Bulk RNA-seq (asynchronous under the hood, returned as data frames)
+- **`single-cell`**: Single-cell RNA-seq (asynchronous under the hood, returned as data frames)
+
+You can check which modalities are available programmatically:
 
 ```{r modalities}
 # Check available modalities
 get_valid_modalities()
 ```
 
-Currently supported modalities:
+You do not need to specify any internal API slugs. The library maps modalities to the appropriate model endpoints automatically.
 
-- **`bulk`**: Bulk RNA-seq data
-- **`single-cell`**: Single-cell RNA-seq data
+```{r query, eval=FALSE}
+# Create a bulk query
+bulk_query <- get_valid_query(modality = "bulk")
+bulk <- predict_query(bulk_query, as_counts = TRUE)
+
+# Create a single-cell query
+sc_query <- get_valid_query(modality = "single-cell")
+sc <- predict_query(sc_query, as_counts = TRUE)
+```
 
 ### Creating a Query
 
-The first step to generating AI-generated gene expression data is to create a query. The package provides sample queries for each modality:
+The structure of the query required by the API is fixed for the currently supported model. You can use `get_valid_query()` to get a correctly structured example list.
 
-```{r query}
-# Get a sample query for bulk RNA-seq
-query <- get_valid_query(modality = "bulk")
-
-# Get a sample query for single-cell RNA-seq
-query_sc <- get_valid_query(modality = "single-cell")
+```{r query-example}
+# Get the example query structure
+example_query <- get_valid_query()
 
 # Inspect the query structure
-str(query)
+str(example_query)
 ```
 
 The query consists of:
 
-1. `modality`: The type of gene expression data to generate ("bulk" or "single-cell")
-2. `mode`: The prediction mode (e.g., "mean estimation" or "sample generation")
-3. `inputs`: A list of biological conditions to generate data for
+1. **`modality`**: The type of gene expression data to generate ("bulk" or "single-cell")
+2. **`mode`**: The prediction mode that controls how expression data is generated:
+   - **"sample generation"**: Generates realistic-looking synthetic data with measurement error (bulk only)
+   - **"mean estimation"**: Provides stable mean estimates of expression levels (bulk and single-cell)
+3. **`inputs`**: A list of biological conditions to generate data for
 
-We train our models with diverse multi-omics datasets. There are two model modes available today:
+Each input contains `metadata` (describing the biological sample) and `num_samples` (how many samples to generate).
 
-+ **Mean estimation**: These models create a distribution capturing the biological heterogeneity consistent with the supplied metadata. This distribution is then sampled to predict a gene expression distribution that captures measurement error. The mean of that distribution serves as the prediction
-+ **Sample generation**: This model works identically to the mean estimation approach except that the final gene expression distribution is also sampled to generate realistic looking synthetic data that captures error associated with measurement
+> See the [Query Parameters](#query-parameters) section below for detailed documentation on `mode` and other optional query fields.
 
 ### Making a Prediction
 
@@ -160,27 +170,9 @@ result <- predict_query(
 )
 ```
 
-### Modifying a Query
+### Valid Metadata Keys
 
-You can customize the query to fit your specific research needs:
-
-```{r modify-query}
-# Adjust number of samples
-query$inputs[[1]]$num_samples <- 10
-
-# Add a new condition
-query$inputs[[3]] <- list(
-  metadata = list(
-    sex = "male",
-    sample_type = "primary tissue"
-  ),
-  num_samples = 3
-)
-```
-
-The input metadata is a list of lists.
-
-Here are the available metadata fields:
+The input metadata is a list of lists. This is the full list of valid metadata keys:
 
 __Biological:__  
 
@@ -210,7 +202,7 @@ __Technical:__
 - ``library_layout`` ("PAIRED", "SINGLE")
 - ``platform`` ("illumina")
 
-### Acceptable Metadata Values
+### Valid Metadata Values
 
 The following are the valid values or expected formats for selected metadata keys:
 
@@ -223,18 +215,106 @@ The following are the valid values or expected formats for selected metadata key
 | `tissue_ontology_id`       | Requires a [UBERON ID](https://www.ebi.ac.uk/ols4/ontologies/uberon).                                                                                                                                                 |
 
 
-To lookup ontology terms, we recommend using the [EMBL-EBI Ontology Lookup Service](https://www.ebi.ac.uk/ols4/).
+We highly recommend using the [EMBL-EBI Ontology Lookup Service](https://www.ebi.ac.uk/ols4/) to find valid IDs for your metadata.
 
 Models have a limited acceptable range of metadata input values. 
 If you provide a value that is not in the acceptable range, the API will return an error.
 
-### Additional Prediction Options
+### Query Parameters
 
-You can also request log-transformed CPM instead of raw counts:
+In addition to metadata, queries support several optional parameters that control the generation process:
 
-```{r predict-2, eval=FALSE}
-# Request log-transformed CPM instead of raw counts
-result_log <- predict_query(query, as_counts = FALSE)
+#### mode (character, required)
+
+Controls the type of prediction the model generates. This parameter is required in all queries.
+
+Available modes:
+
+- **"sample generation"**: The model works identically to the mean estimation approach, except that the final gene expression distribution is also sampled to generate realistic-looking synthetic data that captures the error associated with measurements. This mode is useful when you want data that mimics real experimental measurements.
+
+- **"mean estimation"**: The model creates a distribution capturing the biological heterogeneity consistent with the supplied metadata. This distribution is then sampled to predict a gene expression distribution that captures measurement error. The mean of that distribution serves as the prediction. This mode is useful when you want a stable estimate of expected expression levels.
+
+> **Note:** **Single-cell queries only support "mean estimation" mode.** Bulk queries support both modes.
+
+```{r mode-examples, eval=FALSE}
+# Bulk query with sample generation (default for bulk)
+bulk_query <- get_valid_query(modality = "bulk")
+bulk_query$mode <- "sample generation"
+
+# Bulk query with mean estimation
+bulk_query_mean <- get_valid_query(modality = "bulk")
+bulk_query_mean$mode <- "mean estimation"
+
+# Single-cell query (must use mean estimation)
+sc_query <- get_valid_query(modality = "single-cell")
+sc_query$mode <- "mean estimation" # Required for single-cell
+```
+
+#### total_count (integer, optional)
+
+Library size used when converting predicted log CPM back to raw counts. Higher values scale counts up proportionally.
+
+
+```{r total-count-example, eval=FALSE}
+# Create a query and add custom total_count
+query <- get_valid_query(modality = "bulk")
+query$total_count <- 5000000
+```
+
+#### deterministic_latents (logical, optional)
+
+If `TRUE`, the model uses the mean of each latent distribution (`p(z|metadata)` or `q(z|x)`) instead of sampling. This removes randomness from latent sampling and produces deterministic outputs for the same inputs.
+
+- Default: `FALSE` (sampling is enabled)
+
+```{r deterministic-example, eval=FALSE}
+# Create a query and enable deterministic latents
+query <- get_valid_query(modality = "bulk")
+query$deterministic_latents <- TRUE
+```
+
+#### seed (integer, optional)
+
+Random seed for reproducibility when using stochastic sampling.
+
+```{r seed-example, eval=FALSE}
+# Create a query with a specific seed
+query <- get_valid_query(modality = "bulk")
+query$seed <- 42
+```
+
+You can combine multiple parameters in a single query:
+
+```{r combined-params, eval=FALSE}
+# Create a query and add multiple parameters
+query <- get_valid_query(modality = "bulk")
+query$total_count <- 8000000
+query$deterministic_latents <- TRUE
+query$mode <- "mean estimation"
+
+results <- predict_query(query)
+```
+
+### Modifying Query Inputs
+
+You can customize the query inputs to fit your specific research needs:
+
+```{r modify-query, eval=FALSE}
+# Get a base query
+query <- get_valid_query()
+
+# Adjust number of samples for the first input
+query$inputs[[1]]$num_samples <- 10
+
+# Add a new condition
+query$inputs[[3]] <- list(
+  metadata = list(
+    sex = "male",
+    sample_type = "primary tissue",
+    tissue_ontology_id = "UBERON:0002371"
+  ),
+  num_samples = 5
+)
 ```
 
 ### Working with Results
@@ -270,7 +350,7 @@ write.csv(result$metadata, "sample_metadata.csv")
 
 You can validate your queries before sending them to the API:
 
-```{r validation}
+```{r validation, eval=FALSE}
 # Validate structure
 validate_query(query)
 

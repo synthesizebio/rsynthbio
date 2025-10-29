@@ -15,7 +15,16 @@ predict_query(
 }
 \arguments{
 \item{query}{A list representing the query data to send to the API.
-Use `get_valid_query()` to generate an example.}
+Use `get_valid_query()` to generate an example. The query supports additional
+optional fields:
+\itemize{
+  \item `total_count` (integer): Library size used when converting predicted log CPM
+        back to raw counts. Higher values scale counts up proportionally.
+  \item `deterministic_latents` (logical): If TRUE, the model uses the mean of each
+        latent distribution instead of sampling, producing deterministic outputs for
+        the same inputs. Useful for reproducibility.
+  \item `seed` (integer): Random seed for reproducibility.
+}}
 
 \item{as_counts}{Logical, if FALSE, transforms the predicted expression counts
 into logCPM (default is TRUE, returning raw counts).}
@@ -66,5 +75,13 @@ log_expression <- log_result$expression
 
 # Explore the top expressed genes in the first sample
 head(sort(expression[1, ], decreasing = TRUE))
+
+# Use deterministic latents for reproducible results
+query$deterministic_latents <- TRUE
+result_det <- predict_query(query)
+
+# Specify a custom total count (library size)
+query$total_count <- 5000000
+result_custom <- predict_query(query)
 }
 }

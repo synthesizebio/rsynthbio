@@ -73,33 +73,38 @@ Never hard-code your token in scripts that will be shared or committed to versio
 
 ## Basic Usage
 
-Please see the [Getting Started guide](https://synthesizebio.github.io/rsynthbio/articles/getting-started.html) for more details.
+Please see the [Getting Started guide](https://synthesizebio.github.io/rsynthbio/articles/getting-started.html) for comprehensive documentation.
 
-### Available Modalities
+### Designing Queries
 
-The package supports multiple data modalities. You can view all available modalities with:
+#### Choosing a Modality
+
+The modality (data type to generate) is specified when creating a query:
 
 ```
 # Check available modalities
 get_valid_modalities()
 # Returns: "bulk" "single-cell"
+
+# Create a bulk RNA-seq query
+bulk_query <- get_valid_query(modality = "bulk")
+
+# Create a single-cell RNA-seq query
+sc_query <- get_valid_query(modality = "single-cell")
 ```
 
 Currently supported modalities:
 
-- **`bulk`**: Bulk RNA-seq data
-- **`single-cell`**: Single-cell RNA-seq data
+- **`bulk`**: Bulk RNA-seq data (supports both "sample generation" and "mean estimation" modes)
+- **`single-cell`**: Single-cell RNA-seq data (supports "mean estimation" mode only)
 
-### Creating a Query
+#### Query Structure
 
-The first step in obtaining AI-generated gene expression data is to create a query. The package provides sample queries for each modality:
+The `get_valid_query()` function returns a correctly structured example query:
 
 ```
-# Get a sample query for bulk RNA-seq
+# Get a sample query
 query <- get_valid_query(modality = "bulk")
-
-# Get a sample query for single-cell RNA-seq
-query_sc <- get_valid_query(modality = "single-cell")
 
 # Inspect the query structure
 str(query)
@@ -107,9 +112,18 @@ str(query)
 
 The query consists of:
 
-1. `modality`: The type of gene expression data to generate ("bulk" or "single-cell")
-2. `mode`: The prediction mode (e.g., "sample generation", "mean estimation")
-3. `inputs`: A list of biological conditions to generate data for
+1. **`modality`**: The type of gene expression data to generate ("bulk" or "single-cell")
+2. **`mode`**: The prediction mode that controls how expression data is generated
+   - **"sample generation"**: Realistic synthetic data with measurement error (bulk only)
+   - **"mean estimation"**: Stable mean estimates (bulk and single-cell)
+3. **`inputs`**: A list of biological conditions to generate data for
+
+Each input contains:
+
+- **`metadata`**: A list of metadata key-value pairs describing the biological sample
+- **`num_samples`**: The number of samples to generate for this condition
+
+See the [Query Parameters](#query-parameters) section below for detailed information on mode and other optional fields.
 
 ### Making Predictions
 
@@ -132,7 +146,7 @@ expression <- result$expression
 
 ### Advanced Options
 
-You can customize the polling behavior:
+You can customize the polling behavior and model parameters:
 
 ```
 # Adjust polling timeout (default: 15 minutes)
@@ -144,7 +158,51 @@ result <- predict_query(
 
 # Get log-transformed CPM instead of raw counts
 result_log <- predict_query(query, as_counts = FALSE)
+
+# Use deterministic latents for reproducible results
+# (removes randomness from latent sampling)
+query$deterministic_latents <- TRUE
+result_det <- predict_query(query)
+
+# Specify custom library size (total count)
+query$total_count <- 5000000
+result_custom <- predict_query(query)
+
+# Combine multiple options in the query
+query_combined <- get_valid_query()
+query_combined$total_count <- 8000000
+query_combined$deterministic_latents <- TRUE
+result_combined <- predict_query(query_combined, as_counts = TRUE)
 ```
+
+#### Query Parameters
+
+In addition to the required fields, queries support several optional parameters:
+
+**mode** (character, required)
+
+Controls the type of prediction the model generates:
+
+- **"sample generation"**: The model creates a biological distribution, samples to predict gene expression distribution capturing measurement error, and then samples that distribution to generate realistic-looking synthetic data. This mode mimics real experimental measurements. **Available for bulk queries only.**
+- **"mean estimation"**: The model creates a biological distribution, samples to predict gene expression distribution capturing measurement error, and returns the mean as the prediction. Provides stable estimates. **Available for bulk and single-cell queries.**
+
+> **Note:** Single-cell queries only support "mean estimation" mode.
+
+**total_count** (integer, optional)
+
+- Library size for converting log CPM to raw counts
+
+**deterministic_latents** (logical, optional)
+
+- If `TRUE`, uses mean of latent distributions instead of sampling
+- Produces deterministic, reproducible outputs
+- Default: `FALSE`
+
+**seed** (integer, optional)
+
+- Random seed for reproducibility with stochastic sampling
+
+See the [Getting Started guide](https://synthesizebio.github.io/rsynthbio/articles/getting-started.html) for detailed documentation on all available metadata fields and parameters.
 
 ## Rate Limits
 
