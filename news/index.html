@@ -6,7 +6,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,9 +34,9 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="3.0.0" id="rsynthbio-300">rsynthbio 3.0.0<a class="anchor" aria-label="anchor" href="#rsynthbio-300"></a></h2><p class="text-muted">CRAN release: 2025-10-15</p>
+<h2 class="pkg-version" data-toc-text="3.0.2" id="rsynthbio-302">rsynthbio 3.0.2<a class="anchor" aria-label="anchor" href="#rsynthbio-302"></a></h2>
 <div class="section level3">
-<h3 id="major-changes-3-0-0">Major Changes<a class="anchor" aria-label="anchor" href="#major-changes-3-0-0"></a></h3>
+<h3 id="major-changes-3-0-2">Major Changes<a class="anchor" aria-label="anchor" href="#major-changes-3-0-2"></a></h3>
 <ul><li>
 <strong>Async API Support</strong>: Migrated to async API model matching the Python <code>pysynthbio</code> implementation
 <ul><li>
@@ -58,7 +58,7 @@
 </ul></li>
 </ul></div>
 <div class="section level3">
-<h3 id="breaking-changes-3-0-0">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-3-0-0"></a></h3>
+<h3 id="breaking-changes-3-0-2">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-3-0-2"></a></h3>
 <ul><li>
 <strong>API Base URL Changed</strong>: <code>API_BASE_URL</code> is now <code>https://app.synthesize.bio</code> (base URL only, not versioned endpoint)</li>
 <li>
@@ -71,7 +71,7 @@
 </ul></li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-functions-3-0-0">New Functions<a class="anchor" aria-label="anchor" href="#new-functions-3-0-0"></a></h3>
+<h3 id="new-functions-3-0-2">New Functions<a class="anchor" aria-label="anchor" href="#new-functions-3-0-2"></a></h3>
 <ul><li>
 <code><a href="../reference/resolve_api_slug.html">resolve_api_slug()</a></code>: Maps modality to API endpoint slug (internal)</li>
 <li>
@@ -84,20 +84,20 @@
 <code>transform_result_to_frames()</code>: Converts JSON to data frames (internal)</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-3-0-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-3-0-0"></a></h3>
+<h3 id="bug-fixes-3-0-2">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-3-0-2"></a></h3>
 <ul><li>Fixed metadata handling for queries with empty metadata fields</li>
 <li>Improved error messages for failed queries (now shows error message instead of error URL)</li>
 <li>Better handling of single-cell count data format (dict vs list)</li>
 </ul></div>
 <div class="section level3">
-<h3 id="documentation-3-0-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-3-0-0"></a></h3>
+<h3 id="documentation-3-0-2">Documentation<a class="anchor" aria-label="anchor" href="#documentation-3-0-2"></a></h3>
 <ul><li>Updated README.md to explain async API behavior</li>
 <li>Updated vignettes with async workflow examples</li>
 <li>Added examples for both bulk and single-cell modalities</li>
 <li>Clarified polling timeout and interval configuration</li>
 </ul></div>
 <div class="section level3">
-<h3 id="tests-3-0-0">Tests<a class="anchor" aria-label="anchor" href="#tests-3-0-0"></a></h3>
+<h3 id="tests-3-0-2">Tests<a class="anchor" aria-label="anchor" href="#tests-3-0-2"></a></h3>
 <ul><li>Added comprehensive test suite mirroring Python implementation</li>
 <li>Added live API tests for both bulk and single-cell modalities</li>
 <li>Added tests for invalid metadata validation</li>

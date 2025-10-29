@@ -30,7 +30,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,43 +113,65 @@
 <div class="section level2">
 <h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
 </h2>
-<p>Please see the <a href="https://synthesizebio.github.io/rsynthbio/articles/getting-started.html">Getting Started guide</a> for more details.</p>
+<p>Please see the <a href="https://synthesizebio.github.io/rsynthbio/articles/getting-started.html">Getting Started guide</a> for comprehensive documentation.</p>
 <div class="section level3">
-<h3 id="available-modalities">Available Modalities<a class="anchor" aria-label="anchor" href="#available-modalities"></a>
+<h3 id="designing-queries">Designing Queries<a class="anchor" aria-label="anchor" href="#designing-queries"></a>
 </h3>
-<p>The package supports multiple data modalities. You can view all available modalities with:</p>
+<div class="section level4">
+<h4 id="choosing-a-modality">Choosing a Modality<a class="anchor" aria-label="anchor" href="#choosing-a-modality"></a>
+</h4>
+<p>The modality (data type to generate) is specified when creating a query:</p>
 <pre><code><span><span class="co"># Check available modalities</span></span>
 <span><span class="fu"><a href="reference/get_valid_modalities.html">get_valid_modalities</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co"># Returns: "bulk" "single-cell"</span></span></code></pre>
+<span><span class="co"># Returns: "bulk" "single-cell"</span></span>
+<span></span>
+<span><span class="co"># Create a bulk RNA-seq query</span></span>
+<span><span class="va">bulk_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span>modality <span class="op">=</span> <span class="st">"bulk"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create a single-cell RNA-seq query</span></span>
+<span><span class="va">sc_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span>modality <span class="op">=</span> <span class="st">"single-cell"</span><span class="op">)</span></span></code></pre>
 <p>Currently supported modalities:</p>
 <ul>
 <li>
-<strong><code>bulk</code></strong>: Bulk RNA-seq data</li>
+<strong><code>bulk</code></strong>: Bulk RNA-seq data (supports both “sample generation” and “mean estimation” modes)</li>
 <li>
-<strong><code>single-cell</code></strong>: Single-cell RNA-seq data</li>
+<strong><code>single-cell</code></strong>: Single-cell RNA-seq data (supports “mean estimation” mode only)</li>
 </ul>
 </div>
-<div class="section level3">
-<h3 id="creating-a-query">Creating a Query<a class="anchor" aria-label="anchor" href="#creating-a-query"></a>
-</h3>
-<p>The first step in obtaining AI-generated gene expression data is to create a query. The package provides sample queries for each modality:</p>
-<pre><code><span><span class="co"># Get a sample query for bulk RNA-seq</span></span>
+<div class="section level4">
+<h4 id="query-structure">Query Structure<a class="anchor" aria-label="anchor" href="#query-structure"></a>
+</h4>
+<p>The <code><a href="reference/get_valid_query.html">get_valid_query()</a></code> function returns a correctly structured example query:</p>
+<pre><code><span><span class="co"># Get a sample query</span></span>
 <span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span>modality <span class="op">=</span> <span class="st">"bulk"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Get a sample query for single-cell RNA-seq</span></span>
-<span><span class="va">query_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span>modality <span class="op">=</span> <span class="st">"single-cell"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Inspect the query structure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></code></pre>
 <p>The query consists of:</p>
 <ol style="list-style-type: decimal">
 <li>
-<code>modality</code>: The type of gene expression data to generate (“bulk” or “single-cell”)</li>
+<strong><code>modality</code></strong>: The type of gene expression data to generate (“bulk” or “single-cell”)</li>
 <li>
-<code>mode</code>: The prediction mode (e.g., “sample generation”, “mean estimation”)</li>
+<strong><code>mode</code></strong>: The prediction mode that controls how expression data is generated
+<ul>
 <li>
-<code>inputs</code>: A list of biological conditions to generate data for</li>
+<strong>“sample generation”</strong>: Realistic synthetic data with measurement error (bulk only)</li>
+<li>
+<strong>“mean estimation”</strong>: Stable mean estimates (bulk and single-cell)</li>
+</ul>
+</li>
+<li>
+<strong><code>inputs</code></strong>: A list of biological conditions to generate data for</li>
 </ol>
+<p>Each input contains:</p>
+<ul>
+<li>
+<strong><code>metadata</code></strong>: A list of metadata key-value pairs describing the biological sample</li>
+<li>
+<strong><code>num_samples</code></strong>: The number of samples to generate for this condition</li>
+</ul>
+<p>See the <a href="#query-parameters">Query Parameters</a> section below for detailed information on mode and other optional fields.</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="making-predictions">Making Predictions<a class="anchor" aria-label="anchor" href="#making-predictions"></a>
@@ -171,7 +193,7 @@
 <div class="section level3">
 <h3 id="advanced-options">Advanced Options<a class="anchor" aria-label="anchor" href="#advanced-options"></a>
 </h3>
-<p>You can customize the polling behavior:</p>
+<p>You can customize the polling behavior and model parameters:</p>
 <pre><code><span><span class="co"># Adjust polling timeout (default: 15 minutes)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span></span>
 <span>  <span class="va">query</span>,</span>
@@ -180,7 +202,56 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get log-transformed CPM instead of raw counts</span></span>
-<span><span class="va">result_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, as_counts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre>
+<span><span class="va">result_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, as_counts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Use deterministic latents for reproducible results</span></span>
+<span><span class="co"># (removes randomness from latent sampling)</span></span>
+<span><span class="va">query</span><span class="op">$</span><span class="va">deterministic_latents</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
+<span><span class="va">result_det</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Specify custom library size (total count)</span></span>
+<span><span class="va">query</span><span class="op">$</span><span class="va">total_count</span> <span class="op">&lt;-</span> <span class="fl">5000000</span></span>
+<span><span class="va">result_custom</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Combine multiple options in the query</span></span>
+<span><span class="va">query_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">query_combined</span><span class="op">$</span><span class="va">total_count</span> <span class="op">&lt;-</span> <span class="fl">8000000</span></span>
+<span><span class="va">query_combined</span><span class="op">$</span><span class="va">deterministic_latents</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
+<span><span class="va">result_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query_combined</span>, as_counts <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
+<div class="section level4">
+<h4 id="query-parameters">Query Parameters<a class="anchor" aria-label="anchor" href="#query-parameters"></a>
+</h4>
+<p>In addition to the required fields, queries support several optional parameters:</p>
+<p><strong>mode</strong> (character, required)</p>
+<p>Controls the type of prediction the model generates:</p>
+<ul>
+<li>
+<strong>“sample generation”</strong>: The model creates a biological distribution, samples to predict gene expression distribution capturing measurement error, and then samples that distribution to generate realistic-looking synthetic data. This mode mimics real experimental measurements. <strong>Available for bulk queries only.</strong>
+</li>
+<li>
+<strong>“mean estimation”</strong>: The model creates a biological distribution, samples to predict gene expression distribution capturing measurement error, and returns the mean as the prediction. Provides stable estimates. <strong>Available for bulk and single-cell queries.</strong>
+</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> Single-cell queries only support “mean estimation” mode.</p>
+</blockquote>
+<p><strong>total_count</strong> (integer, optional)</p>
+<ul>
+<li>Library size for converting log CPM to raw counts</li>
+</ul>
+<p><strong>deterministic_latents</strong> (logical, optional)</p>
+<ul>
+<li>If <code>TRUE</code>, uses mean of latent distributions instead of sampling</li>
+<li>Produces deterministic, reproducible outputs</li>
+<li>Default: <code>FALSE</code>
+</li>
+</ul>
+<p><strong>seed</strong> (integer, optional)</p>
+<ul>
+<li>Random seed for reproducibility with stochastic sampling</li>
+</ul>
+<p>See the <a href="https://synthesizebio.github.io/rsynthbio/articles/getting-started.html">Getting Started guide</a> for detailed documentation on all available metadata fields and parameters.</p>
+</div>
 </div>
 </div>
 <div class="section level2">
