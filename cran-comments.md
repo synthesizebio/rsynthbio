@@ -4,7 +4,7 @@
 
 ## Release summary
 
-This is a major version release (3.0.0) with significant updates:
+This is a major version release (3.0.2) with significant updates:
 
 - Migrated to async API model to match Synthesize Bio's new API architecture
 - Added support for single-cell RNA-seq data (new "single-cell" modality)
