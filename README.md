@@ -147,26 +147,30 @@ result_log <- predict_query(query, as_counts = FALSE)
 
 # Use deterministic latents for reproducible results
 # (removes randomness from latent sampling)
-result_det <- predict_query(query, deterministic_latents = TRUE)
+query$deterministic_latents <- TRUE
+result_det <- predict_query(query)
 
 # Specify custom library size (total count)
 # Default: 10,000,000 for bulk; 10,000 for single-cell
-result_custom <- predict_query(query, total_count = 5000000)
+query$total_count <- 5000000
+result_custom <- predict_query(query)
 
-# Combine multiple options
-result_combined <- predict_query(
-  query,
-  total_count = 8000000,
-  deterministic_latents = TRUE,
-  as_counts = TRUE
-)
+# Combine multiple options in the query
+query_combined <- get_valid_query()
+query_combined$total_count <- 8000000
+query_combined$deterministic_latents <- TRUE
+result_combined <- predict_query(query_combined, as_counts = TRUE)
 ```
 
-#### Parameter Details
+#### Optional Query Fields
+
+These fields can be added to your query object to control model behavior:
 
 - **`deterministic_latents`** (logical): If `TRUE`, the model uses the mean of each latent distribution instead of sampling, producing deterministic outputs for the same inputs. Useful for reproducibility.
 
-- **`total_count`** (integer): Library size used when converting predicted log CPM back to raw counts. Higher values scale counts up proportionally.
+- **`total_count`** (integer): Library size used when converting predicted log CPM back to raw counts. Higher values scale counts up proportionally. Default: 10,000,000 for bulk; 10,000 for single-cell.
+
+- **`seed`** (integer): Random seed for reproducibility when using stochastic sampling.
 
 ## Rate Limits
 

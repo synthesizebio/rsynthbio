@@ -368,7 +368,8 @@ get_json <- function(url) {
   parsed_content <- tryCatch(
     {
       fromJSON(
-        content(response, "text", encoding = "UTF-8"), simplifyDataFrame = TRUE
+        content(response, "text", encoding = "UTF-8"),
+        simplifyDataFrame = TRUE
       )
     },
     error = function(e) {
@@ -386,16 +387,19 @@ get_json <- function(url) {
 #' to the API, and processes the response into usable data frames.
 #'
 #' @param query A list representing the query data to send to the API.
-#'        Use `get_valid_query()` to generate an example.
+#'        Use `get_valid_query()` to generate an example. The query supports additional
+#'        optional fields:
+#'        \itemize{
+#'          \item `total_count` (integer): Library size used when converting predicted log CPM
+#'                back to raw counts. Higher values scale counts up proportionally.
+#'                Default: 10,000,000 for bulk; 10,000 for single-cell.
+#'          \item `deterministic_latents` (logical): If TRUE, the model uses the mean of each
+#'                latent distribution instead of sampling, producing deterministic outputs for
+#'                the same inputs. Useful for reproducibility.
+#'          \item `seed` (integer): Random seed for reproducibility.
+#'        }
 #' @param as_counts Logical, if FALSE, transforms the predicted expression counts
 #'        into logCPM (default is TRUE, returning raw counts).
-#' @param total_count Integer, library size used when converting predicted log CPM back to
-#'        raw counts. Higher values scale counts up proportionally.
-#'        Default: 10,000,000 for bulk; 10,000 for single-cell (when not specified).
-#' @param deterministic_latents Logical, if TRUE, the model uses the mean of each latent
-#'        distribution (p(z|metadata) or q(z|x)) instead of sampling. This removes randomness
-#'        from latent sampling and produces deterministic outputs for the same inputs.
-#'        Default is NULL (uses API default behavior).
 #' @param api_base_url The base URL for the API server. Default is API_BASE_URL.
 #' @param poll_interval_seconds Seconds between polling attempts of the status endpoint.
 #'        Default is DEFAULT_POLL_INTERVAL_SECONDS (2).
@@ -435,16 +439,16 @@ get_json <- function(url) {
 #' head(sort(expression[1, ], decreasing = TRUE))
 #'
 #' # Use deterministic latents for reproducible results
-#' result_det <- predict_query(query, deterministic_latents = TRUE)
+#' query$deterministic_latents <- TRUE
+#' result_det <- predict_query(query)
 #'
 #' # Specify a custom total count (library size)
-#' result_custom <- predict_query(query, total_count = 5000000)
+#' query$total_count <- 5000000
+#' result_custom <- predict_query(query)
 #' }
 #' @export
 predict_query <- function(query,
                           as_counts = TRUE,
-                          total_count = NULL,
-                          deterministic_latents = NULL,
                           api_base_url = API_BASE_URL,
                           poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
                           poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
@@ -470,14 +474,6 @@ predict_query <- function(query,
   validate_mode(query)
 
   modality <- query$modality
-
-  # Add optional parameters to query if provided
-  if (!is.null(total_count)) {
-    query$total_count <- as.integer(total_count)
-  }
-  if (!is.null(deterministic_latents)) {
-    query$deterministic_latents <- as.logical(deterministic_latents)
-  }
 
   # Add source field for reporting
   query$source <- "rsynthbio"
