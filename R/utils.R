@@ -1,32 +1,7 @@
-RELEASE_NUMBER <- "v3.0"
-
 #' @title API Base URL
 #' @description Base URL for the Synthesize Bio API
 #' @export
-API_BASE_URL <- "https://app.synthesize.bio"
-
-#' @title Model Modalities
-#' @description A nested list containing supported modalities for different
-#' model versions
-#' + bulk = bulk RNA-seq
-#' + single-cell = single-cell RNA-seq
-#' @format A nested list with structure: model type > version > modalities
-#' @export
-MODEL_MODALITIES <- list()
-MODEL_MODALITIES[[RELEASE_NUMBER]] <- c("bulk", "single-cell")
-
-#' @title Model Modes
-#' @description A nested list containing supported modes for different
-#' model versions
-#' + bulk = bulk RNA-seq
-#' + single-cell = single-cell RNA-seq
-#' @format A nested list with structure: version > modality > mode
-#' @export
-MODEL_MODES <- list()
-MODEL_MODES[[RELEASE_NUMBER]] <- list(
-  "bulk" = c("sample generation", "mean estimation"),
-  "single-cell" = c("mean estimation")
-)
+API_BASE_URL <- Sys.getenv("SYNTHESIZE_API_BASE_URL", unset = "https://app.synthesize.bio")
 
 #' @title Default Timeout
 #' @description Default timeout (seconds) for outbound HTTP requests

@@ -35,8 +35,22 @@ test_that("predict_query mocked call success (bulk async)", {
   stub(predict_query, "poll_model_query", mocks$poll)
   stub(predict_query, "get_json", mocks$get_json)
 
-  test_query <- get_valid_query()
-  results <- predict_query(query = test_query, as_counts = TRUE)
+  test_query <- list(
+    inputs = list(
+      list(
+        metadata = list(
+          cell_type_ontology_id = "CL:0000786",
+          tissue_ontology_id = "UBERON:0001155",
+          sex = "male",
+          sample_type = "primary tissue"
+        ),
+        num_samples = 5
+      )
+    ),
+    mode = "mean estimation",
+    seed = 11
+  )
+  results <- predict_query(query = test_query, model_id = "gem-1-bulk", as_counts = TRUE)
 
   expect_type(results, "list")
   expect_true("metadata" %in% names(results))
@@ -86,8 +100,23 @@ test_that("predict_query new API structure handling (bulk)", {
   stub(predict_query, "poll_model_query", mocks$poll)
   stub(predict_query, "get_json", mocks$get_json)
 
-  query <- get_valid_query()
-  results <- predict_query(query, as_counts = TRUE)
+  query <- list(
+    inputs = list(
+      list(
+        metadata = list(
+          age_years = "65",
+          disease_ontology_id = "MONDO:0011719",
+          sex = "female",
+          sample_type = "primary tissue",
+          tissue_ontology_id = "UBERON:0000945"
+        ),
+        num_samples = 1
+      )
+    ),
+    mode = "mean estimation",
+    seed = 11
+  )
+  results <- predict_query(query, model_id = "gem-1-bulk", as_counts = TRUE)
 
   expect_true("metadata" %in% names(results))
   expect_true("expression" %in% names(results))
@@ -122,8 +151,21 @@ test_that("predict_query single-cell success (mocked)", {
   stub(predict_query, "poll_model_query", mocks$poll)
   stub(predict_query, "get_json", mocks$get_json)
 
-  query <- get_valid_query(modality = "single-cell")
-  result <- predict_query(query)
+  query <- list(
+    inputs = list(
+      list(
+        metadata = list(
+          cell_type_ontology_id = "CL:0000786",
+          tissue_ontology_id = "UBERON:0001155",
+          sex = "male"
+        ),
+        num_samples = 5
+      )
+    ),
+    mode = "mean estimation",
+    seed = 11
+  )
+  result <- predict_query(query, model_id = "gem-1-sc")
 
   expect_true("metadata" %in% names(result))
   expect_true("expression" %in% names(result))
@@ -146,10 +188,23 @@ test_that("predict_query single-cell failure (mocked)", {
   stub(predict_query, "start_model_query", mocks$start_query)
   stub(predict_query, "poll_model_query", mocks$poll)
 
-  query <- get_valid_query(modality = "single-cell")
+  query <- list(
+    inputs = list(
+      list(
+        metadata = list(
+          cell_type_ontology_id = "CL:0000786",
+          tissue_ontology_id = "UBERON:0001155",
+          sex = "male"
+        ),
+        num_samples = 5
+      )
+    ),
+    mode = "mean estimation",
+    seed = 11
+  )
 
   expect_error(
-    predict_query(query),
+    predict_query(query, model_id = "gem-1-sc"),
     "Model query failed.*missing required field"
   )
 })
@@ -164,11 +219,25 @@ test_that("predict_query single-cell timeout (mocked)", {
   stub(predict_query, "start_model_query", mocks$start_query)
   stub(predict_query, "poll_model_query", mocks$poll)
 
-  query <- get_valid_query(modality = "single-cell")
+  query <- list(
+    inputs = list(
+      list(
+        metadata = list(
+          cell_type_ontology_id = "CL:0000786",
+          tissue_ontology_id = "UBERON:0001155",
+          sex = "male"
+        ),
+        num_samples = 5
+      )
+    ),
+    mode = "mean estimation",
+    seed = 11
+  )
 
   expect_error(
     predict_query(
       query,
+      model_id = "gem-1-sc",
       poll_interval_seconds = 0,
       poll_timeout_seconds = 0
     ),
@@ -177,106 +246,71 @@ test_that("predict_query single-cell timeout (mocked)", {
 })
 
 # -----------------------------
-# Validation Tests
+# New API Function Tests
 # -----------------------------
 
-test_that("get_valid_modalities returns correct structure", {
-  modalities <- get_valid_modalities()
-  expect_type(modalities, "character")
-  expect_true("bulk" %in% modalities)
-  expect_true("single-cell" %in% modalities)
-})
+test_that("list_models mock test", {
+  original_api_key <- setup_test_environment()
+  on.exit(restore_api_key(original_api_key))
 
-test_that("get_valid_query returns correct structure", {
-  query <- get_valid_query()
-  expect_type(query, "list")
-  expect_true("inputs" %in% names(query))
-  expect_true("mode" %in% names(query))
-  expect_true("modality" %in% names(query))
-  expect_type(query$inputs, "list")
-})
-
-test_that("get_valid_query supports modality parameter", {
-  query_bulk <- get_valid_query(modality = "bulk")
-  expect_equal(query_bulk$modality, "bulk")
-
-  query_sc <- get_valid_query(modality = "single-cell")
-  expect_equal(query_sc$modality, "single-cell")
-})
-
-test_that("validate_query passes for valid query", {
-  valid_query <- list(
-    inputs = list(
-      list(
-        metadata = list(
-          cell_line_ontology_id = "CVCL_0023",
-          perturbation_ontology_id = "ENSG00000156127",
-          perturbation_type = "crispr",
-          perturbation_time = "96 hours",
-          sample_type = "cell line"
-        ),
-        num_samples = 1
-      )
+  mock_list_models <- mockery::mock(
+    list(
+      list(id = "gem-1-bulk", name = "GEM-1 Bulk"),
+      list(id = "gem-1-sc", name = "GEM-1 Single Cell")
     ),
-    modality = "bulk",
-    mode = "sample generation"
+    cycle <- TRUE
   )
 
-  expect_invisible(validate_query(valid_query))
+  stub(list_models, "has_synthesize_token", mockery::mock(TRUE, cycle = TRUE))
+  stub(list_models, "GET", function(...) {
+    structure(
+      list(status_code = 200),
+      class = "response"
+    )
+  })
+  stub(list_models, "status_code", function(x) 200)
+  stub(list_models, "content", function(x, type) '[{"id":"gem-1-bulk","name":"GEM-1 Bulk"},{"id":"gem-1-sc","name":"GEM-1 Single Cell"}]')
+  stub(list_models, "fromJSON", function(x, ...) {
+    list(
+      list(id = "gem-1-bulk", name = "GEM-1 Bulk"),
+      list(id = "gem-1-sc", name = "GEM-1 Single Cell")
+    )
+  })
+
+  result <- list_models()
+  expect_type(result, "list")
+  expect_true(length(result) > 0)
 })
 
-test_that("validate_query fails for missing keys", {
-  invalid_query <- list(
-    inputs = list(),
-    mode = "sample generation"
-  )
+test_that("get_example_query mock test", {
+  original_api_key <- setup_test_environment()
+  on.exit(restore_api_key(original_api_key))
 
-  expect_error(
-    validate_query(invalid_query),
-    "Missing required keys in query.*modality"
-  )
-})
+  stub(get_example_query, "has_synthesize_token", mockery::mock(TRUE, cycle = TRUE))
+  stub(get_example_query, "GET", function(...) {
+    structure(
+      list(status_code = 200),
+      class = "response"
+    )
+  })
+  stub(get_example_query, "status_code", function(x) 200)
+  stub(get_example_query, "content", function(x, type) '{"inputs":[{"metadata":{"cell_type_ontology_id":"CL:0000786"},"num_samples":5}],"mode":"mean estimation"}')
+  stub(get_example_query, "fromJSON", function(x, ...) {
+    list(
+      inputs = list(
+        list(
+          metadata = list(cell_type_ontology_id = "CL:0000786"),
+          num_samples = 5
+        )
+      ),
+      mode = "mean estimation"
+    )
+  })
 
-test_that("validate_query fails for non-list input", {
-  expect_error(
-    validate_query("not a list"),
-    "Expected `query` to be a list"
-  )
-})
-
-test_that("validate_modality passes for valid modality", {
-  query <- list(
-    modality = "bulk",
-    mode = "x",
-    inputs = list()
-  )
-
-  expect_invisible(validate_modality(query))
-})
-
-test_that("validate_modality fails for invalid modality", {
-  query <- list(
-    modality = "invalid_modality",
-    mode = "x",
-    inputs = list()
-  )
-
-  expect_error(
-    validate_modality(query),
-    "Invalid modality 'invalid_modality'"
-  )
-})
-
-test_that("validate_modality fails for missing modality key", {
-  query <- list(
-    mode = "x",
-    inputs = list()
-  )
-
-  expect_error(
-    validate_modality(query),
-    "Query requires `modality` key"
-  )
+  result <- get_example_query(model_id = "gem-1-bulk")
+  expect_type(result, "list")
+  expect_true("inputs" %in% names(result))
+  expect_true("mode" %in% names(result))
 })
 
 # -----------------------------
@@ -298,7 +332,7 @@ test_that("log_cpm transforms counts correctly", {
     gene2 = c(log1p(2000000 / 9000000 * 1e6), log1p(6000000 / 9000000 * 1e6))
   )
 
-  result_log_cpm <- log_cpm(counts_data)
+  result_log_cpm <- rsynthbio:::log_cpm(counts_data)
 
   expect_equal(result_log_cpm$gene1, expected_log_cpm$gene1, tolerance = 1e-5)
   expect_equal(result_log_cpm$gene2, expected_log_cpm$gene2, tolerance = 1e-5)
@@ -314,7 +348,7 @@ test_that("log_cpm handles zero counts", {
   # The R implementation's t(t(expr)/library_size) creates Inf/NaN for zero library sizes
   # With column-cycling: [1,1]/30, [2,1]/0, [1,2]/30, [2,2]/0
   # Result after transpose: [1,1]=10/30, [1,2]=20/0=Inf, [2,1]=0/30=0, [2,2]=0/0=NaN
-  result_log_cpm <- log_cpm(counts_data)
+  result_log_cpm <- rsynthbio:::log_cpm(counts_data)
 
   # Verify the first row is calculated correctly
   expect_equal(result_log_cpm$gene1[1], log1p(10 / 30 * 1e6), tolerance = 1e-5)
@@ -351,14 +385,28 @@ test_that("predict_query passes as_counts parameter correctly", {
   stub(predict_query, "poll_model_query", mocks$poll)
   stub(predict_query, "get_json", mocks$get_json)
 
-  query <- get_valid_query()
+  query <- list(
+    inputs = list(
+      list(
+        metadata = list(
+          cell_type_ontology_id = "CL:0000786",
+          tissue_ontology_id = "UBERON:0001155",
+          sex = "male",
+          sample_type = "primary tissue"
+        ),
+        num_samples = 1
+      )
+    ),
+    mode = "mean estimation",
+    seed = 11
+  )
 
   # Test with as_counts = TRUE (should return raw counts)
-  result_counts <- predict_query(query, as_counts = TRUE)
+  result_counts <- predict_query(query, model_id = "gem-1-bulk", as_counts = TRUE)
   expect_equal(as.numeric(result_counts$expression[1, ]), c(100, 200, 300))
 
   # Test with as_counts = FALSE (should return log CPM transformed data)
-  result_log <- predict_query(query, as_counts = FALSE)
+  result_log <- predict_query(query, model_id = "gem-1-bulk", as_counts = FALSE)
   # Verify transformation was applied - values should be different from raw counts
   expect_false(all(as.numeric(result_log$expression[1, ]) == c(100, 200, 300)))
   # Values should be positive (log1p of positive numbers)
