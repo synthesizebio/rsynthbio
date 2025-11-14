@@ -12,6 +12,57 @@ api_key_available <- function() {
 # Live API Tests
 # -----------------------------
 
+test_that("list_models live API call", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting live list_models call...")
+
+    models <- list_models()
+
+    # Verify we got a valid response
+    expect_type(models, "list")
+    expect_true(length(models) > 0, info = "Should return at least one model")
+
+    # Check that expected models are present
+    model_ids <- sapply(models, function(m) if (is.list(m)) m$id else m)
+    expect_true("gem-1-bulk" %in% model_ids,
+        info = "Should include gem-1-bulk model"
+    )
+    expect_true("gem-1-sc" %in% model_ids,
+        info = "Should include gem-1-sc model"
+    )
+
+    message(sprintf("Successfully retrieved %d models", length(models)))
+})
+
+test_that("get_example_query live API call", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting live get_example_query call...")
+
+    # Test for bulk model
+    bulk_query <- get_example_query(model_id = "gem-1-bulk")
+    expect_type(bulk_query, "list")
+    expect_true("inputs" %in% names(bulk_query),
+        info = "Bulk query should contain inputs"
+    )
+
+    # Test for single-cell model
+    sc_query <- get_example_query(model_id = "gem-1-sc")
+    expect_type(sc_query, "list")
+    expect_true("inputs" %in% names(sc_query),
+        info = "Single-cell query should contain inputs"
+    )
+
+    message("Successfully retrieved example queries for both models")
+})
+
 test_that("predict_query live call success (bulk)", {
     skip_if_not(
         api_key_available(),
@@ -20,11 +71,12 @@ test_that("predict_query live call success (bulk)", {
 
     message("\nTesting live predict_query call for bulk modality...")
 
-    test_query <- get_valid_query()
+    test_query <- get_example_query(model_id = "gem-1-bulk")
 
     results <- predict_query(
         query = test_query,
-        as_counts = TRUE,
+        model_id = "gem-1-bulk",
+        as_counts = TRUE
     )
 
     expect_type(results, "list")
@@ -75,11 +127,12 @@ test_that("predict_query live call success (single-cell)", {
 
     message("\nTesting live predict_query call for single-cell modality...")
 
-    test_query <- get_valid_query(modality = "single-cell")
+    test_query <- get_example_query(model_id = "gem-1-sc")
 
     results <- predict_query(
         query = test_query,
-        as_counts = TRUE,
+        model_id = "gem-1-sc",
+        as_counts = TRUE
     )
 
     expect_type(results, "list")
@@ -149,7 +202,6 @@ test_that("predict_query live call invalid UBERON (bulk)", {
                 num_samples = 1
             )
         ),
-        modality = "bulk",
         mode = "sample generation"
     )
 
@@ -157,6 +209,7 @@ test_that("predict_query live call invalid UBERON (bulk)", {
     expect_error(
         predict_query(
             query = invalid_query,
+            model_id = "gem-1-bulk",
             as_counts = TRUE
         ),
         "Model query failed"
@@ -164,7 +217,7 @@ test_that("predict_query live call invalid UBERON (bulk)", {
 
     # Verify the error contains validation details
     error_result <- tryCatch(
-        predict_query(query = invalid_query, as_counts = TRUE),
+        predict_query(query = invalid_query, model_id = "gem-1-bulk", as_counts = TRUE),
         error = function(e) e$message
     )
 
@@ -203,7 +256,6 @@ test_that("predict_query live call invalid UBERON (single-cell)", {
                 num_samples = 1
             )
         ),
-        modality = "single-cell",
         mode = "mean estimation",
         return_classifier_probs = TRUE,
         seed = 42
@@ -213,6 +265,7 @@ test_that("predict_query live call invalid UBERON (single-cell)", {
     expect_error(
         predict_query(
             query = invalid_query,
+            model_id = "gem-1-sc",
             as_counts = TRUE
         ),
         "Model query failed"
@@ -220,7 +273,7 @@ test_that("predict_query live call invalid UBERON (single-cell)", {
 
     # Verify the error contains validation details
     error_result <- tryCatch(
-        predict_query(query = invalid_query, as_counts = TRUE),
+        predict_query(query = invalid_query, model_id = "gem-1-sc", as_counts = TRUE),
         error = function(e) e$message
     )
 
@@ -247,11 +300,12 @@ test_that("predict_query download URL flow works correctly", {
 
     message("\nTesting download URL flow with return_download_url=TRUE...")
 
-    test_query <- get_valid_query()
+    test_query <- get_example_query(model_id = "gem-1-bulk")
 
     # First get the download URL without parsing
     result_with_url <- predict_query(
         query = test_query,
+        model_id = "gem-1-bulk",
         as_counts = TRUE,
         return_download_url = TRUE
     )
@@ -330,12 +384,11 @@ test_that("predict_query returns biologically valid expression data (differentia
                 num_samples = 5
             )
         ),
-        modality = "bulk",
         mode = "sample generation",
         seed = 42
     )
 
-    results <- predict_query(query = de_query, as_counts = TRUE)
+    results <- predict_query(query = de_query, model_id = "gem-1-bulk", as_counts = TRUE)
 
     # Split samples by condition
     group1_idx <- 1:5
@@ -466,12 +519,11 @@ test_that("predict_query returns biologically valid single-cell expression data 
                 num_samples = 10
             )
         ),
-        modality = "single-cell",
         mode = "mean estimation",
         seed = 123
     )
 
-    results <- predict_query(query = sc_de_query, as_counts = TRUE)
+    results <- predict_query(query = sc_de_query, model_id = "gem-1-sc", as_counts = TRUE)
 
     # Split samples by condition
     group1_idx <- 1:10
@@ -630,12 +682,13 @@ test_that("predict_query with total_count parameter works correctly", {
 
     message("\nTesting predict_query with custom total_count parameter...")
 
-    test_query <- get_valid_query()
+    test_query <- get_example_query(model_id = "gem-1-bulk")
     test_query$total_count <- 5000000
 
     # Test with custom total_count
     results <- predict_query(
         query = test_query,
+        model_id = "gem-1-bulk",
         as_counts = TRUE
     )
 
@@ -666,19 +719,21 @@ test_that("predict_query with deterministic_latents produces reproducible result
 
     message("\nTesting predict_query with deterministic_latents for reproducibility...")
 
-    test_query <- get_valid_query()
+    test_query <- get_example_query(model_id = "gem-1-bulk")
     test_query$seed <- 12345 # Set a seed for consistency
     test_query$deterministic_latents <- TRUE
 
     # First call with deterministic_latents = TRUE
     results1 <- predict_query(
         query = test_query,
+        model_id = "gem-1-bulk",
         as_counts = TRUE
     )
 
     # Second call with same query and deterministic_latents = TRUE
     results2 <- predict_query(
         query = test_query,
+        model_id = "gem-1-bulk",
         as_counts = TRUE
     )
 
@@ -711,19 +766,21 @@ test_that("predict_query with deterministic_latents FALSE shows variation", {
 
     message("\nTesting predict_query with deterministic_latents=FALSE shows variation...")
 
-    test_query <- get_valid_query()
+    test_query <- get_example_query(model_id = "gem-1-bulk")
     test_query$seed <- NULL # Remove seed to allow variation
     test_query$deterministic_latents <- FALSE
 
     # First call with deterministic_latents = FALSE
     results1 <- predict_query(
         query = test_query,
+        model_id = "gem-1-bulk",
         as_counts = TRUE
     )
 
     # Second call with deterministic_latents = FALSE
     results2 <- predict_query(
         query = test_query,
+        model_id = "gem-1-bulk",
         as_counts = TRUE
     )
 
@@ -760,12 +817,13 @@ test_that("predict_query with total_count for single-cell", {
 
     message("\nTesting predict_query with custom total_count for single-cell...")
 
-    test_query <- get_valid_query(modality = "single-cell")
+    test_query <- get_example_query(model_id = "gem-1-sc")
     test_query$total_count <- 5000
 
     # Test with custom total_count (typical single-cell library size)
     results <- predict_query(
         query = test_query,
+        model_id = "gem-1-sc",
         as_counts = TRUE
     )
 
@@ -796,13 +854,14 @@ test_that("predict_query with both total_count and deterministic_latents", {
 
     message("\nTesting predict_query with both total_count and deterministic_latents...")
 
-    test_query <- get_valid_query()
+    test_query <- get_example_query(model_id = "gem-1-bulk")
     test_query$total_count <- 8000000
     test_query$deterministic_latents <- TRUE
 
     # Test with both parameters
     results <- predict_query(
         query = test_query,
+        model_id = "gem-1-bulk",
         as_counts = TRUE
     )
 

@@ -1,0 +1,202 @@
+# Testing the live API calls
+
+Use .Renviron to set the API key and base URL, for example:
+
+```
+SYNTHESIZE_API_KEY=some-api-key
+SYNTHESIZE_API_BASE_URL=https://app.synthesize.bio
+```
+
+## Testing list_models call
+```{r}
+# Load all R source files
+for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
+
+# Load test dependencies
+library(testthat)
+library(jsonlite)
+library(httr)
+
+# Load helper functions
+source("tests/testthat/helper-mocks.R")
+
+for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
+
+# Run the specific test
+test_that("list_models live API call", {
+    api_key_available <- function() {
+        !is.na(Sys.getenv("SYNTHESIZE_API_KEY")) &&
+            Sys.getenv("SYNTHESIZE_API_KEY") != ""
+    }
+
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting live list_models call...")
+
+    models <- list_models(api_base_url = Sys.getenv("SYNTHESIZE_API_BASE_URL"))
+
+    # Verify we got a valid response
+    expect_type(models, "list")
+    expect_true(length(models) > 0, info = "Should return at least one model")
+
+    # Check that expected models are present
+    model_ids <- sapply(models, function(m) m$model_id)
+    expect_true("gem-1-bulk" %in% model_ids,
+        info = "Should include gem-1-bulk model"
+    )
+    expect_true("gem-1-sc" %in% model_ids,
+        info = "Should include gem-1-sc model"
+    )
+
+    message(sprintf("Successfully retrieved %d models", length(models)))
+})
+```
+
+### Testing baseline models with example queries
+```{r}
+# Load all R source files
+for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
+
+test_that("get_example_query live API call", {
+    Sys.setenv(SYNTHESIZE_API_KEY = "sbio_Shm_Jpmntzz5TP8hAwjJ5coE0Y-REkzmQyDN5gHtJPk")
+    api_key_available <- function() {
+        !is.na(Sys.getenv("SYNTHESIZE_API_KEY")) &&
+            Sys.getenv("SYNTHESIZE_API_KEY") != ""
+    }
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting live get_example_query call...")
+
+    # Test for bulk model
+    bulk_query <- get_example_query(model_id = "gem-1-bulk", api_base_url = "http://localhost")
+    expect_type(bulk_query$example_query, "list")
+    expect_true("inputs" %in% names(bulk_query$example_query),
+        info = "Bulk query should contain inputs"
+    )
+
+    # Test for single-cell model
+    sc_query <- get_example_query(model_id = "gem-1-sc", api_base_url = "http://localhost")
+    expect_type(sc_query$example_query, "list")
+    expect_true("inputs" %in% names(sc_query$example_query),
+        info = "Single-cell query should contain inputs"
+    )
+
+    message("Successfully retrieved example queries for both models")
+})
+```
+
+### Testing predict_query with gem-1-bulk_reference-conditioning model and example query
+
+```{r}
+# Load all R source files
+for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
+
+test_that("predict_query live API call", {
+    Sys.setenv(SYNTHESIZE_API_KEY = "sbio_Shm_Jpmntzz5TP8hAwjJ5coE0Y-REkzmQyDN5gHtJPk")
+    api_key_available <- function() {
+        !is.na(Sys.getenv("SYNTHESIZE_API_KEY")) &&
+            Sys.getenv("SYNTHESIZE_API_KEY") != ""
+    }
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+    message("\nTesting live predict_query call...")
+
+    # Test for bulk model
+    bulk_query <- get_example_query(model_id = "gem-1-bulk_reference-conditioning", api_base_url = "http://localhost")
+    bulk_result <- predict_query(query = bulk_query$example_query, model_id = "gem-1-bulk_reference-conditioning", api_base_url = "http://localhost")
+    expect_type(bulk_result, "list")
+    expect_true("metadata" %in% names(bulk_result),
+        info = "Bulk reference conditioning result should contain metadata"
+    )
+    expect_true("expression" %in% names(bulk_result),
+        info = "Bulk reference conditioning result should contain expression"
+    )
+})
+```
+
+### Testing predict_query with gem-1-sc_reference-conditioning model and example query
+```{r}
+test_that("predict_query live API call for gem-1-sc reference conditioning model", {
+    # Load all R source files
+    for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
+    message("\nTesting live predict_query call for gem-1-sc reference conditioning model...")
+    Sys.setenv(SYNTHESIZE_API_KEY = "sbio_Shm_Jpmntzz5TP8hAwjJ5coE0Y-REkzmQyDN5gHtJPk")
+    api_key_available <- function() {
+        !is.na(Sys.getenv("SYNTHESIZE_API_KEY")) &&
+            Sys.getenv("SYNTHESIZE_API_KEY") != ""
+    }
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+    message("\nTesting live predict_query call for gem-1-sc reference conditioning model...")
+    sc_query <- get_example_query(model_id = "gem-1-sc_reference-conditioning", api_base_url = "http://localhost")
+    sc_result <- predict_query(query = sc_query$example_query, model_id = "gem-1-sc_reference-conditioning", api_base_url = "http://localhost")
+    expect_type(sc_result, "list")
+    expect_true("metadata" %in% names(sc_result),
+        info = "Single-cell reference conditioning result should contain metadata"
+    )
+    expect_true("expression" %in% names(sc_result),
+        info = "Single-cell reference conditioning result should contain expression"
+    )
+})
+```
+
+### Testing predict_query with gem-1-bulk_predict-metadata model and example query
+
+```{r}
+test_that("predict_query live API call for gem-1-bulk predict metadata model", {
+    # Load all R source files
+    for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
+    message("\nTesting live predict_query call for gem-1-bulk predict metadata model...")
+    Sys.setenv(SYNTHESIZE_API_KEY = "sbio_Shm_Jpmntzz5TP8hAwjJ5coE0Y-REkzmQyDN5gHtJPk")
+    api_key_available <- function() {
+        !is.na(Sys.getenv("SYNTHESIZE_API_KEY")) &&
+            Sys.getenv("SYNTHESIZE_API_KEY") != ""
+    }
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+    message("\nTesting live predict_query call for gem-1-bulk predict metadata model...")
+    query <- get_example_query(model_id = "gem-1-bulk_predict-metadata", api_base_url = "http://localhost")
+    result <- predict_query(query = query$example_query, model_id = "gem-1-bulk_predict-metadata", api_base_url = "http://localhost")
+    expect_type(result, "list")
+    expect_true("metadata" %in% names(result),
+        info = "Predict metadata result should contain metadata"
+    )
+})
+```
+
+### Testing predict_query with gem-1-sc_predict-metadata model and example query
+```{r}
+test_that("predict_query live API call for gem-1-sc predict metadata model", {
+    # Load all R source files
+    for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
+    message("\nTesting live predict_query call for gem-1-sc predict metadata model...")
+    Sys.setenv(SYNTHESIZE_API_KEY = "sbio_Shm_Jpmntzz5TP8hAwjJ5coE0Y-REkzmQyDN5gHtJPk")
+    api_key_available <- function() {
+        !is.na(Sys.getenv("SYNTHESIZE_API_KEY")) &&
+            Sys.getenv("SYNTHESIZE_API_KEY") != ""
+    }
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+    message("\nTesting live predict_query call for gem-1-sc predict metadata model...")
+    query <- get_example_query(model_id = "gem-1-sc_predict-metadata", api_base_url = "http://localhost")
+    result <- predict_query(query = query$example_query, model_id = "gem-1-sc_predict-metadata", api_base_url = "http://localhost")
+    expect_type(result, "list")
+    expect_true("metadata" %in% names(result),
+        info = "Predict metadata result should contain metadata"
+    )
+})
+```

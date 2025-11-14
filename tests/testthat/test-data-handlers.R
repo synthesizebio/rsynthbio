@@ -145,7 +145,7 @@ test_that("log_cpm transforms data correctly", {
   )
 
   # Transform to log CPM
-  result <- log_cpm(raw_counts)
+  result <- rsynthbio:::log_cpm(raw_counts)
 
   # Manually calculate expected values for first row
   row1_lib_size <- sum(raw_counts[1, -1 ])  # 100 + 50 + 10 = 160
@@ -175,7 +175,7 @@ test_that("log_cpm handles edge cases correctly", {
   # Test with matrix input
   matrix_input <- matrix(c(100, 200, 50, 100, 10, 20), nrow = 2)
   colnames(matrix_input) <- c("ENSG00001", "ENSG00002", "ENSG00003")
-  expect_error(log_cpm(matrix_input), NA) # Should not error
+  expect_error(rsynthbio:::log_cpm(matrix_input), NA) # Should not error
 
   # Test with zero counts
   zero_counts <- data.frame(
@@ -184,7 +184,7 @@ test_that("log_cpm handles edge cases correctly", {
     gene2 = c(50, 0, 150),
     gene3 = c(10, 20, 0)
   )
-  result_zeros <- log_cpm(zero_counts)
+  result_zeros <- rsynthbio:::log_cpm(zero_counts)
   expect_false(any(is.na(result_zeros)))
 
   # Test with negative values (should be converted to 0)
@@ -194,27 +194,27 @@ test_that("log_cpm handles edge cases correctly", {
     gene2 = c(50, -20, 150),
     gene3 = c(10, 20, -30)
   )
-  result_neg <- log_cpm(neg_counts)
+  result_neg <- rsynthbio:::log_cpm(neg_counts)
   expect_false(any(is.na(result_neg)))
 })
 
 test_that("log_cpm handles invalid inputs correctly", {
   # Test with non-data frame/matrix
-  expect_error(log_cpm(list(a = 1:3, b = 4:6)), "Input must be a data frame or matrix")
+  expect_error(rsynthbio:::log_cpm(list(a = 1:3, b = 4:6)), "Input must be a data frame or matrix")
 
   # Test with empty data frame
-  expect_error(log_cpm(data.frame()), "Input must have at least one row and one column")
+  expect_error(rsynthbio:::log_cpm(data.frame()), "Input must have at least one row and one column")
 
   # Test with data frame with no columns
   empty_df <- data.frame(x = integer(0))[, FALSE]
-  expect_error(log_cpm(empty_df), "Input must have at least one row and one column")
+  expect_error(rsynthbio:::log_cpm(empty_df), "Input must have at least one row and one column")
 })
 
-# Tests for extract_expression_data function
-test_that("extract_expression_data processes API response correctly", {
+# Tests for transform_standard_output function (formerly extract_expression_data)
+test_that("transform_standard_output processes API response correctly", {
 
   # Test with as_counts = TRUE (default)
-  result_counts <- extract_expression_data(mock_api_response)
+  result_counts <- rsynthbio:::transform_standard_output(mock_api_response)
 
   # Check structure
   expect_type(result_counts, "list")
@@ -231,17 +231,17 @@ test_that("extract_expression_data processes API response correctly", {
                c("ENSG00000000003", "ENSG00000000005", "ENSG00000000419", "ENSG00000000457"))
 
   # Test with as_counts = FALSE (log CPM transformation)
-  result_logcpm <- extract_expression_data(mock_api_response, as_counts = FALSE)
+  result_logcpm <- rsynthbio:::transform_standard_output(mock_api_response, as_counts = FALSE)
 
   # Check expression data has been transformed (no longer integers)
   expect_false(all(sapply(result_logcpm$expression, is.integer)))
 })
 
 
-test_that("extract_expression_data correctly assigns sample IDs", {
+test_that("transform_standard_output correctly assigns sample IDs", {
 
   # Test sample ID generation
-  result <- extract_expression_data(mock_api_response)
+  result <- rsynthbio:::transform_standard_output(mock_api_response)
 
   # Check sample IDs match between metadata and expression
   expect_equal(
