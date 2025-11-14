@@ -1,7 +1,7 @@
 #' @title API Base URL
 #' @description Base URL for the Synthesize Bio API
 #' @export
-API_BASE_URL <- "https://app.synthesize.bio"
+API_BASE_URL <- Sys.getenv("SYNTHESIZE_API_BASE_URL", unset = "https://app.synthesize.bio")
 
 #' @title Default Timeout
 #' @description Default timeout (seconds) for outbound HTTP requests
