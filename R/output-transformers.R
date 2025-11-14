@@ -78,8 +78,11 @@ log_cpm <- function(expression) {
 #' @keywords internal
 transform_standard_output <- function(final_json, as_counts = TRUE) {
   # Extract the expression matrices and combine them
-  expression_list <- lapply(final_json$outputs$counts, function(x) as.data.frame(t(x)))
-  expression <- do.call(rbind, expression_list)
+  counts_list <- final_json$outputs$counts
+
+  # Convert each sample's expression vector into a row of the expression matrix
+  expression <- do.call(rbind, lapply(counts_list, function(x) as.numeric(x)))
+  expression <- as.data.frame(expression)
 
   # Set gene names as column names
   colnames(expression) <- final_json$gene_order

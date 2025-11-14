@@ -12,20 +12,18 @@ mock_api_response <- list(
 
   # NEW STRUCTURE: outputs is now a list (not data.frame)
   outputs = list(
-    # counts - list with counts element containing list of integer vectors
+    # counts - list of integer vectors (one per sample)
     counts = list(
-      counts = list(
-        as.integer(c(904, 0, 539, 115, 239, 0, 1976, 817, 2422, 372, runif(44582, 0, 2000))),
-        as.integer(c(1350, 0, 343, 120, 151, 5, 937, 947, 1439, 344, runif(44582, 0, 2000))),
-        as.integer(c(1082, 0, 471, 144, 230, 4, 924, 861, 2093, 179, runif(44582, 0, 2000))),
-        as.integer(c(851, 5, 423, 147, 139, 3, 725, 1592, 5669, 407, runif(44582, 0, 2000))),
-        as.integer(c(339, 0, 356, 170, 91, 0, 1119, 748, 2459, 314, runif(44582, 0, 2000))),
-        as.integer(c(337, 0, 545, 174, 106, 28, 734, 770, 570, 651, runif(44582, 0, 2000))),
-        as.integer(c(822, 0, 440, 578, 60, 20, 1411, 915, 1004, 500, runif(44582, 0, 2000))),
-        as.integer(c(591, 0, 360, 212, 104, 53, 883, 1021, 826, 1439, runif(44582, 0, 2000))),
-        as.integer(c(999, 0, 844, 228, 61, 30, 786, 977, 446, 516, runif(44582, 0, 2000))),
-        as.integer(c(638, 1, 578, 194, 92, 64, 828, 416, 605, 613, runif(44582, 0, 2000)))
-      )
+      as.integer(c(904, 0, 539, 115, 239, 0, 1976, 817, 2422, 372, runif(44582, 0, 2000))),
+      as.integer(c(1350, 0, 343, 120, 151, 5, 937, 947, 1439, 344, runif(44582, 0, 2000))),
+      as.integer(c(1082, 0, 471, 144, 230, 4, 924, 861, 2093, 179, runif(44582, 0, 2000))),
+      as.integer(c(851, 5, 423, 147, 139, 3, 725, 1592, 5669, 407, runif(44582, 0, 2000))),
+      as.integer(c(339, 0, 356, 170, 91, 0, 1119, 748, 2459, 314, runif(44582, 0, 2000))),
+      as.integer(c(337, 0, 545, 174, 106, 28, 734, 770, 570, 651, runif(44582, 0, 2000))),
+      as.integer(c(822, 0, 440, 578, 60, 20, 1411, 915, 1004, 500, runif(44582, 0, 2000))),
+      as.integer(c(591, 0, 360, 212, 104, 53, 883, 1021, 826, 1439, runif(44582, 0, 2000))),
+      as.integer(c(999, 0, 844, 228, 61, 30, 786, 977, 446, 516, runif(44582, 0, 2000))),
+      as.integer(c(638, 1, 578, 194, 92, 64, 828, 416, 605, 613, runif(44582, 0, 2000)))
     ),
 
     # classifier_probs - data.frame with nested data.frames for each classifier
