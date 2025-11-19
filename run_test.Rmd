@@ -159,6 +159,45 @@ test_that("predict_query for metadata prediction models", {
 })
 ```
 
+## Test: Bulk Prediction
+
+```{r test-bulk-prediction}
+test_that("predict_query for bulk prediction", {
+  skip_if_not(check_api_key(),
+              "SYNTHESIZE_API_KEY is not set")
+
+  model_id <- "gem-1-bulk"
+  query <- get_example_query(model_id = model_id,
+                             api_base_url = api_url)
+  result <- predict_query(query = query$example_query,
+                           model_id = model_id,
+                           api_base_url = api_url)
+
+  # Basic structure checks
+  expect_type(result, "list")
+  expect_true("metadata" %in% names(result),
+              info = "Result should contain metadata")
+  expect_true("expression" %in% names(result),
+              info = "Result should contain expression")
+
+  # Check metadata structure
+  expect_s3_class(result$metadata, "data.frame")
+  expect_true("sample_id" %in% colnames(result$metadata),
+              info = "Metadata should have sample_id column")
+  expect_true(nrow(result$metadata) > 0,
+              info = "Should have at least one sample")
+
+  # Check expression structure
+  expect_s3_class(result$expression, "data.frame")
+  expect_equal(nrow(result$expression), nrow(result$metadata),
+               info = "Expression and metadata should have matching rows")
+  expect_true(ncol(result$expression) > 1000,
+              info = "Should have many genes (typically >10k)")
+
+})
+```
+
+
 ## Summary
 
 Run all chunks sequentially or run individual chunks to test specific functionality. The setup chunk must be run first.

@@ -80,6 +80,12 @@ transform_standard_output <- function(final_json, as_counts = TRUE) {
   # Extract the expression matrices and combine them
   counts_list <- final_json$outputs$counts
 
+  # Handle case where jsonlite converts to data.frame with one column of lists
+  # This happens when the server returns an array of arrays
+  if (is.data.frame(counts_list) && ncol(counts_list) == 1) {
+    counts_list <- counts_list[[1]]
+  }
+
   # Convert each sample's expression vector into a row of the expression matrix
   expression <- do.call(rbind, lapply(counts_list, function(x) as.numeric(x)))
   expression <- as.data.frame(expression)
