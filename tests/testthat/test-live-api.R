@@ -199,7 +199,7 @@ test_that("predict_query live call invalid UBERON (bulk)", {
 
     # Start with a valid example query and modify it to have an invalid UBERON ID
     invalid_query <- get_example_query(model_id = "gem-1-bulk")$example_query
-    invalid_query$inputs[[1]]$metadata$tissue_ontology_id <- "UBERON:9999999" # Invalid ID
+    invalid_query$inputs[[1]]$tissue_ontology_id <- "UBERON:999999" # Invalid ID
     invalid_query$inputs[[1]]$num_samples <- 1
 
     # The API should reject this with an error
@@ -215,14 +215,14 @@ test_that("predict_query live call invalid UBERON (bulk)", {
     # Verify the error contains validation details
     error_result <- tryCatch(
         predict_query(query = invalid_query, model_id = "gem-1-bulk", as_counts = TRUE),
-        error = function(e) e$message
+        error = function(e) e
     )
 
     message(paste("API correctly rejected invalid UBERON ID with error:", error_result))
 
     # The error message should contain the validation details
     expect_true(
-        grepl("UBERON:9999999", error_result),
+        grepl("UBERON:999999", error_result),
         info = paste("Error message should mention the invalid UBERON ID. Got:", error_result)
     )
     expect_true(
@@ -243,7 +243,7 @@ test_that("predict_query live call invalid UBERON (single-cell)", {
 
     # Start with a valid example query and modify it to have an invalid UBERON ID
     invalid_query <- get_example_query(model_id = "gem-1-sc")$example_query
-    invalid_query$inputs[[1]]$metadata$tissue_ontology_id <- "UBERON:9999999" # Invalid ID
+invalid_query$inputs[[1]]$tissue_ontology_id <- "UBERON:999999" # Invalid ID
     invalid_query$inputs[[1]]$num_samples <- 1
     invalid_query$seed <- 42
 
@@ -260,14 +260,14 @@ test_that("predict_query live call invalid UBERON (single-cell)", {
     # Verify the error contains validation details
     error_result <- tryCatch(
         predict_query(query = invalid_query, model_id = "gem-1-sc", as_counts = TRUE),
-        error = function(e) e$message
+        error = function(e) e
     )
 
     message(paste("API correctly rejected invalid UBERON ID (single-cell) with error:", error_result))
 
     # The error message should contain the validation details
     expect_true(
-        grepl("UBERON:9999999", error_result),
+        grepl("UBERON:999999", error_result),
         info = paste("Error message should mention the invalid UBERON ID. Got:", error_result)
     )
     expect_true(
