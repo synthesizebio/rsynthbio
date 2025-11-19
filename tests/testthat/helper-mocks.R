@@ -50,7 +50,7 @@ create_success_mocks <- function(query_id = "test-id",
         get_json = mockery::mock(
             list(
                 outputs = list(
-                    counts = list(counts = counts_list),
+                    counts = counts_list,
                     metadata = metadata_df
                 ),
                 gene_order = gene_order,
