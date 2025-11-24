@@ -4,12 +4,12 @@
 \alias{start_model_query}
 \title{Start Model Query}
 \usage{
-start_model_query(api_base_url, api_slug, query)
+start_model_query(api_base_url, model_id, query)
 }
 \arguments{
 \item{api_base_url}{The base URL for the API}
 
-\item{api_slug}{The API slug for the specific model}
+\item{model_id}{The model ID for the specific model}
 
 \item{query}{The query list}
 }

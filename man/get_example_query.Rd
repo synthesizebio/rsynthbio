@@ -30,4 +30,3 @@ query_sc <- get_example_query(model_id = "gem-1-sc")
 query$inputs[[1]]$num_samples <- 10
 }
 }
-

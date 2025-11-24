@@ -87,10 +87,10 @@ models <- list_models()
 print(models)
 
 # Create a query for the bulk RNA-seq model
-bulk_query <- get_example_query(model_id = "gem-1-bulk")
+bulk_query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Create a query for the single-cell model
-sc_query <- get_example_query(model_id = "gem-1-sc")
+sc_query <- get_example_query(model_id = "gem-1-sc")$example_query
 ```
 
 Currently supported models:
@@ -104,7 +104,7 @@ The `get_example_query()` function returns a correctly structured example query 
 
 ```
 # Get a sample query for a specific model
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Inspect the query structure
 str(query)
