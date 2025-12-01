@@ -50,7 +50,7 @@ test_that("predict_query mocked call success (bulk async)", {
     mode = "mean estimation",
     seed = 11
   )
-  results <- predict_query(query = test_query, model_id = "gem-1-bulk", as_counts = TRUE)
+  results <- predict_query(query = test_query, model_id = "gem-1-bulk")
 
   expect_type(results, "list")
   expect_true("metadata" %in% names(results))
@@ -116,7 +116,7 @@ test_that("predict_query new API structure handling (bulk)", {
     mode = "mean estimation",
     seed = 11
   )
-  results <- predict_query(query, model_id = "gem-1-bulk", as_counts = TRUE)
+  results <- predict_query(query, model_id = "gem-1-bulk")
 
   expect_true("metadata" %in% names(results))
   expect_true("expression" %in% names(results))
@@ -287,106 +287,6 @@ test_that("get_example_query mock test", {
   expect_type(result, "list")
   expect_true("inputs" %in% names(result))
   expect_true("mode" %in% names(result))
-})
-
-# -----------------------------
-# Log CPM Tests
-# -----------------------------
-
-test_that("log_cpm transforms counts correctly", {
-  counts_data <- data.frame(
-    gene1 = c(1000000, 3000000),
-    gene2 = c(2000000, 6000000)
-  )
-
-  # R's log_cpm implementation uses t(t(expr) / library_size) which divides
-  # element-wise in column-cycling order, not row-wise
-  # library_size = c(3e6, 9e6) recycles as: [1,1]/lib[1], [2,1]/lib[2], [1,2]/lib[1], [2,2]/lib[2]
-  # After transpose: [1,1]=1e6/3e6, [1,2]=2e6/9e6, [2,1]=3e6/3e6, [2,2]=6e6/9e6
-  expected_log_cpm <- data.frame(
-    gene1 = c(log1p(1000000 / 3000000 * 1e6), log1p(3000000 / 3000000 * 1e6)),
-    gene2 = c(log1p(2000000 / 9000000 * 1e6), log1p(6000000 / 9000000 * 1e6))
-  )
-
-  result_log_cpm <- rsynthbio:::log_cpm(counts_data)
-
-  expect_equal(result_log_cpm$gene1, expected_log_cpm$gene1, tolerance = 1e-5)
-  expect_equal(result_log_cpm$gene2, expected_log_cpm$gene2, tolerance = 1e-5)
-})
-
-test_that("log_cpm handles zero counts", {
-  counts_data <- data.frame(
-    gene1 = c(10, 0),
-    gene2 = c(20, 0)
-  )
-
-  # library_size = c(30, 0)
-  # The R implementation's t(t(expr)/library_size) creates Inf/NaN for zero library sizes
-  # With column-cycling: [1,1]/30, [2,1]/0, [1,2]/30, [2,2]/0
-  # Result after transpose: [1,1]=10/30, [1,2]=20/0=Inf, [2,1]=0/30=0, [2,2]=0/0=NaN
-  result_log_cpm <- rsynthbio:::log_cpm(counts_data)
-
-  # Verify the first row is calculated correctly
-  expect_equal(result_log_cpm$gene1[1], log1p(10 / 30 * 1e6), tolerance = 1e-5)
-  # gene2 in row 1 gets divided by 0 due to column-recycling, resulting in Inf
-  expect_true(is.infinite(result_log_cpm$gene2[1]))
-
-  # For row 2: gene1 gets divided by 30 (column-recycle), gene2 by 0
-  expect_equal(result_log_cpm$gene1[2], 0.0)
-  expect_true(is.nan(result_log_cpm$gene2[2]))
-})
-
-# -----------------------------
-# Parameter Tests
-# -----------------------------
-
-test_that("predict_query passes as_counts parameter correctly", {
-  original_api_key <- setup_test_environment()
-  on.exit(restore_api_key(original_api_key))
-
-  mocks <- create_success_mocks(
-    query_id = "test-id",
-    download_url = "https://example.com/data.json",
-    counts_list = list(
-      c(100, 200, 300)
-    ),
-    metadata_df = data.frame(
-      sample_id = "test1"
-    ),
-    gene_order = c("gene1", "gene2", "gene3")
-  )
-
-  stub(predict_query, "has_synthesize_token", mocks$has_token)
-  stub(predict_query, "start_model_query", mocks$start_query)
-  stub(predict_query, "poll_model_query", mocks$poll)
-  stub(predict_query, "get_json", mocks$get_json)
-
-  query <- list(
-    inputs = list(
-      list(
-        metadata = list(
-          cell_type_ontology_id = "CL:0000786",
-          tissue_ontology_id = "UBERON:0001155",
-          sex = "male",
-          sample_type = "primary tissue"
-        ),
-        num_samples = 1
-      )
-    ),
-    mode = "mean estimation",
-    seed = 11
-  )
-
-  # Test with as_counts = TRUE (should return raw counts)
-  result_counts <- predict_query(query, model_id = "gem-1-bulk", as_counts = TRUE)
-  expect_equal(as.numeric(result_counts$expression[1, ]), c(100, 200, 300))
-
-  # Test with as_counts = FALSE (should return log CPM transformed data)
-  result_log <- predict_query(query, model_id = "gem-1-bulk", as_counts = FALSE)
-  # Verify transformation was applied - values should be different from raw counts
-  expect_false(all(as.numeric(result_log$expression[1, ]) == c(100, 200, 300)))
-  # Values should be positive (log1p of positive numbers)
-  expect_true(all(result_log$expression >= 0))
 })
 
 # -----------------------------

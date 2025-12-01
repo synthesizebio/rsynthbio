@@ -10,7 +10,7 @@ get_output_transformer(model_id)
 \item{model_id}{Character string specifying the model ID}
 }
 \value{
-A transformer function that accepts (final_json, as_counts) and returns
+A transformer function that accepts (final_json) and returns
         a list with metadata, expression, and optionally latents
 }
 \description{

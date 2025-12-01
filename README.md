@@ -130,7 +130,7 @@ The API uses an **asynchronous model**: the query is submitted, the system polls
 
 ```
 # Request raw counts data
-result <- predict_query(query, model_id = "gem-1-bulk", as_counts = TRUE)
+result <- predict_query(query, model_id = "gem-1-bulk")
 
 # The function will automatically:
 # 1. Submit your query to the API
@@ -157,7 +157,7 @@ result <- predict_query(
 )
 
 # Get log-transformed CPM instead of raw counts
-result_log <- predict_query(query, model_id = "gem-1-bulk", as_counts = FALSE)
+result_log <- predict_query(query, model_id = "gem-1-bulk")
 
 # Use deterministic latents for reproducible results
 # (removes randomness from latent sampling)
@@ -172,7 +172,7 @@ result_custom <- predict_query(query, model_id = "gem-1-bulk")
 query_combined <- get_example_query(model_id = "gem-1-bulk")
 query_combined$total_count <- 8000000
 query_combined$deterministic_latents <- TRUE
-result_combined <- predict_query(query_combined, model_id = "gem-1-bulk", as_counts = TRUE)
+result_combined <- predict_query(query_combined, model_id = "gem-1-bulk")
 ```
 
 #### Query Parameters

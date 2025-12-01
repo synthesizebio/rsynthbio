@@ -279,8 +279,6 @@ make_api_request <- function(url, context_msg) {
 #'        }
 #' @param model_id Character string specifying the model ID (e.g., "gem-1-bulk", "gem-1-sc").
 #'        Use `list_models()` to see available models.
-#' @param as_counts Logical, if FALSE, transforms the predicted expression counts
-#'        into logCPM (default is TRUE, returning raw counts).
 #' @param api_base_url The base URL for the API server. Default is API_BASE_URL.
 #' @param poll_interval_seconds Seconds between polling attempts of the status endpoint.
 #'        Default is DEFAULT_POLL_INTERVAL_SECONDS (2).
@@ -309,15 +307,11 @@ make_api_request <- function(url, context_msg) {
 #' query <- get_example_query(model_id = "gem-1-bulk")
 #'
 #' # Request raw counts
-#' result <- predict_query(query, model_id = "gem-1-bulk", as_counts = TRUE)
+#' result <- predict_query(query, model_id = "gem-1-bulk")
 #'
 #' # Access the results
 #' metadata <- result$metadata
 #' expression <- result$expression
-#'
-#' # Request log CPM transformed data
-#' log_result <- predict_query(query, model_id = "gem-1-bulk", as_counts = FALSE)
-#' log_expression <- log_result$expression
 #'
 #' # Explore the top expressed genes in the first sample
 #' head(sort(expression[1, ], decreasing = TRUE))
@@ -333,7 +327,6 @@ make_api_request <- function(url, context_msg) {
 #' @export
 predict_query <- function(query,
                           model_id,
-                          as_counts = TRUE,
                           api_base_url = API_BASE_URL,
                           poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
                           poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
@@ -420,7 +413,7 @@ predict_query <- function(query,
   transformer <- get_output_transformer(model_id)
 
   # Apply transformation
-  result <- transformer(final_json, as_counts = as_counts)
+  result <- transformer(final_json)
 
   return(result)
 }

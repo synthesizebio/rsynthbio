@@ -4,13 +4,10 @@
 \alias{transform_metadata_output}
 \title{Transform Metadata Model Output (Internal)}
 \usage{
-transform_metadata_output(final_json, as_counts = TRUE)
+transform_metadata_output(final_json)
 }
 \arguments{
 \item{final_json}{The parsed API response list}
-
-\item{as_counts}{Logical, if FALSE, transforms the predicted expression counts into logCPM
-(default is TRUE, returning raw counts).}
 }
 \value{
 A list with:

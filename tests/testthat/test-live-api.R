@@ -84,7 +84,6 @@ test_that("predict_query live call success (bulk)", {
     results <- predict_query(
         query = test_query,
         model_id = "gem-1-bulk",
-        as_counts = TRUE
     )
 
     expect_type(results, "list")
@@ -140,7 +139,6 @@ test_that("predict_query live call success (single-cell)", {
     results <- predict_query(
         query = test_query,
         model_id = "gem-1-sc",
-        as_counts = TRUE
     )
 
     expect_type(results, "list")
@@ -207,14 +205,13 @@ test_that("predict_query live call invalid UBERON (bulk)", {
         predict_query(
             query = invalid_query,
             model_id = "gem-1-bulk",
-            as_counts = TRUE
         ),
         "Model query failed"
     )
 
     # Verify the error contains validation details
     error_result <- tryCatch(
-        predict_query(query = invalid_query, model_id = "gem-1-bulk", as_counts = TRUE),
+        predict_query(query = invalid_query, model_id = "gem-1-bulk"),
         error = function(e) e
     )
 
@@ -252,14 +249,13 @@ invalid_query$inputs[[1]]$tissue_ontology_id <- "UBERON:999999" # Invalid ID
         predict_query(
             query = invalid_query,
             model_id = "gem-1-sc",
-            as_counts = TRUE
         ),
         "Model query failed"
     )
 
     # Verify the error contains validation details
     error_result <- tryCatch(
-        predict_query(query = invalid_query, model_id = "gem-1-sc", as_counts = TRUE),
+        predict_query(query = invalid_query, model_id = "gem-1-sc"),
         error = function(e) e
     )
 
@@ -292,7 +288,6 @@ test_that("predict_query download URL flow works correctly", {
     result_with_url <- predict_query(
         query = test_query,
         model_id = "gem-1-bulk",
-        as_counts = TRUE,
         return_download_url = TRUE
     )
 
@@ -375,7 +370,7 @@ test_that("predict_query returns biologically valid expression data (differentia
     de_query$sampling_strategy <- "sample generation"
     de_query$seed <- 42
 
-    results <- predict_query(query = de_query, model_id = "gem-1-bulk", as_counts = TRUE)
+    results <- predict_query(query = de_query, model_id = "gem-1-bulk")
 
     # Split samples by condition
     group1_idx <- 1:5
@@ -511,7 +506,7 @@ test_that("predict_query returns biologically valid single-cell expression data 
     sc_de_query$sampling_strategy <- "mean estimation"
     sc_de_query$seed <- 123
 
-    results <- predict_query(query = sc_de_query, model_id = "gem-1-sc", as_counts = TRUE)
+    results <- predict_query(query = sc_de_query, model_id = "gem-1-sc")
 
     # Split samples by condition
     group1_idx <- 1:10
@@ -677,7 +672,6 @@ test_that("predict_query with total_count parameter works correctly", {
     results <- predict_query(
         query = test_query,
         model_id = "gem-1-bulk",
-        as_counts = TRUE
     )
 
     expect_type(results, "list")
@@ -699,104 +693,6 @@ test_that("predict_query with total_count parameter works correctly", {
     message("total_count parameter test passed.")
 })
 
-test_that("predict_query with deterministic_latents produces reproducible results", {
-    skip_if_not(
-        api_key_available(),
-        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-    )
-
-    message("\nTesting predict_query with deterministic_latents for reproducibility...")
-
-    test_query <- get_example_query(model_id = "gem-1-bulk")$example_query
-    test_query$seed <- 12345 # Set a seed for consistency
-    test_query$deterministic_latents <- TRUE
-
-    # First call with deterministic_latents = TRUE
-    results1 <- predict_query(
-        query = test_query,
-        model_id = "gem-1-bulk",
-        as_counts = TRUE
-    )
-
-    # Second call with same query and deterministic_latents = TRUE
-    results2 <- predict_query(
-        query = test_query,
-        model_id = "gem-1-bulk",
-        as_counts = TRUE
-    )
-
-    expect_type(results1, "list")
-    expect_type(results2, "list")
-
-    # With deterministic_latents, results should be identical
-    expect_equal(dim(results1$expression), dim(results2$expression),
-        info = "Expression dimensions should match"
-    )
-
-    # Check that at least some values are identical (allowing for potential minor differences)
-    # In practice, deterministic_latents should make results highly similar if not identical
-    correlation <- cor(
-        as.vector(as.matrix(results1$expression)),
-        as.vector(as.matrix(results2$expression))
-    )
-    expect_true(correlation > 0.99,
-        info = sprintf("With deterministic_latents, results should be highly correlated (got r=%.4f)", correlation)
-    )
-
-    message(sprintf("Deterministic latents test passed (correlation: %.6f)", correlation))
-})
-
-test_that("predict_query with deterministic_latents FALSE shows variation", {
-    skip_if_not(
-        api_key_available(),
-        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-    )
-
-    message("\nTesting predict_query with deterministic_latents=FALSE shows variation...")
-
-    test_query <- get_example_query(model_id = "gem-1-bulk")$example_query
-    test_query$seed <- NULL # Remove seed to allow variation
-    test_query$deterministic_latents <- FALSE
-
-    # First call with deterministic_latents = FALSE
-    results1 <- predict_query(
-        query = test_query,
-        model_id = "gem-1-bulk",
-        as_counts = TRUE
-    )
-
-    # Second call with deterministic_latents = FALSE
-    results2 <- predict_query(
-        query = test_query,
-        model_id = "gem-1-bulk",
-        as_counts = TRUE
-    )
-
-    expect_type(results1, "list")
-    expect_type(results2, "list")
-
-    # With deterministic_latents = FALSE and no seed, results should show some variation
-    expect_equal(dim(results1$expression), dim(results2$expression),
-        info = "Expression dimensions should match"
-    )
-
-    # Calculate correlation - should be high but not perfect
-    correlation <- cor(
-        as.vector(as.matrix(results1$expression)),
-        as.vector(as.matrix(results2$expression))
-    )
-
-    # Results should still be similar (same biological context) but not identical
-    expect_true(correlation < 1.0,
-        info = sprintf("Without deterministic_latents, results should show some variation (got r=%.4f)", correlation)
-    )
-    expect_true(correlation > 0.8,
-        info = sprintf("Results should still be reasonably correlated (got r=%.4f)", correlation)
-    )
-
-    message(sprintf("Stochastic latents test passed (correlation: %.4f, showing expected variation)", correlation))
-})
-
 test_that("predict_query with total_count for single-cell", {
     skip_if_not(
         api_key_available(),
@@ -812,7 +708,6 @@ test_that("predict_query with total_count for single-cell", {
     results <- predict_query(
         query = test_query,
         model_id = "gem-1-sc",
-        as_counts = TRUE
     )
 
     expect_type(results, "list")
@@ -850,7 +745,6 @@ test_that("predict_query with both total_count and deterministic_latents", {
     results <- predict_query(
         query = test_query,
         model_id = "gem-1-bulk",
-        as_counts = TRUE
     )
 
     expect_type(results, "list")

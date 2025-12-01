@@ -103,11 +103,11 @@ list_models()
 ```{r query, eval=FALSE}
 # Create a query for the bulk model
 bulk_query <- get_example_query(model_id = "gem-1-bulk")
-bulk <- predict_query(bulk_query, model_id = "gem-1-bulk", as_counts = TRUE)
+bulk <- predict_query(bulk_query, model_id = "gem-1-bulk")
 
 # Create a query for the single-cell model
 sc_query <- get_example_query(model_id = "gem-1-sc")
-sc <- predict_query(sc_query, model_id = "gem-1-sc", as_counts = TRUE)
+sc <- predict_query(sc_query, model_id = "gem-1-sc")
 ```
 
 ### Creating a Query
@@ -138,7 +138,7 @@ Each input contains `metadata` (describing the biological sample) and `num_sampl
 Once your query is ready, you can send it to the API to generate gene expression data:
 
 ```{r predict, eval=FALSE}
-result <- predict_query(query, model_id = "gem-1-bulk", as_counts = TRUE)
+result <- predict_query(query, model_id = "gem-1-bulk")
 ```
 
 This result will be a list of two dataframes: `metadata` and `expression`

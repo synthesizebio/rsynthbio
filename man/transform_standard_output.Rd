@@ -4,13 +4,10 @@
 \alias{transform_standard_output}
 \title{Transform Standard Model Output (Internal)}
 \usage{
-transform_standard_output(final_json, as_counts = TRUE)
+transform_standard_output(final_json)
 }
 \arguments{
 \item{final_json}{The parsed API response list}
-
-\item{as_counts}{Logical, if FALSE, transforms the predicted expression counts into logCPM
-(default is TRUE, returning raw counts).}
 }
 \value{
 A list with:

@@ -7,7 +7,6 @@
 predict_query(
   query,
   model_id,
-  as_counts = TRUE,
   api_base_url = API_BASE_URL,
   poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
   poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
@@ -29,9 +28,6 @@ optional fields:
 
 \item{model_id}{Character string specifying the model ID (e.g., "gem-1-bulk", "gem-1-sc").
 Use `list_models()` to see available models.}
-
-\item{as_counts}{Logical, if FALSE, transforms the predicted expression counts
-into logCPM (default is TRUE, returning raw counts).}
 
 \item{api_base_url}{The base URL for the API server. Default is API_BASE_URL.}
 
@@ -70,15 +66,11 @@ models <- list_models()
 query <- get_example_query(model_id = "gem-1-bulk")
 
 # Request raw counts
-result <- predict_query(query, model_id = "gem-1-bulk", as_counts = TRUE)
+result <- predict_query(query, model_id = "gem-1-bulk")
 
 # Access the results
 metadata <- result$metadata
 expression <- result$expression
-
-# Request log CPM transformed data
-log_result <- predict_query(query, model_id = "gem-1-bulk", as_counts = FALSE)
-log_expression <- log_result$expression
 
 # Explore the top expressed genes in the first sample
 head(sort(expression[1, ], decreasing = TRUE))
