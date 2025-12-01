@@ -253,24 +253,8 @@ test_that("list_models mock test", {
   original_api_key <- setup_test_environment()
   on.exit(restore_api_key(original_api_key))
 
-  mock_list_models <- mockery::mock(
-    list(
-      list(id = "gem-1-bulk", name = "GEM-1 Bulk"),
-      list(id = "gem-1-sc", name = "GEM-1 Single Cell")
-    ),
-    cycle <- TRUE
-  )
-
-  stub(list_models, "has_synthesize_token", mockery::mock(TRUE, cycle = TRUE))
-  stub(list_models, "GET", function(...) {
-    structure(
-      list(status_code = 200),
-      class = "response"
-    )
-  })
-  stub(list_models, "status_code", function(x) 200)
-  stub(list_models, "content", function(x, type) '[{"id":"gem-1-bulk","name":"GEM-1 Bulk"},{"id":"gem-1-sc","name":"GEM-1 Single Cell"}]')
-  stub(list_models, "fromJSON", function(x, ...) {
+  # Stub make_api_request to return mock data
+  stub(list_models, "make_api_request", function(url, context_msg) {
     list(
       list(id = "gem-1-bulk", name = "GEM-1 Bulk"),
       list(id = "gem-1-sc", name = "GEM-1 Single Cell")
@@ -286,16 +270,8 @@ test_that("get_example_query mock test", {
   original_api_key <- setup_test_environment()
   on.exit(restore_api_key(original_api_key))
 
-  stub(get_example_query, "has_synthesize_token", mockery::mock(TRUE, cycle = TRUE))
-  stub(get_example_query, "GET", function(...) {
-    structure(
-      list(status_code = 200),
-      class = "response"
-    )
-  })
-  stub(get_example_query, "status_code", function(x) 200)
-  stub(get_example_query, "content", function(x, type) '{"inputs":[{"metadata":{"cell_type_ontology_id":"CL:0000786"},"num_samples":5}],"mode":"mean estimation"}')
-  stub(get_example_query, "fromJSON", function(x, ...) {
+  # Stub make_api_request to return mock data
+  stub(get_example_query, "make_api_request", function(url, context_msg) {
     list(
       inputs = list(
         list(

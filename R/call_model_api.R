@@ -14,45 +14,8 @@
 #' @importFrom jsonlite fromJSON
 #' @export
 list_models <- function(api_base_url = API_BASE_URL) {
-  if (!has_synthesize_token()) {
-    stop("Please set your API key for Synthesize Bio using set_synthesize_token()")
-  }
-
   url <- paste0(api_base_url, "/api/models")
-
-  response <- tryCatch(
-    {
-      GET(
-        url = url,
-        add_headers(
-          Accept = "application/json",
-          Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY"))
-        ),
-        timeout(DEFAULT_TIMEOUT)
-      )
-    },
-    error = function(e) {
-      stop(paste0("List models request failed due to a network issue: ", e$message))
-    }
-  )
-
-  if (status_code(response) >= 400) {
-    stop(paste0(
-      "List models request failed with status ",
-      status_code(response), ": ", content(response, "text")
-    ))
-  }
-
-  parsed_content <- tryCatch(
-    {
-      fromJSON(content(response, "text"), simplifyDataFrame = TRUE)
-    },
-    error = function(e) {
-      stop(paste0("Failed to decode JSON from list models response: ", e$message))
-    }
-  )
-
-  return(parsed_content)
+  return(make_api_request(url, "List models"))
 }
 
 #' @title Get Example Query for Model
@@ -77,45 +40,8 @@ list_models <- function(api_base_url = API_BASE_URL) {
 #' @importFrom jsonlite fromJSON
 #' @export
 get_example_query <- function(model_id, api_base_url = API_BASE_URL) {
-  if (!has_synthesize_token()) {
-    stop("Please set your API key for Synthesize Bio using set_synthesize_token()")
-  }
-
   url <- paste0(api_base_url, "/api/models/", model_id, "/example-query")
-
-  response <- tryCatch(
-    {
-      GET(
-        url = url,
-        add_headers(
-          Accept = "application/json",
-          Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY"))
-        ),
-        timeout(DEFAULT_TIMEOUT)
-      )
-    },
-    error = function(e) {
-      stop(paste0("Get example query request failed due to a network issue: ", e$message))
-    }
-  )
-
-  if (status_code(response) >= 400) {
-    stop(paste0(
-      "Get example query request failed with status ",
-      status_code(response), ": ", content(response, "text")
-    ))
-  }
-
-  parsed_content <- tryCatch(
-    {
-      fromJSON(content(response, "text"), simplifyDataFrame = TRUE)
-    },
-    error = function(e) {
-      stop(paste0("Failed to decode JSON from example query response: ", e$message))
-    }
-  )
-
-  return(parsed_content)
+  return(make_api_request(url, "Get example query"))
 }
 
 #' @title Start Model Query
@@ -280,6 +206,54 @@ get_json <- function(url) {
     },
     error = function(e) {
       stop(paste0("Failed to decode JSON from download URL response: ", e$message))
+    }
+  )
+
+  return(parsed_content)
+}
+
+#' @title Make Authenticated API Request
+#' @description Internal helper to make authenticated GET requests
+#' @param url The URL to fetch
+#' @param context_msg String describing the request context for error messages
+#' @return The parsed JSON content
+#' @importFrom httr GET add_headers content status_code timeout
+#' @importFrom jsonlite fromJSON
+#' @keywords internal
+make_api_request <- function(url, context_msg) {
+  if (!has_synthesize_token()) {
+    stop("Please set your API key for Synthesize Bio using set_synthesize_token()")
+  }
+
+  response <- tryCatch(
+    {
+      GET(
+        url = url,
+        add_headers(
+          Accept = "application/json",
+          Authorization = paste("Bearer", Sys.getenv("SYNTHESIZE_API_KEY"))
+        ),
+        timeout(DEFAULT_TIMEOUT)
+      )
+    },
+    error = function(e) {
+      stop(paste0(context_msg, " request failed due to a network issue: ", e$message))
+    }
+  )
+
+  if (status_code(response) >= 400) {
+    stop(paste0(
+      context_msg, " request failed with status ",
+      status_code(response), ": ", content(response, "text")
+    ))
+  }
+
+  parsed_content <- tryCatch(
+    {
+      fromJSON(content(response, "text"), simplifyDataFrame = TRUE)
+    },
+    error = function(e) {
+      stop(paste0("Failed to decode JSON from ", tolower(context_msg), " response: ", e$message))
     }
   )
 
