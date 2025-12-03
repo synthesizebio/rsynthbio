@@ -1,7 +1,7 @@
 #' Transform Standard Model Output (Internal)
 #'
 #' @description Extracts and combines gene expression data from a standard API response
-#' (e.g., gem-1-bulk, gem-1-sc models). This is the default transformer for most models.
+#' (e.g., gem-1-bulk, gem-1-sc models).
 #'
 #' @param final_json The parsed API response list
 #' @return A list with:
@@ -54,19 +54,14 @@ transform_baseline_output <- function(final_json) {
 
 #' Transform Metadata Model Output (Internal)
 #'
-#' @description Transforms output from metadata-enhanced models such as
-#' gem-1-bulk_predict-metadata and gem-1-sc_predict-metadata. These models
-#' provide additional metadata fields in their output.
+#' @description Default output transformer, does not modify the response from the server.
 #'
 #' @param final_json The parsed API response list
-#' @return A list with:
-#'         - metadata: data.frame containing sample metadata (with enhanced fields)
-#'         - expression: data.frame containing combined gene expression data
-#'         - latents: data.frame containing embeddings (if requested)
+#' @return the same final_json
 #' @keywords internal
 default_output_transformer <- function(final_json) {
   # return the entire output
-  return (final_json$outputs)
+  return (final_json)
 }
 
 #' Output Transformer Registry
