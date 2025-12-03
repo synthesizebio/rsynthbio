@@ -10,14 +10,9 @@ default_output_transformer(final_json)
 \item{final_json}{The parsed API response list}
 }
 \value{
-A list with:
-        - metadata: data.frame containing sample metadata (with enhanced fields)
-        - expression: data.frame containing combined gene expression data
-        - latents: data.frame containing embeddings (if requested)
+the same final_json
 }
 \description{
-Transforms output from metadata-enhanced models such as
-gem-1-bulk_predict-metadata and gem-1-sc_predict-metadata. These models
-provide additional metadata fields in their output.
+Default output transformer, does not modify the response from the server.
 }
 \keyword{internal}

@@ -26,20 +26,16 @@ test_that("reference conditioning endpoint returns valid data", {
 
     query <- get_example_query(model_id = "gem-1-bulk_reference-conditioning")$example_query
     results <- predict_query(query = query, model_id = "gem-1-bulk_reference-conditioning")
-    print(names(results))
+
     expect_type(results, "list")
 
-    expect_true("outputs" %in% names(results))
-    expect_type(results$outputs, "list")
-
-    outputs <- results$outputs
-    expect_true("metadata" %in% names(outputs))
-    expect_type(outputs$metadata, "list")
-    expect_s3_class(outputs$metadata, "data.frame")
-    expect_true(nrow(outputs$metadata) > 0)
-    expect_true("latents" %in% names(outputs))
-    expect_type(outputs$latents, "list")
-    expect_s3_class(outputs$latents, "data.frame")
-    expect_true(nrow(outputs$latents) > 0)
-    expect_true(ncol(outputs$latents) > 0)
+    expect_true("metadata" %in% names(results))
+    expect_type(results$metadata, "list")
+    expect_s3_class(results$metadata, "data.frame")
+    expect_true(nrow(results$metadata) > 0)
+    expect_true("latents" %in% names(results))
+    expect_type(results$latents, "list")
+    expect_s3_class(results$latents, "data.frame")
+    expect_true(nrow(results$latents) > 0)
+    expect_true(ncol(results$latents) > 0)
 })

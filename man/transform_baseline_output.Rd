@@ -17,6 +17,6 @@ A list with:
 }
 \description{
 Extracts and combines gene expression data from a standard API response
-(e.g., gem-1-bulk, gem-1-sc models). This is the default transformer for most models.
+(e.g., gem-1-bulk, gem-1-sc models).
 }
 \keyword{internal}

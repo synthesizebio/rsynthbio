@@ -35,6 +35,4 @@ test_that("predict metadata endpoint returns valid data", {
     expect_type(outputs$classifier_probs, "list")
     expect_s3_class(outputs$classifier_probs, "data.frame")
     expect_true(nrow(outputs$classifier_probs) > 0)
-    expect_s3_class(results$metadata, "data.frame")
-    expect_true(nrow(results$metadata) > 0)
 })
