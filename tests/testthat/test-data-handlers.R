@@ -132,8 +132,8 @@ mock_api_response <- list(
 )
 
 # Tests for transform_standard_output function (formerly extract_expression_data)
-test_that("transform_standard_output processes API response correctly", {
-  result_counts <- rsynthbio:::transform_standard_output(mock_api_response)
+test_that("transform_baseline_output processes API response correctly", {
+  result_counts <- rsynthbio:::transform_baseline_output(mock_api_response)
 
   # Check structure
   expect_type(result_counts, "list")
@@ -151,10 +151,10 @@ test_that("transform_standard_output processes API response correctly", {
 })
 
 
-test_that("transform_standard_output correctly assigns sample IDs", {
+test_that("transform_baseline_output correctly assigns sample IDs", {
 
   # Test sample ID generation
-  result <- rsynthbio:::transform_standard_output(mock_api_response)
+  result <- rsynthbio:::transform_baseline_output(mock_api_response)
 
   # Check sample IDs match between metadata and expression
   expect_equal(
