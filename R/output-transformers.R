@@ -9,7 +9,7 @@
 #'         - expression: data.frame containing combined gene expression data
 #'         - latents: data.frame containing embeddings (if requested)
 #' @keywords internal
-transform_standard_output <- function(final_json) {
+transform_baseline_output <- function(final_json) {
   # Extract the expression matrices and combine them
   counts_list <- final_json$outputs$counts
 
@@ -64,11 +64,9 @@ transform_standard_output <- function(final_json) {
 #'         - expression: data.frame containing combined gene expression data
 #'         - latents: data.frame containing embeddings (if requested)
 #' @keywords internal
-transform_metadata_output <- function(final_json) {
-  # For now, use the same logic as standard output
-  # In the future, this can be customized to handle additional metadata fields
-  # that are specific to metadata-enhanced models
-  transform_standard_output(final_json)
+default_output_transformer <- function(final_json) {
+  # return the entire output
+  return (final_json$outputs)
 }
 
 #' Output Transformer Registry
@@ -77,9 +75,10 @@ transform_metadata_output <- function(final_json) {
 #' Models not in the registry will use the default standard transformer.
 #' @keywords internal
 OUTPUT_TRANSFORMERS <- list(
-  "gem-1-bulk_predict-metadata" = transform_metadata_output,
-  "gem-1-sc_predict-metadata" = transform_metadata_output
-  # Default fallback: NULL means use transform_standard_output
+  "gem-1-bulk" = transform_baseline_output,
+  "gem-1-sc" = transform_baseline_output,
+  "gem-1-bulk_reference-conditioning" = transform_baseline_output,
+  "gem-1-sc_reference-conditioning" = transform_baseline_output
 )
 
 #' Get Output Transformer for Model (Internal)
@@ -97,7 +96,7 @@ get_output_transformer <- function(model_id) {
 
   # If not found, use standard transformer as default
   if (is.null(transformer)) {
-    transformer <- transform_standard_output
+    transformer <- default_output_transformer
   }
 
   return(transformer)
