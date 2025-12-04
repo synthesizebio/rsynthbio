@@ -6,7 +6,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-    
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 ```
 
 
-`rsynthbio` is an R package that provides a convenient interface to the [Synthesize Bio](https://www.synthesize.bio/) API, allowing users to generate realistic gene expression data based on specified biological conditions. 
+`rsynthbio` is an R package that provides a convenient interface to the [Synthesize Bio](https://www.synthesize.bio/) API, allowing users to generate realistic gene expression data based on specified biological conditions.
 This package enables researchers to easily access AI-generated transcriptomic data for various modalities including bulk RNA-seq and single-cell RNA-seq.
 
 Alternatively, you can AI generate datasets from our [web platform](https://app.synthesize.bio/datasets/).
@@ -58,7 +58,7 @@ set_synthesize_token()
 set_synthesize_token(use_keyring = TRUE)
 ```
 
-Loading your API key for a session. 
+Loading your API key for a session.
 
 ```{r, eval=FALSE}
 # In future sessions, load the stored token
@@ -86,39 +86,37 @@ Never hard-code your token in scripts that will be shared or committed to versio
 
 ## Designing Queries for Models
 
-### Choosing a Modality
+### Choosing a Model
 
-The modality (data type to generate) is specified in the query using `get_valid_query()`:
+The first step is to identify which model you want to use for prediction:
 
-- **`bulk`**: Bulk RNA-seq (asynchronous under the hood, returned as data frames)
-- **`single-cell`**: Single-cell RNA-seq (asynchronous under the hood, returned as data frames)
+- **`gem-1-bulk`**: Bulk RNA-seq (asynchronous under the hood, returned as data frames)
+- **`gem-1-sc`**: Single-cell RNA-seq (asynchronous under the hood, returned as data frames)
 
-You can check which modalities are available programmatically:
+You can check which models are available programmatically:
 
-```{r modalities}
-# Check available modalities
-get_valid_modalities()
+```{r models}
+# Check available models
+list_models()
 ```
 
-You do not need to specify any internal API slugs. The library maps modalities to the appropriate model endpoints automatically.
-
 ```{r query, eval=FALSE}
-# Create a bulk query
-bulk_query <- get_valid_query(modality = "bulk")
-bulk <- predict_query(bulk_query, as_counts = TRUE)
+# Create a query for the bulk model
+bulk_query <- get_example_query(model_id = "gem-1-bulk")
+bulk <- predict_query(bulk_query, model_id = "gem-1-bulk")
 
-# Create a single-cell query
-sc_query <- get_valid_query(modality = "single-cell")
-sc <- predict_query(sc_query, as_counts = TRUE)
+# Create a query for the single-cell model
+sc_query <- get_example_query(model_id = "gem-1-sc")
+sc <- predict_query(sc_query, model_id = "gem-1-sc")
 ```
 
 ### Creating a Query
 
-The structure of the query required by the API is fixed for the currently supported model. You can use `get_valid_query()` to get a correctly structured example list.
+The structure of the query required by the API is specific to each model. You can use `get_example_query()` to get a correctly structured example for your chosen model.
 
 ```{r query-example}
-# Get the example query structure
-example_query <- get_valid_query()
+# Get the example query structure for a specific model
+example_query <- get_example_query(model_id = "gem-1-bulk")
 
 # Inspect the query structure
 str(example_query)
@@ -126,11 +124,10 @@ str(example_query)
 
 The query consists of:
 
-1. **`modality`**: The type of gene expression data to generate ("bulk" or "single-cell")
-2. **`mode`**: The prediction mode that controls how expression data is generated:
+1. **`mode`**: The prediction mode that controls how expression data is generated:
    - **"sample generation"**: Generates realistic-looking synthetic data with measurement error (bulk only)
    - **"mean estimation"**: Provides stable mean estimates of expression levels (bulk and single-cell)
-3. **`inputs`**: A list of biological conditions to generate data for
+2. **`inputs`**: A list of biological conditions to generate data for
 
 Each input contains `metadata` (describing the biological sample) and `num_samples` (how many samples to generate).
 
@@ -141,7 +138,7 @@ Each input contains `metadata` (describing the biological sample) and `num_sampl
 Once your query is ready, you can send it to the API to generate gene expression data:
 
 ```{r predict, eval=FALSE}
-result <- predict_query(query, as_counts = TRUE)
+result <- predict_query(query, model_id = "gem-1-bulk")
 ```
 
 This result will be a list of two dataframes: `metadata` and `expression`
@@ -165,6 +162,7 @@ You can customize the polling behavior if needed:
 # Increase timeout for large queries (default: 900 seconds = 15 minutes)
 result <- predict_query(
   query,
+  model_id = "gem-1-bulk",
   poll_timeout_seconds = 1800, # 30 minutes
   poll_interval_seconds = 5 # Check every 5 seconds instead of 2
 )
@@ -174,7 +172,7 @@ result <- predict_query(
 
 The input metadata is a list of lists. This is the full list of valid metadata keys:
 
-__Biological:__  
+__Biological:__
 
 - ``age_years``
 - ``cell_line_ontology_id``
@@ -188,14 +186,14 @@ __Biological:__
 - ``sex`` ("male", "female")
 - ``tissue_ontology_id``
 
-__Perturbational:__  
+__Perturbational:__
 
 - ``perturbation_dose``
 - ``perturbation_ontology_id``
 - ``perturbation_time``
 - ``perturbation_type`` ("coculture","compound","control","crispr","genetic","infection","other","overexpression","peptide or biologic","shrna","sirna")
 
-__Technical:__  
+__Technical:__
 
 - ``study`` (Bioproject ID)
 - ``library_selection`` (e.g., "cDNA", "polyA", "Oligo-dT" - see https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-selection)
@@ -217,7 +215,7 @@ The following are the valid values or expected formats for selected metadata key
 
 We highly recommend using the [EMBL-EBI Ontology Lookup Service](https://www.ebi.ac.uk/ols4/) to find valid IDs for your metadata.
 
-Models have a limited acceptable range of metadata input values. 
+Models have a limited acceptable range of metadata input values.
 If you provide a value that is not in the acceptable range, the API will return an error.
 
 ### Query Parameters
@@ -238,15 +236,15 @@ Available modes:
 
 ```{r mode-examples, eval=FALSE}
 # Bulk query with sample generation (default for bulk)
-bulk_query <- get_valid_query(modality = "bulk")
+bulk_query <- get_example_query(model_id = "gem-1-bulk")
 bulk_query$mode <- "sample generation"
 
 # Bulk query with mean estimation
-bulk_query_mean <- get_valid_query(modality = "bulk")
+bulk_query_mean <- get_example_query(model_id = "gem-1-bulk")
 bulk_query_mean$mode <- "mean estimation"
 
 # Single-cell query (must use mean estimation)
-sc_query <- get_valid_query(modality = "single-cell")
+sc_query <- get_example_query(model_id = "gem-1-sc")
 sc_query$mode <- "mean estimation" # Required for single-cell
 ```
 
@@ -257,7 +255,7 @@ Library size used when converting predicted log CPM back to raw counts. Higher v
 
 ```{r total-count-example, eval=FALSE}
 # Create a query and add custom total_count
-query <- get_valid_query(modality = "bulk")
+query <- get_example_query(model_id = "gem-1-bulk")
 query$total_count <- 5000000
 ```
 
@@ -269,7 +267,7 @@ If `TRUE`, the model uses the mean of each latent distribution (`p(z|metadata)` 
 
 ```{r deterministic-example, eval=FALSE}
 # Create a query and enable deterministic latents
-query <- get_valid_query(modality = "bulk")
+query <- get_example_query(model_id = "gem-1-bulk")
 query$deterministic_latents <- TRUE
 ```
 
@@ -279,7 +277,7 @@ Random seed for reproducibility when using stochastic sampling.
 
 ```{r seed-example, eval=FALSE}
 # Create a query with a specific seed
-query <- get_valid_query(modality = "bulk")
+query <- get_example_query(model_id = "gem-1-bulk")
 query$seed <- 42
 ```
 
@@ -287,12 +285,12 @@ You can combine multiple parameters in a single query:
 
 ```{r combined-params, eval=FALSE}
 # Create a query and add multiple parameters
-query <- get_valid_query(modality = "bulk")
+query <- get_example_query(model_id = "gem-1-bulk")
 query$total_count <- 8000000
 query$deterministic_latents <- TRUE
 query$mode <- "mean estimation"
 
-results <- predict_query(query)
+results <- predict_query(query, model_id = "gem-1-bulk")
 ```
 
 ### Modifying Query Inputs
@@ -301,7 +299,7 @@ You can customize the query inputs to fit your specific research needs:
 
 ```{r modify-query, eval=FALSE}
 # Get a base query
-query <- get_valid_query()
+query <- get_example_query(model_id = "gem-1-bulk")
 
 # Adjust number of samples for the first input
 query$inputs[[1]]$num_samples <- 10
@@ -346,17 +344,6 @@ write.csv(result$metadata, "sample_metadata.csv")
 ```
 
 
-### Custom Validation
-
-You can validate your queries before sending them to the API:
-
-```{r validation, eval=FALSE}
-# Validate structure
-validate_query(query)
-
-# Validate modality
-validate_modality(query)
-```
 
 ## Session info
 

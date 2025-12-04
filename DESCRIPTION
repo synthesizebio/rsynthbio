@@ -1,25 +1,23 @@
 Type: Package
 Package: rsynthbio
 Title: Synthesize Bio API Wrapper
-Version: 3.0.2
-Authors@R: c(
-    person("Candace", "Savonen", , 
-    c("cansav09@gmail.com", "candace@synthesize.bio"),
+Version: 4.0.0
+Authors@R: person(given = "Synthesize Bio",
+    email = "candace@synthesize.bio",
     role = c("aut", "cre"))
-    )
 Description: Access Synthesize Bio models from their API <https://app.synthesize.bio/> using
   this wrapper that provides a convenient interface to the Synthesize Bio API, allowing users
-  to generate realistic gene expression data based on specified biological conditions. This package 
-  enables researchers to easily access AI-generated transcriptomic data for various 
+  to generate realistic gene expression data based on specified biological conditions. This package
+  enables researchers to easily access AI-generated transcriptomic data for various
   modalities including bulk RNA-seq, single-cell RNA-seq, microarray data, and more.
 URL: https://github.com/synthesizebio/rsynthbio
 BugReports: https://github.com/synthesizebio/rsynthbio/issues
 Imports:
     getPass,
-    keyring, 
+    keyring,
     jsonlite,
     httr
-Suggests: 
+Suggests:
     rmarkdown,
     knitr,
     testthat (>= 3.0.2),

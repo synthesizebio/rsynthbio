@@ -77,34 +77,34 @@ Please see the [Getting Started guide](https://synthesizebio.github.io/rsynthbio
 
 ### Designing Queries
 
-#### Choosing a Modality
+#### Choosing a Model
 
-The modality (data type to generate) is specified when creating a query:
+The first step is to identify which model you want to use for prediction:
 
 ```
-# Check available modalities
-get_valid_modalities()
-# Returns: "bulk" "single-cell"
+# Check available models
+models <- list_models()
+print(models)
 
-# Create a bulk RNA-seq query
-bulk_query <- get_valid_query(modality = "bulk")
+# Create a query for the bulk RNA-seq model
+bulk_query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
-# Create a single-cell RNA-seq query
-sc_query <- get_valid_query(modality = "single-cell")
+# Create a query for the single-cell model
+sc_query <- get_example_query(model_id = "gem-1-sc")$example_query
 ```
 
-Currently supported modalities:
+Currently supported models:
 
-- **`bulk`**: Bulk RNA-seq data (supports both "sample generation" and "mean estimation" modes)
-- **`single-cell`**: Single-cell RNA-seq data (supports "mean estimation" mode only)
+- **`gem-1-bulk`**: Bulk RNA-seq data (supports both "sample generation" and "mean estimation" modes)
+- **`gem-1-sc`**: Single-cell RNA-seq data (supports "mean estimation" mode only)
 
 #### Query Structure
 
-The `get_valid_query()` function returns a correctly structured example query:
+The `get_example_query()` function returns a correctly structured example query for a specific model:
 
 ```
-# Get a sample query
-query <- get_valid_query(modality = "bulk")
+# Get a sample query for a specific model
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Inspect the query structure
 str(query)
@@ -112,11 +112,10 @@ str(query)
 
 The query consists of:
 
-1. **`modality`**: The type of gene expression data to generate ("bulk" or "single-cell")
-2. **`mode`**: The prediction mode that controls how expression data is generated
+1. **`mode`**: The prediction mode that controls how expression data is generated
    - **"sample generation"**: Realistic synthetic data with measurement error (bulk only)
    - **"mean estimation"**: Stable mean estimates (bulk and single-cell)
-3. **`inputs`**: A list of biological conditions to generate data for
+2. **`inputs`**: A list of biological conditions to generate data for
 
 Each input contains:
 
@@ -131,7 +130,7 @@ The API uses an **asynchronous model**: the query is submitted, the system polls
 
 ```
 # Request raw counts data
-result <- predict_query(query, as_counts = TRUE)
+result <- predict_query(query, model_id = "gem-1-bulk")
 
 # The function will automatically:
 # 1. Submit your query to the API
@@ -152,27 +151,28 @@ You can customize the polling behavior and model parameters:
 # Adjust polling timeout (default: 15 minutes)
 result <- predict_query(
   query,
+  model_id = "gem-1-bulk",
   poll_timeout_seconds = 1800,  # 30 minutes
   poll_interval_seconds = 5      # Check every 5 seconds
 )
 
 # Get log-transformed CPM instead of raw counts
-result_log <- predict_query(query, as_counts = FALSE)
+result_log <- predict_query(query, model_id = "gem-1-bulk")
 
 # Use deterministic latents for reproducible results
 # (removes randomness from latent sampling)
 query$deterministic_latents <- TRUE
-result_det <- predict_query(query)
+result_det <- predict_query(query, model_id = "gem-1-bulk")
 
 # Specify custom library size (total count)
 query$total_count <- 5000000
-result_custom <- predict_query(query)
+result_custom <- predict_query(query, model_id = "gem-1-bulk")
 
 # Combine multiple options in the query
-query_combined <- get_valid_query()
+query_combined <- get_example_query(model_id = "gem-1-bulk")
 query_combined$total_count <- 8000000
 query_combined$deterministic_latents <- TRUE
-result_combined <- predict_query(query_combined, as_counts = TRUE)
+result_combined <- predict_query(query_combined, model_id = "gem-1-bulk")
 ```
 
 #### Query Parameters

@@ -4,22 +4,19 @@
 
 ## Release summary
 
-This is a major version release (3.0.2) with significant updates:
+This is a major version release (4.0.0) with significant architectural changes:
 
-- Migrated to async API model to match Synthesize Bio's new API architecture
-- Added support for single-cell RNA-seq data (new "single-cell" modality)
-- Updated to work with GEM-1 model from Synthesize Bio
-- Contains breaking changes to `predict_query()` function parameters
+- Updated client to be model-agnostic to support all current and future Synthesize Bio models
+- `model_id` is now passed directly to the API, removing the need for package updates for new models
+- Simplified API by removing hardcoded model validations
 
 ## Breaking changes
 
-This release includes intentional breaking changes:
+This release includes intentional breaking changes to support the model-agnostic design:
 
-- Changed API base URL from versioned endpoint to base URL
-- Removed `raw_response` and `url` parameters from `predict_query()`
-- Added new polling-related parameters for async API support
-
-These changes align the R package with the Python implementation and support the new API architecture.
+- `predict_query()` now requires a `model_id` parameter
+- `get_example_query(model_id)` replaces `get_valid_query()`
+- Removed `get_valid_query()`, `get_valid_modalities()`, and `validate_modality()`
 
 ## Test environments
 

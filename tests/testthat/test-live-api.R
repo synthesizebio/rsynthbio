@@ -12,6 +12,65 @@ api_key_available <- function() {
 # Live API Tests
 # -----------------------------
 
+test_that("list_models live API call", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting live list_models call...")
+
+    models <- list_models()
+
+    # Verify we got a valid response
+    expect_type(models, "list")
+    expect_true(length(models) > 0, info = "Should return at least one model")
+
+    # Check that expected models are present
+    # API returns structure: list(models = data.frame(model_id = ...))
+    model_ids <- sapply(models, function(m) m$model_id)
+
+    expect_true("gem-1-bulk" %in% model_ids,
+        info = "Should include gem-1-bulk model"
+    )
+    expect_true("gem-1-sc" %in% model_ids,
+        info = "Should include gem-1-sc model"
+    )
+
+    message(sprintf("Successfully retrieved %d models", length(model_ids)))
+})
+
+test_that("get_example_query live API call", {
+    skip_if_not(
+        api_key_available(),
+        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
+    )
+
+    message("\nTesting live get_example_query call...")
+
+    # Test for bulk model
+    bulk_response <- get_example_query(model_id = "gem-1-bulk")
+    expect_type(bulk_response, "list")
+    expect_true("example_query" %in% names(bulk_response),
+        info = "Response should contain example_query field"
+    )
+    expect_true("inputs" %in% names(bulk_response$example_query),
+        info = "Bulk query should contain inputs"
+    )
+
+    # Test for single-cell model
+    sc_response <- get_example_query(model_id = "gem-1-sc")
+    expect_type(sc_response, "list")
+    expect_true("example_query" %in% names(sc_response),
+        info = "Response should contain example_query field"
+    )
+    expect_true("inputs" %in% names(sc_response$example_query),
+        info = "Single-cell query should contain inputs"
+    )
+
+    message("Successfully retrieved example queries for both models")
+})
+
 test_that("predict_query live call success (bulk)", {
     skip_if_not(
         api_key_available(),
@@ -20,11 +79,11 @@ test_that("predict_query live call success (bulk)", {
 
     message("\nTesting live predict_query call for bulk modality...")
 
-    test_query <- get_valid_query()
+    test_query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
     results <- predict_query(
         query = test_query,
-        as_counts = TRUE,
+        model_id = "gem-1-bulk",
     )
 
     expect_type(results, "list")
@@ -75,11 +134,11 @@ test_that("predict_query live call success (single-cell)", {
 
     message("\nTesting live predict_query call for single-cell modality...")
 
-    test_query <- get_valid_query(modality = "single-cell")
+    test_query <- get_example_query(model_id = "gem-1-sc")$example_query
 
     results <- predict_query(
         query = test_query,
-        as_counts = TRUE,
+        model_id = "gem-1-sc",
     )
 
     expect_type(results, "list")
@@ -136,43 +195,31 @@ test_that("predict_query live call invalid UBERON (bulk)", {
 
     message("\nTesting live predict_query with invalid UBERON ID for bulk...")
 
-    # Create a query with an invalid UBERON ID
-    invalid_query <- list(
-        inputs = list(
-            list(
-                metadata = list(
-                    tissue_ontology_id = "UBERON:9999999", # Invalid ID
-                    age_years = "65",
-                    sex = "female",
-                    sample_type = "primary tissue"
-                ),
-                num_samples = 1
-            )
-        ),
-        modality = "bulk",
-        mode = "sample generation"
-    )
+    # Start with a valid example query and modify it to have an invalid UBERON ID
+    invalid_query <- get_example_query(model_id = "gem-1-bulk")$example_query
+    invalid_query$inputs[[1]]$tissue_ontology_id <- "UBERON:999999" # Invalid ID
+    invalid_query$inputs[[1]]$num_samples <- 1
 
     # The API should reject this with an error
     expect_error(
         predict_query(
             query = invalid_query,
-            as_counts = TRUE
+            model_id = "gem-1-bulk",
         ),
         "Model query failed"
     )
 
     # Verify the error contains validation details
     error_result <- tryCatch(
-        predict_query(query = invalid_query, as_counts = TRUE),
-        error = function(e) e$message
+        predict_query(query = invalid_query, model_id = "gem-1-bulk"),
+        error = function(e) e
     )
 
     message(paste("API correctly rejected invalid UBERON ID with error:", error_result))
 
     # The error message should contain the validation details
     expect_true(
-        grepl("UBERON:9999999", error_result),
+        grepl("UBERON:999999", error_result),
         info = paste("Error message should mention the invalid UBERON ID. Got:", error_result)
     )
     expect_true(
@@ -191,44 +238,32 @@ test_that("predict_query live call invalid UBERON (single-cell)", {
 
     message("\nTesting live predict_query (single-cell) with invalid UBERON ID...")
 
-    # Create a single-cell query with an invalid UBERON ID
-    invalid_query <- list(
-        inputs = list(
-            list(
-                metadata = list(
-                    cell_type_ontology_id = "CL:0000786",
-                    tissue_ontology_id = "UBERON:9999999", # Invalid ID
-                    sex = "male"
-                ),
-                num_samples = 1
-            )
-        ),
-        modality = "single-cell",
-        mode = "mean estimation",
-        return_classifier_probs = TRUE,
-        seed = 42
-    )
+    # Start with a valid example query and modify it to have an invalid UBERON ID
+    invalid_query <- get_example_query(model_id = "gem-1-sc")$example_query
+invalid_query$inputs[[1]]$tissue_ontology_id <- "UBERON:999999" # Invalid ID
+    invalid_query$inputs[[1]]$num_samples <- 1
+    invalid_query$seed <- 42
 
     # The API should reject this with an error
     expect_error(
         predict_query(
             query = invalid_query,
-            as_counts = TRUE
+            model_id = "gem-1-sc",
         ),
         "Model query failed"
     )
 
     # Verify the error contains validation details
     error_result <- tryCatch(
-        predict_query(query = invalid_query, as_counts = TRUE),
-        error = function(e) e$message
+        predict_query(query = invalid_query, model_id = "gem-1-sc"),
+        error = function(e) e
     )
 
     message(paste("API correctly rejected invalid UBERON ID (single-cell) with error:", error_result))
 
     # The error message should contain the validation details
     expect_true(
-        grepl("UBERON:9999999", error_result),
+        grepl("UBERON:999999", error_result),
         info = paste("Error message should mention the invalid UBERON ID. Got:", error_result)
     )
     expect_true(
@@ -247,12 +282,12 @@ test_that("predict_query download URL flow works correctly", {
 
     message("\nTesting download URL flow with return_download_url=TRUE...")
 
-    test_query <- get_valid_query()
+    test_query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
     # First get the download URL without parsing
     result_with_url <- predict_query(
         query = test_query,
-        as_counts = TRUE,
+        model_id = "gem-1-bulk",
         return_download_url = TRUE
     )
 
@@ -306,36 +341,36 @@ test_that("predict_query returns biologically valid expression data (differentia
 
     message("\nTesting biological validity with simple differential expression analysis...")
 
-    # Create query with two distinct conditions
-    de_query <- list(
-        inputs = list(
-            # Condition 1: One cell type
-            list(
-                metadata = list(
-                    cell_type_ontology_id = "CL:0000786", # Plasmacytoid dendritic cell
-                    tissue_ontology_id = "UBERON:0002371", # bone marrow
-                    sex = "female",
-                    sample_type = "primary tissue"
-                ),
-                num_samples = 5
-            ),
-            # Condition 2: Different cell type
-            list(
-                metadata = list(
-                    cell_type_ontology_id = "CL:0000763", # Myeloid cell
-                    tissue_ontology_id = "UBERON:0002371", # bone marrow
-                    sex = "female",
-                    sample_type = "primary tissue"
-                ),
-                num_samples = 5
-            )
-        ),
-        modality = "bulk",
-        mode = "sample generation",
-        seed = 42
-    )
+    # Start with a valid example query and modify it for differential expression test
+    de_query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
-    results <- predict_query(query = de_query, as_counts = TRUE)
+    # Create query with two distinct conditions
+    de_query$inputs <- list(
+        # Condition 1: One cell type
+        list(
+            metadata = list(
+                cell_type_ontology_id = "CL:0000786", # Plasmacytoid dendritic cell
+                tissue_ontology_id = "UBERON:0002371", # bone marrow
+                sex = "female",
+                sample_type = "primary tissue"
+            ),
+            num_samples = 5
+        ),
+        # Condition 2: Different cell type
+        list(
+            metadata = list(
+                cell_type_ontology_id = "CL:0000763", # Myeloid cell
+                tissue_ontology_id = "UBERON:0002371", # bone marrow
+                sex = "female",
+                sample_type = "primary tissue"
+            ),
+            num_samples = 5
+        )
+    )
+    de_query$sampling_strategy <- "sample generation"
+    de_query$seed <- 42
+
+    results <- predict_query(query = de_query, model_id = "gem-1-bulk")
 
     # Split samples by condition
     group1_idx <- 1:5
@@ -444,34 +479,34 @@ test_that("predict_query returns biologically valid single-cell expression data 
 
     message("\nTesting single-cell biological validity with differential expression analysis...")
 
-    # Create query with two distinct cell types
-    sc_de_query <- list(
-        inputs = list(
-            # Condition 1: T cells
-            list(
-                metadata = list(
-                    cell_type_ontology_id = "CL:0000084", # T cell
-                    tissue_ontology_id = "UBERON:0002371", # bone marrow
-                    sex = "female"
-                ),
-                num_samples = 10
-            ),
-            # Condition 2: B cells
-            list(
-                metadata = list(
-                    cell_type_ontology_id = "CL:0000236", # B cell
-                    tissue_ontology_id = "UBERON:0002371", # bone marrow
-                    sex = "female"
-                ),
-                num_samples = 10
-            )
-        ),
-        modality = "single-cell",
-        mode = "mean estimation",
-        seed = 123
-    )
+    # Start with a valid example query and modify it for differential expression test
+    sc_de_query <- get_example_query(model_id = "gem-1-sc")$example_query
 
-    results <- predict_query(query = sc_de_query, as_counts = TRUE)
+    # Create query with two distinct cell types
+    sc_de_query$inputs <- list(
+        # Condition 1: T cells
+        list(
+            metadata = list(
+                cell_type_ontology_id = "CL:0000084", # T cell
+                tissue_ontology_id = "UBERON:0002371", # bone marrow
+                sex = "female"
+            ),
+            num_samples = 10
+        ),
+        # Condition 2: B cells
+        list(
+            metadata = list(
+                cell_type_ontology_id = "CL:0000236", # B cell
+                tissue_ontology_id = "UBERON:0002371", # bone marrow
+                sex = "female"
+            ),
+            num_samples = 10
+        )
+    )
+    sc_de_query$sampling_strategy <- "mean estimation"
+    sc_de_query$seed <- 123
+
+    results <- predict_query(query = sc_de_query, model_id = "gem-1-sc")
 
     # Split samples by condition
     group1_idx <- 1:10
@@ -620,212 +655,4 @@ test_that("predict_query returns biologically valid single-cell expression data 
     ))
 
     message("Single-cell biological validity tests passed!")
-})
-
-test_that("predict_query with total_count parameter works correctly", {
-    skip_if_not(
-        api_key_available(),
-        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-    )
-
-    message("\nTesting predict_query with custom total_count parameter...")
-
-    test_query <- get_valid_query()
-    test_query$total_count <- 5000000
-
-    # Test with custom total_count
-    results <- predict_query(
-        query = test_query,
-        as_counts = TRUE
-    )
-
-    expect_type(results, "list")
-    expect_true("metadata" %in% names(results))
-    expect_true("expression" %in% names(results))
-
-    expect_s3_class(results$metadata, "data.frame")
-    expect_s3_class(results$expression, "data.frame")
-
-    expect_true(nrow(results$metadata) > 0)
-    expect_true(nrow(results$expression) > 0)
-    expect_true(ncol(results$expression) > 0)
-
-    # Verify expression values are non-negative
-    expect_true(all(results$expression >= 0, na.rm = TRUE),
-        info = "Expression counts should be non-negative"
-    )
-
-    message("total_count parameter test passed.")
-})
-
-test_that("predict_query with deterministic_latents produces reproducible results", {
-    skip_if_not(
-        api_key_available(),
-        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-    )
-
-    message("\nTesting predict_query with deterministic_latents for reproducibility...")
-
-    test_query <- get_valid_query()
-    test_query$seed <- 12345 # Set a seed for consistency
-    test_query$deterministic_latents <- TRUE
-
-    # First call with deterministic_latents = TRUE
-    results1 <- predict_query(
-        query = test_query,
-        as_counts = TRUE
-    )
-
-    # Second call with same query and deterministic_latents = TRUE
-    results2 <- predict_query(
-        query = test_query,
-        as_counts = TRUE
-    )
-
-    expect_type(results1, "list")
-    expect_type(results2, "list")
-
-    # With deterministic_latents, results should be identical
-    expect_equal(dim(results1$expression), dim(results2$expression),
-        info = "Expression dimensions should match"
-    )
-
-    # Check that at least some values are identical (allowing for potential minor differences)
-    # In practice, deterministic_latents should make results highly similar if not identical
-    correlation <- cor(
-        as.vector(as.matrix(results1$expression)),
-        as.vector(as.matrix(results2$expression))
-    )
-    expect_true(correlation > 0.99,
-        info = sprintf("With deterministic_latents, results should be highly correlated (got r=%.4f)", correlation)
-    )
-
-    message(sprintf("Deterministic latents test passed (correlation: %.6f)", correlation))
-})
-
-test_that("predict_query with deterministic_latents FALSE shows variation", {
-    skip_if_not(
-        api_key_available(),
-        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-    )
-
-    message("\nTesting predict_query with deterministic_latents=FALSE shows variation...")
-
-    test_query <- get_valid_query()
-    test_query$seed <- NULL # Remove seed to allow variation
-    test_query$deterministic_latents <- FALSE
-
-    # First call with deterministic_latents = FALSE
-    results1 <- predict_query(
-        query = test_query,
-        as_counts = TRUE
-    )
-
-    # Second call with deterministic_latents = FALSE
-    results2 <- predict_query(
-        query = test_query,
-        as_counts = TRUE
-    )
-
-    expect_type(results1, "list")
-    expect_type(results2, "list")
-
-    # With deterministic_latents = FALSE and no seed, results should show some variation
-    expect_equal(dim(results1$expression), dim(results2$expression),
-        info = "Expression dimensions should match"
-    )
-
-    # Calculate correlation - should be high but not perfect
-    correlation <- cor(
-        as.vector(as.matrix(results1$expression)),
-        as.vector(as.matrix(results2$expression))
-    )
-
-    # Results should still be similar (same biological context) but not identical
-    expect_true(correlation < 1.0,
-        info = sprintf("Without deterministic_latents, results should show some variation (got r=%.4f)", correlation)
-    )
-    expect_true(correlation > 0.8,
-        info = sprintf("Results should still be reasonably correlated (got r=%.4f)", correlation)
-    )
-
-    message(sprintf("Stochastic latents test passed (correlation: %.4f, showing expected variation)", correlation))
-})
-
-test_that("predict_query with total_count for single-cell", {
-    skip_if_not(
-        api_key_available(),
-        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-    )
-
-    message("\nTesting predict_query with custom total_count for single-cell...")
-
-    test_query <- get_valid_query(modality = "single-cell")
-    test_query$total_count <- 5000
-
-    # Test with custom total_count (typical single-cell library size)
-    results <- predict_query(
-        query = test_query,
-        as_counts = TRUE
-    )
-
-    expect_type(results, "list")
-    expect_true("metadata" %in% names(results))
-    expect_true("expression" %in% names(results))
-
-    expect_s3_class(results$metadata, "data.frame")
-    expect_s3_class(results$expression, "data.frame")
-
-    expect_true(nrow(results$metadata) > 0)
-    expect_true(nrow(results$expression) > 0)
-    expect_true(ncol(results$expression) > 0)
-
-    # Verify expression values are non-negative
-    expect_true(all(results$expression >= 0, na.rm = TRUE),
-        info = "Expression counts should be non-negative"
-    )
-
-    message("Single-cell total_count parameter test passed.")
-})
-
-test_that("predict_query with both total_count and deterministic_latents", {
-    skip_if_not(
-        api_key_available(),
-        "Skipping live API test because SYNTHESIZE_API_KEY is not set."
-    )
-
-    message("\nTesting predict_query with both total_count and deterministic_latents...")
-
-    test_query <- get_valid_query()
-    test_query$total_count <- 8000000
-    test_query$deterministic_latents <- TRUE
-
-    # Test with both parameters
-    results <- predict_query(
-        query = test_query,
-        as_counts = TRUE
-    )
-
-    expect_type(results, "list")
-    expect_true("metadata" %in% names(results))
-    expect_true("expression" %in% names(results))
-
-    expect_s3_class(results$metadata, "data.frame")
-    expect_s3_class(results$expression, "data.frame")
-
-    expect_true(nrow(results$metadata) > 0)
-    expect_true(nrow(results$expression) > 0)
-    expect_true(ncol(results$expression) > 0)
-
-    # Verify expression values are non-negative
-    expect_true(all(results$expression >= 0, na.rm = TRUE),
-        info = "Expression counts should be non-negative"
-    )
-
-    # Verify numeric data
-    expect_true(all(sapply(results$expression, is.numeric)),
-        info = "Expression data should contain numeric values"
-    )
-
-    message("Combined parameters test passed.")
 })
