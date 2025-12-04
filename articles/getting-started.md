@@ -1,0 +1,388 @@
+# Getting Started
+
+`rsynthbio` is an R package that provides a convenient interface to the
+[Synthesize Bio](https://www.synthesize.bio/) API, allowing users to
+generate realistic gene expression data based on specified biological
+conditions. This package enables researchers to easily access
+AI-generated transcriptomic data for various modalities including bulk
+RNA-seq and single-cell RNA-seq.
+
+Alternatively, you can AI generate datasets from our [web
+platform](https://app.synthesize.bio/datasets/).
+
+## How to install
+
+You can install `rsynthbio` from CRAN:
+
+``` r
+install.packages("rsynthbio")
+```
+
+If you want the development version, you can install using the `remotes`
+package to install from GitHub:
+
+``` r
+if (!("remotes" %in% installed.packages())) {
+  install.packages("remotes")
+}
+remotes::install_github("synthesizebio/rsynthbio")
+```
+
+Once installed, load the package:
+
+``` r
+library(rsynthbio)
+```
+
+## Authentication
+
+Before using the Synthesize Bio API, you need to set up your API token.
+The package provides a secure way to handle authentication:
+
+``` r
+# Securely prompt for and store your API token
+# The token will not be visible in the console
+set_synthesize_token()
+
+# You can also store the token in your system keyring for persistence
+# across R sessions (requires the 'keyring' package)
+set_synthesize_token(use_keyring = TRUE)
+```
+
+Loading your API key for a session.
+
+``` r
+# In future sessions, load the stored token
+load_synthesize_token_from_keyring()
+
+# Check if a token is already set
+has_synthesize_token()
+```
+
+You can obtain an API token by registering at [Synthesize
+Bio](https://app.synthesize.bio).
+
+### Security Best Practices
+
+For security reasons, remember to clear your token when you’re done:
+
+``` r
+# Clear token from current session
+clear_synthesize_token()
+
+# Clear token from both session and keyring
+clear_synthesize_token(remove_from_keyring = TRUE)
+```
+
+Never hard-code your token in scripts that will be shared or committed
+to version control.
+
+## Designing Queries for Models
+
+### Choosing a Model
+
+The first step is to identify which model you want to use for
+prediction:
+
+- **`gem-1-bulk`**: Bulk RNA-seq (asynchronous under the hood, returned
+  as data frames)
+- **`gem-1-sc`**: Single-cell RNA-seq (asynchronous under the hood,
+  returned as data frames)
+
+You can check which models are available programmatically:
+
+``` r
+# Check available models
+list_models()
+```
+
+``` r
+# Create a query for the bulk model
+bulk_query <- get_example_query(model_id = "gem-1-bulk")
+bulk <- predict_query(bulk_query, model_id = "gem-1-bulk")
+
+# Create a query for the single-cell model
+sc_query <- get_example_query(model_id = "gem-1-sc")
+sc <- predict_query(sc_query, model_id = "gem-1-sc")
+```
+
+### Creating a Query
+
+The structure of the query required by the API is specific to each
+model. You can use
+[`get_example_query()`](https://synthesizebio.github.io/rsynthbio/reference/get_example_query.md)
+to get a correctly structured example for your chosen model.
+
+``` r
+# Get the example query structure for a specific model
+example_query <- get_example_query(model_id = "gem-1-bulk")
+
+# Inspect the query structure
+str(example_query)
+```
+
+The query consists of:
+
+1.  **`mode`**: The prediction mode that controls how expression data is
+    generated:
+    - **“sample generation”**: Generates realistic-looking synthetic
+      data with measurement error (bulk only)
+    - **“mean estimation”**: Provides stable mean estimates of
+      expression levels (bulk and single-cell)
+2.  **`inputs`**: A list of biological conditions to generate data for
+
+Each input contains `metadata` (describing the biological sample) and
+`num_samples` (how many samples to generate).
+
+> See the [Query Parameters](#query-parameters) section below for
+> detailed documentation on `mode` and other optional query fields.
+
+### Making a Prediction
+
+Once your query is ready, you can send it to the API to generate gene
+expression data:
+
+``` r
+result <- predict_query(query, model_id = "gem-1-bulk")
+```
+
+This result will be a list of two dataframes: `metadata` and
+`expression`
+
+### Understanding the Async API
+
+Behind the scenes, the API uses an **asynchronous model** to handle
+queries efficiently:
+
+1.  Your query is submitted to the API, which returns a query ID
+2.  The function automatically polls the status endpoint (default: every
+    2 seconds)
+3.  When the query completes, results are downloaded from a signed URL
+4.  Data is parsed and returned as R data frames
+
+All of this happens automatically when you call
+[`predict_query()`](https://synthesizebio.github.io/rsynthbio/reference/predict_query.md).
+
+### Controlling Async Behavior
+
+You can customize the polling behavior if needed:
+
+``` r
+# Increase timeout for large queries (default: 900 seconds = 15 minutes)
+result <- predict_query(
+  query,
+  model_id = "gem-1-bulk",
+  poll_timeout_seconds = 1800, # 30 minutes
+  poll_interval_seconds = 5 # Check every 5 seconds instead of 2
+)
+```
+
+### Valid Metadata Keys
+
+The input metadata is a list of lists. This is the full list of valid
+metadata keys:
+
+**Biological:**
+
+- `age_years`
+- `cell_line_ontology_id`
+- `cell_type_ontology_id`
+- `developmental_stage`
+- `disease_ontology_id`
+- `ethnicity`
+- `genotype`
+- `race`
+- `sample_type` (“cell line”, “organoid”, “other”, “primary cells”,
+  “primary tissue”, “xenograft”)
+- `sex` (“male”, “female”)
+- `tissue_ontology_id`
+
+**Perturbational:**
+
+- `perturbation_dose`
+- `perturbation_ontology_id`
+- `perturbation_time`
+- `perturbation_type`
+  (“coculture”,“compound”,“control”,“crispr”,“genetic”,“infection”,“other”,“overexpression”,“peptide
+  or biologic”,“shrna”,“sirna”)
+
+**Technical:**
+
+- `study` (Bioproject ID)
+- `library_selection` (e.g., “cDNA”, “polyA”, “Oligo-dT” - see
+  <https://ena-docs.readthedocs.io/en/latest/submit/reads/webin-cli.html#permitted-values-for-library-selection>)
+- `library_layout` (“PAIRED”, “SINGLE”)
+- `platform` (“illumina”)
+
+### Valid Metadata Values
+
+The following are the valid values or expected formats for selected
+metadata keys:
+
+| Metadata Field             | Requirement / Example                                                                                                                                                                                                                                                       |
+|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `cell_line_ontology_id`    | Requires a [Cellosaurus ID](https://www.cellosaurus.org/).                                                                                                                                                                                                                  |
+| `cell_type_ontology_id`    | Requires a [CL ID](https://www.ebi.ac.uk/ols4/ontologies/cl).                                                                                                                                                                                                               |
+| `disease_ontology_id`      | Requires a [MONDO ID](https://www.ebi.ac.uk/ols4/ontologies/mondo).                                                                                                                                                                                                         |
+| `perturbation_ontology_id` | Must be a valid Ensembl gene ID (e.g., `ENSG00000156127`), [ChEBI ID](https://www.ebi.ac.uk/chebi/) (e.g., `CHEBI:16681`), [ChEMBL ID](https://www.ebi.ac.uk/chembl/) (e.g., `CHEMBL1234567`), or [NCBI Taxonomy ID](https://www.ncbi.nlm.nih.gov/taxonomy) (e.g., `9606`). |
+| `tissue_ontology_id`       | Requires a [UBERON ID](https://www.ebi.ac.uk/ols4/ontologies/uberon).                                                                                                                                                                                                       |
+
+We highly recommend using the [EMBL-EBI Ontology Lookup
+Service](https://www.ebi.ac.uk/ols4/) to find valid IDs for your
+metadata.
+
+Models have a limited acceptable range of metadata input values. If you
+provide a value that is not in the acceptable range, the API will return
+an error.
+
+### Query Parameters
+
+In addition to metadata, queries support several optional parameters
+that control the generation process:
+
+#### mode (character, required)
+
+Controls the type of prediction the model generates. This parameter is
+required in all queries.
+
+Available modes:
+
+- **“sample generation”**: The model works identically to the mean
+  estimation approach, except that the final gene expression
+  distribution is also sampled to generate realistic-looking synthetic
+  data that captures the error associated with measurements. This mode
+  is useful when you want data that mimics real experimental
+  measurements.
+
+- **“mean estimation”**: The model creates a distribution capturing the
+  biological heterogeneity consistent with the supplied metadata. This
+  distribution is then sampled to predict a gene expression distribution
+  that captures measurement error. The mean of that distribution serves
+  as the prediction. This mode is useful when you want a stable estimate
+  of expected expression levels.
+
+> **Note:** **Single-cell queries only support “mean estimation” mode.**
+> Bulk queries support both modes.
+
+``` r
+# Bulk query with sample generation (default for bulk)
+bulk_query <- get_example_query(model_id = "gem-1-bulk")
+bulk_query$mode <- "sample generation"
+
+# Bulk query with mean estimation
+bulk_query_mean <- get_example_query(model_id = "gem-1-bulk")
+bulk_query_mean$mode <- "mean estimation"
+
+# Single-cell query (must use mean estimation)
+sc_query <- get_example_query(model_id = "gem-1-sc")
+sc_query$mode <- "mean estimation" # Required for single-cell
+```
+
+#### total_count (integer, optional)
+
+Library size used when converting predicted log CPM back to raw counts.
+Higher values scale counts up proportionally.
+
+``` r
+# Create a query and add custom total_count
+query <- get_example_query(model_id = "gem-1-bulk")
+query$total_count <- 5000000
+```
+
+#### deterministic_latents (logical, optional)
+
+If `TRUE`, the model uses the mean of each latent distribution
+(`p(z|metadata)` or `q(z|x)`) instead of sampling. This removes
+randomness from latent sampling and produces deterministic outputs for
+the same inputs.
+
+- Default: `FALSE` (sampling is enabled)
+
+``` r
+# Create a query and enable deterministic latents
+query <- get_example_query(model_id = "gem-1-bulk")
+query$deterministic_latents <- TRUE
+```
+
+#### seed (integer, optional)
+
+Random seed for reproducibility when using stochastic sampling.
+
+``` r
+# Create a query with a specific seed
+query <- get_example_query(model_id = "gem-1-bulk")
+query$seed <- 42
+```
+
+You can combine multiple parameters in a single query:
+
+``` r
+# Create a query and add multiple parameters
+query <- get_example_query(model_id = "gem-1-bulk")
+query$total_count <- 8000000
+query$deterministic_latents <- TRUE
+query$mode <- "mean estimation"
+
+results <- predict_query(query, model_id = "gem-1-bulk")
+```
+
+### Modifying Query Inputs
+
+You can customize the query inputs to fit your specific research needs:
+
+``` r
+# Get a base query
+query <- get_example_query(model_id = "gem-1-bulk")
+
+# Adjust number of samples for the first input
+query$inputs[[1]]$num_samples <- 10
+
+# Add a new condition
+query$inputs[[3]] <- list(
+  metadata = list(
+    sex = "male",
+    sample_type = "primary tissue",
+    tissue_ontology_id = "UBERON:0002371"
+  ),
+  num_samples = 5
+)
+```
+
+### Working with Results
+
+``` r
+# Access metadata and expression matrices
+metadata <- result$metadata
+expression <- result$expression
+
+# Check dimensions
+dim(expression)
+
+# View metadata sample
+head(metadata)
+```
+
+You may want to process the data in chunks or save it for later use:
+
+``` r
+# Save results to RDS file
+saveRDS(result, "synthesize_results.rds")
+
+# Load previously saved results
+result <- readRDS("synthesize_results.rds")
+
+# Export as CSV
+write.csv(result$expression, "expression_matrix.csv")
+write.csv(result$metadata, "sample_metadata.csv")
+```
+
+## Session info
+
+``` r
+sessionInfo()
+```
+
+## Additional Resources
+
+- [Package Source Code](https://github.com/synthesizebio/rsynthbio)
+- [File Bug Reports](https://github.com/synthesizebio/rsynthbio/issues)

@@ -30,7 +30,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,39 +118,37 @@
 <h3 id="designing-queries">Designing Queries<a class="anchor" aria-label="anchor" href="#designing-queries"></a>
 </h3>
 <div class="section level4">
-<h4 id="choosing-a-modality">Choosing a Modality<a class="anchor" aria-label="anchor" href="#choosing-a-modality"></a>
+<h4 id="choosing-a-model">Choosing a Model<a class="anchor" aria-label="anchor" href="#choosing-a-model"></a>
 </h4>
-<p>The modality (data type to generate) is specified when creating a query:</p>
-<pre><code><span><span class="co"># Check available modalities</span></span>
-<span><span class="fu"><a href="reference/get_valid_modalities.html">get_valid_modalities</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co"># Returns: "bulk" "single-cell"</span></span>
+<p>The first step is to identify which model you want to use for prediction:</p>
+<pre><code><span><span class="co"># Check available models</span></span>
+<span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/list_models.html">list_models</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">models</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create a bulk RNA-seq query</span></span>
-<span><span class="va">bulk_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span>modality <span class="op">=</span> <span class="st">"bulk"</span><span class="op">)</span></span>
+<span><span class="co"># Create a query for the bulk RNA-seq model</span></span>
+<span><span class="va">bulk_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span></span>
-<span><span class="co"># Create a single-cell RNA-seq query</span></span>
-<span><span class="va">sc_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span>modality <span class="op">=</span> <span class="st">"single-cell"</span><span class="op">)</span></span></code></pre>
-<p>Currently supported modalities:</p>
+<span><span class="co"># Create a query for the single-cell model</span></span>
+<span><span class="va">sc_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-sc"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span></code></pre>
+<p>Currently supported models:</p>
 <ul>
 <li>
-<strong><code>bulk</code></strong>: Bulk RNA-seq data (supports both “sample generation” and “mean estimation” modes)</li>
+<strong><code>gem-1-bulk</code></strong>: Bulk RNA-seq data (supports both “sample generation” and “mean estimation” modes)</li>
 <li>
-<strong><code>single-cell</code></strong>: Single-cell RNA-seq data (supports “mean estimation” mode only)</li>
+<strong><code>gem-1-sc</code></strong>: Single-cell RNA-seq data (supports “mean estimation” mode only)</li>
 </ul>
 </div>
 <div class="section level4">
 <h4 id="query-structure">Query Structure<a class="anchor" aria-label="anchor" href="#query-structure"></a>
 </h4>
-<p>The <code><a href="reference/get_valid_query.html">get_valid_query()</a></code> function returns a correctly structured example query:</p>
-<pre><code><span><span class="co"># Get a sample query</span></span>
-<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span>modality <span class="op">=</span> <span class="st">"bulk"</span><span class="op">)</span></span>
+<p>The <code><a href="reference/get_example_query.html">get_example_query()</a></code> function returns a correctly structured example query for a specific model:</p>
+<pre><code><span><span class="co"># Get a sample query for a specific model</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span></span>
 <span><span class="co"># Inspect the query structure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></code></pre>
 <p>The query consists of:</p>
 <ol style="list-style-type: decimal">
-<li>
-<strong><code>modality</code></strong>: The type of gene expression data to generate (“bulk” or “single-cell”)</li>
 <li>
 <strong><code>mode</code></strong>: The prediction mode that controls how expression data is generated
 <ul>
@@ -178,7 +176,7 @@
 </h3>
 <p>The API uses an <strong>asynchronous model</strong>: the query is submitted, the system polls for completion, and results are downloaded when ready. This happens automatically:</p>
 <pre><code><span><span class="co"># Request raw counts data</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, as_counts <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The function will automatically:</span></span>
 <span><span class="co"># 1. Submit your query to the API</span></span>
@@ -197,27 +195,28 @@
 <pre><code><span><span class="co"># Adjust polling timeout (default: 15 minutes)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span></span>
 <span>  <span class="va">query</span>,</span>
+<span>  model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span>,</span>
 <span>  poll_timeout_seconds <span class="op">=</span> <span class="fl">1800</span>,  <span class="co"># 30 minutes</span></span>
 <span>  poll_interval_seconds <span class="op">=</span> <span class="fl">5</span>      <span class="co"># Check every 5 seconds</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get log-transformed CPM instead of raw counts</span></span>
-<span><span class="va">result_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, as_counts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">result_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Use deterministic latents for reproducible results</span></span>
 <span><span class="co"># (removes randomness from latent sampling)</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">deterministic_latents</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
-<span><span class="va">result_det</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span>
+<span><span class="va">result_det</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Specify custom library size (total count)</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">total_count</span> <span class="op">&lt;-</span> <span class="fl">5000000</span></span>
-<span><span class="va">result_custom</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span>
+<span><span class="va">result_custom</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Combine multiple options in the query</span></span>
-<span><span class="va">query_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_valid_query.html">get_valid_query</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">query_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
 <span><span class="va">query_combined</span><span class="op">$</span><span class="va">total_count</span> <span class="op">&lt;-</span> <span class="fl">8000000</span></span>
 <span><span class="va">query_combined</span><span class="op">$</span><span class="va">deterministic_latents</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
-<span><span class="va">result_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query_combined</span>, as_counts <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
+<span><span class="va">result_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query_combined</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span></code></pre>
 <div class="section level4">
 <h4 id="query-parameters">Query Parameters<a class="anchor" aria-label="anchor" href="#query-parameters"></a>
 </h4>
@@ -288,7 +287,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Candace Savonen <br><small class="roles"> Author, maintainer </small>   </li>
+<li>Synthesize Bio <br><small class="roles"> Author, maintainer </small>   </li>
 </ul>
 </div>
 
@@ -299,11 +298,11 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Candace Savonen.</p>
+  <p>Developed by Synthesize Bio.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

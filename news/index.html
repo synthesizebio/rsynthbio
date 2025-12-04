@@ -6,7 +6,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">3.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,74 +34,22 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="3.0.2" id="rsynthbio-302">rsynthbio 3.0.2<a class="anchor" aria-label="anchor" href="#rsynthbio-302"></a></h2><p class="text-muted">CRAN release: 2025-10-29</p>
+<h2 class="pkg-version" data-toc-text="4.0.0" id="rsynthbio-400">rsynthbio 4.0.0<a class="anchor" aria-label="anchor" href="#rsynthbio-400"></a></h2>
 <div class="section level3">
-<h3 id="major-changes-3-0-2">Major Changes<a class="anchor" aria-label="anchor" href="#major-changes-3-0-2"></a></h3>
+<h3 id="major-changes-4-0-0">Major Changes<a class="anchor" aria-label="anchor" href="#major-changes-4-0-0"></a></h3>
 <ul><li>
-<strong>Async API Support</strong>: Migrated to async API model matching the Python <code>pysynthbio</code> implementation
-<ul><li>
-<code><a href="../reference/predict_query.html">predict_query()</a></code> now uses an asynchronous workflow: submit → poll → download</li>
-<li>Added automatic status polling with configurable intervals and timeouts</li>
-<li>New parameters: <code>poll_interval_seconds</code> (default: 2), <code>poll_timeout_seconds</code> (default: 900)</li>
-</ul></li>
+<strong>Model Agnostic Client</strong>: The client has been updated to support any model ID via the <code>model_id</code> parameter, enabling support for all current and future Synthesize Bio models without package updates.</li>
 <li>
-<strong>Single-Cell Support</strong>: Added support for single-cell RNA-seq data via the “single-cell” modality
-<ul><li>
-<code><a href="../reference/get_valid_query.html">get_valid_query()</a></code> now accepts a <code>modality</code> parameter (“bulk” or “single-cell”)</li>
-<li>
-<code><a href="../reference/get_valid_modalities.html">get_valid_modalities()</a></code> now returns both “bulk” and “single-cell”</li>
-<li>Updated <code>MODEL_MODALITIES</code> to include both modalities</li>
-</ul></li>
-<li>
-<strong>GEM-1 Model</strong>: rsynthbio now works with the GEM-1 model from Synthesize Bio
-<ul><li>Older versions of Synthesize Bio models are no longer supported</li>
-</ul></li>
+<strong>Dynamic Model Support</strong>: Removed hardcoded model lists and validations to allow flexible usage of new models.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="breaking-changes-3-0-2">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-3-0-2"></a></h3>
+<h3 id="breaking-changes-4-0-0">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-4-0-0"></a></h3>
 <ul><li>
-<strong>API Base URL Changed</strong>: <code>API_BASE_URL</code> is now <code>https://app.synthesize.bio</code> (base URL only, not versioned endpoint)</li>
+<strong><code><a href="../reference/predict_query.html">predict_query()</a></code></strong>: Now requires <code>model_id</code> parameter.</li>
 <li>
-<strong>Parameter Changes in <code><a href="../reference/predict_query.html">predict_query()</a></code></strong>:
-<ul><li>Removed <code>raw_response</code> parameter</li>
-<li>Removed <code>url</code> parameter (replaced with <code>api_base_url</code>)</li>
-<li>Added <code>poll_interval_seconds</code> parameter</li>
-<li>Added <code>poll_timeout_seconds</code> parameter</li>
-<li>Added <code>return_download_url</code> parameter</li>
-</ul></li>
-</ul></div>
-<div class="section level3">
-<h3 id="new-functions-3-0-2">New Functions<a class="anchor" aria-label="anchor" href="#new-functions-3-0-2"></a></h3>
-<ul><li>
-<code><a href="../reference/resolve_api_slug.html">resolve_api_slug()</a></code>: Maps modality to API endpoint slug (internal)</li>
+<strong>New Query Helper</strong>: <code>get_example_query(model_id)</code> replaces <code>get_valid_query()</code>.</li>
 <li>
-<code><a href="../reference/start_model_query.html">start_model_query()</a></code>: Initiates async model query (internal)</li>
-<li>
-<code><a href="../reference/poll_model_query.html">poll_model_query()</a></code>: Polls status endpoint until completion (internal)</li>
-<li>
-<code><a href="../reference/get_json.html">get_json()</a></code>: Fetches results from signed download URL (internal)</li>
-<li>
-<code>transform_result_to_frames()</code>: Converts JSON to data frames (internal)</li>
-</ul></div>
-<div class="section level3">
-<h3 id="bug-fixes-3-0-2">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-3-0-2"></a></h3>
-<ul><li>Fixed metadata handling for queries with empty metadata fields</li>
-<li>Improved error messages for failed queries (now shows error message instead of error URL)</li>
-<li>Better handling of single-cell count data format (dict vs list)</li>
-</ul></div>
-<div class="section level3">
-<h3 id="documentation-3-0-2">Documentation<a class="anchor" aria-label="anchor" href="#documentation-3-0-2"></a></h3>
-<ul><li>Updated README.md to explain async API behavior</li>
-<li>Updated vignettes with async workflow examples</li>
-<li>Added examples for both bulk and single-cell modalities</li>
-<li>Clarified polling timeout and interval configuration</li>
-</ul></div>
-<div class="section level3">
-<h3 id="tests-3-0-2">Tests<a class="anchor" aria-label="anchor" href="#tests-3-0-2"></a></h3>
-<ul><li>Added comprehensive test suite mirroring Python implementation</li>
-<li>Added live API tests for both bulk and single-cell modalities</li>
-<li>Added tests for invalid metadata validation</li>
-<li>Added mocked async workflow tests (success, failure, timeout scenarios)</li>
+<strong>Removed Functions</strong>: <code>get_valid_query()</code>, <code>get_valid_modalities()</code>, and <code>validate_modality()</code> have been removed in favor of dynamic model support.</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -109,11 +57,11 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Candace Savonen.</p>
+  <p>Developed by Synthesize Bio.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
