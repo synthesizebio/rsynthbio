@@ -1,4 +1,4 @@
-# rsynthbio <img src="assets/logomark.png" style="width: 80px;" alt="Logomark">
+# <img src="https://assets.synthesize.bio/logomark.png" style="width: 30px; height: 30px;" alt="Logomark"> rsynthbio
 
 `rsynthbio` is an R package that provides a convenient interface to the [Synthesize Bio](https://www.synthesize.bio/) API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities, including bulk RNA-seq and single-cell RNA-seq.
 
@@ -55,21 +55,13 @@ load_synthesize_token_from_keyring()
 has_synthesize_token()
 ```
 
+You manually set the token manually, but don't commit it to version control!
+
+```
+set_synthesize_token(token = "your-token-here")
+```
+
 You can obtain an API token by registering at [Synthesize Bio](https://app.synthesize.bio).
-
-### Security Best Practices
-
-For security reasons, remember to clear your token when you're done:
-
-```
-# Clear token from current session
-clear_synthesize_token()
-
-# Clear token from both session and keyring
-clear_synthesize_token(remove_from_keyring = TRUE)
-```
-
-Never hard-code your token in scripts that will be shared or committed to version control.
 
 ## Basic Usage
 
@@ -93,14 +85,16 @@ bulk_query <- get_example_query(model_id = "gem-1-bulk")$example_query
 sc_query <- get_example_query(model_id = "gem-1-sc")$example_query
 ```
 
-Currently supported models:
+Baseline models:
 
-- **`gem-1-bulk`**: Bulk RNA-seq data (supports both "sample generation" and "mean estimation" modes)
-- **`gem-1-sc`**: Single-cell RNA-seq data (supports "mean estimation" mode only)
+- **`gem-1-bulk`**: Bulk RNA-seq data (supports both "sample generation" and "mean estimation" sampling strategies)
+- **`gem-1-sc`**: Single-cell RNA-seq data (supports "mean estimation" sampling strategy only)
+
+Use `list_models()` to see all available models.
 
 #### Query Structure
 
-The `get_example_query()` function returns a correctly structured example query for a specific model:
+The `get_example_query` function returns a correctly structured example query for a specific model:
 
 ```
 # Get a sample query for a specific model
@@ -112,7 +106,7 @@ str(query)
 
 The query consists of:
 
-1. **`mode`**: The prediction mode that controls how expression data is generated
+1. **`sampling_strategy`**: The sampling strategy that controls how expression data is generated
    - **"sample generation"**: Realistic synthetic data with measurement error (bulk only)
    - **"mean estimation"**: Stable mean estimates (bulk and single-cell)
 2. **`inputs`**: A list of biological conditions to generate data for
@@ -126,17 +120,10 @@ See the [Query Parameters](#query-parameters) section below for detailed informa
 
 ### Making Predictions
 
-The API uses an **asynchronous model**: the query is submitted, the system polls for completion, and results are downloaded when ready. This happens automatically:
-
+Example usage:
 ```
 # Request raw counts data
 result <- predict_query(query, model_id = "gem-1-bulk")
-
-# The function will automatically:
-# 1. Submit your query to the API
-# 2. Poll for completion (default: checks every 2 seconds)
-# 3. Download and parse results when ready
-# 4. Return formatted data frames
 
 # Access the results
 metadata <- result$metadata
@@ -145,7 +132,7 @@ expression <- result$expression
 
 ### Advanced Options
 
-You can customize the polling behavior and model parameters:
+Under the hood, `predict_query()` polls the status endpoint of the API and downloads the results when ready. If you want to customize the polling behavior, you can use the `poll_timeout_seconds` and `poll_interval_seconds` parameters.
 
 ```
 # Adjust polling timeout (default: 15 minutes)
@@ -155,9 +142,6 @@ result <- predict_query(
   poll_timeout_seconds = 1800,  # 30 minutes
   poll_interval_seconds = 5      # Check every 5 seconds
 )
-
-# Get log-transformed CPM instead of raw counts
-result_log <- predict_query(query, model_id = "gem-1-bulk")
 
 # Use deterministic latents for reproducible results
 # (removes randomness from latent sampling)
@@ -179,14 +163,14 @@ result_combined <- predict_query(query_combined, model_id = "gem-1-bulk")
 
 In addition to the required fields, queries support several optional parameters:
 
-**mode** (character, required)
+**sampling_strategy** (character, required for bulk queries)
 
 Controls the type of prediction the model generates:
 
 - **"sample generation"**: The model creates a biological distribution, samples to predict gene expression distribution capturing measurement error, and then samples that distribution to generate realistic-looking synthetic data. This mode mimics real experimental measurements. **Available for bulk queries only.**
 - **"mean estimation"**: The model creates a biological distribution, samples to predict gene expression distribution capturing measurement error, and returns the mean as the prediction. Provides stable estimates. **Available for bulk and single-cell queries.**
 
-> **Note:** Single-cell queries only support "mean estimation" mode.
+> **Note:** Single-cell queries only support "mean estimation" sampling strategy.
 
 **total_count** (integer, optional)
 

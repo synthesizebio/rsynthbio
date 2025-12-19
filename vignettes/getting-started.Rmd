@@ -237,7 +237,7 @@ Available modes:
 ```{r mode-examples, eval=FALSE}
 # Bulk query with sample generation (default for bulk)
 bulk_query <- get_example_query(model_id = "gem-1-bulk")
-bulk_query$mode <- "sample generation"
+bulk_query$sampling_strategy <- "sample generation"
 
 # Bulk query with mean estimation
 bulk_query_mean <- get_example_query(model_id = "gem-1-bulk")
@@ -245,7 +245,7 @@ bulk_query_mean$mode <- "mean estimation"
 
 # Single-cell query (must use mean estimation)
 sc_query <- get_example_query(model_id = "gem-1-sc")
-sc_query$mode <- "mean estimation" # Required for single-cell
+sc_query$sampling_strategy <- "mean estimation" # Required for single-cell
 ```
 
 #### total_count (integer, optional)
@@ -288,7 +288,7 @@ You can combine multiple parameters in a single query:
 query <- get_example_query(model_id = "gem-1-bulk")
 query$total_count <- 8000000
 query$deterministic_latents <- TRUE
-query$mode <- "mean estimation"
+query$sampling_strategy <- "mean estimation"
 
 results <- predict_query(query, model_id = "gem-1-bulk")
 ```
