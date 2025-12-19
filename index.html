@@ -39,14 +39,15 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/getting-started.html">Get Started</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/getting-started.html">Getting Started</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-models" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Models</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-models">
+<li><a class="dropdown-item" href="articles/baseline.html">Baseline Models</a></li>
+    <li><a class="dropdown-item" href="articles/reference-conditioning.html">Reference Conditioning</a></li>
+    <li><a class="dropdown-item" href="articles/metadata-prediction.html">Metadata Prediction</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/synthesizebio/rsynthbio" aria-label="GitHub repository"><span class="fa fa-github"></span></a></li>
@@ -60,7 +61,8 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.png" class="logo" alt=""><h1 id="rsynthbio-">rsynthbio <a class="anchor" aria-label="anchor" href="#rsynthbio-"></a>
+<img src="logo.png" class="logo" alt=""><h1 id="id_-rsynthbio">
+ rsynthbio<a class="anchor" aria-label="anchor" href="#id_-rsynthbio"></a>
 </h1>
 </div>
 <p><code>rsynthbio</code> is an R package that provides a convenient interface to the <a href="https://www.synthesize.bio/" class="external-link">Synthesize Bio</a> API, allowing users to generate realistic gene expression data based on specified biological conditions. This package enables researchers to easily access AI-generated transcriptomic data for various modalities, including bulk RNA-seq and single-cell RNA-seq.</p>
@@ -71,192 +73,105 @@
 <h2 id="how-to-install">How to Install<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
 </h2>
 <p>You can install <code>rsynthbio</code> from CRAN:</p>
-<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rsynthbio"</span><span class="op">)</span></span></code></pre>
-<p>To install the development version from GitHub, use the <code>remotes</code> package:</p>
-<pre><code><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="op">(</span><span class="st">"remotes"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"synthesizebio/rsynthbio"</span><span class="op">)</span></span></code></pre>
-<p>Once installed, load the package:</p>
-<pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/synthesizebio/rsynthbio" class="external-link">rsynthbio</a></span><span class="op">)</span></span></code></pre>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rsynthbio"</span><span class="op">)</span></span></code></pre></div>
+<p>To install the development version from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"synthesizebio/rsynthbio"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="authentication">Authentication<a class="anchor" aria-label="anchor" href="#authentication"></a>
 </h2>
-<p>Before using the Synthesize Bio API, you need to set up your API token. The package provides a secure way to handle authentication:</p>
-<pre><code><span><span class="co"># Securely prompt for and store your API token</span></span>
-<span><span class="co"># The token will not be visible in the console</span></span>
+<p>Set up your API token (obtain one at <a href="https://app.synthesize.bio" class="external-link">app.synthesize.bio</a>):</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/synthesizebio/rsynthbio" class="external-link">rsynthbio</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Securely prompt for your token (recommended)</span></span>
 <span><span class="fu"><a href="reference/set_synthesize_token.html">set_synthesize_token</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># You can also store the token in your system keyring for persistence</span></span>
-<span><span class="co"># across R sessions (requires the 'keyring' package)</span></span>
-<span><span class="fu"><a href="reference/set_synthesize_token.html">set_synthesize_token</a></span><span class="op">(</span>use_keyring <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
-<p>Load your API token for a session:</p>
-<pre><code><span><span class="co"># In future sessions, load the stored token</span></span>
-<span><span class="fu"><a href="reference/load_synthesize_token_from_keyring.html">load_synthesize_token_from_keyring</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># Or store in system keyring for persistence across sessions</span></span>
+<span><span class="fu"><a href="reference/set_synthesize_token.html">set_synthesize_token</a></span><span class="op">(</span>use_keyring <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Check if a token is already set</span></span>
-<span><span class="fu"><a href="reference/has_synthesize_token.html">has_synthesize_token</a></span><span class="op">(</span><span class="op">)</span></span></code></pre>
-<p>You can obtain an API token by registering at <a href="https://app.synthesize.bio" class="external-link">Synthesize Bio</a>.</p>
-<div class="section level3">
-<h3 id="security-best-practices">Security Best Practices<a class="anchor" aria-label="anchor" href="#security-best-practices"></a>
-</h3>
-<p>For security reasons, remember to clear your token when you’re done:</p>
-<pre><code><span><span class="co"># Clear token from current session</span></span>
-<span><span class="fu"><a href="reference/clear_synthesize_token.html">clear_synthesize_token</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Clear token from both session and keyring</span></span>
-<span><span class="fu"><a href="reference/clear_synthesize_token.html">clear_synthesize_token</a></span><span class="op">(</span>remove_from_keyring <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
-<p>Never hard-code your token in scripts that will be shared or committed to version control.</p>
-</div>
+<span><span class="co"># Load from keyring in future sessions</span></span>
+<span><span class="fu"><a href="reference/load_synthesize_token_from_keyring.html">load_synthesize_token_from_keyring</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
+<h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<p>Please see the <a href="https://synthesizebio.github.io/rsynthbio/articles/getting-started.html">Getting Started guide</a> for comprehensive documentation.</p>
-<div class="section level3">
-<h3 id="designing-queries">Designing Queries<a class="anchor" aria-label="anchor" href="#designing-queries"></a>
-</h3>
-<div class="section level4">
-<h4 id="choosing-a-model">Choosing a Model<a class="anchor" aria-label="anchor" href="#choosing-a-model"></a>
-</h4>
-<p>The first step is to identify which model you want to use for prediction:</p>
-<pre><code><span><span class="co"># Check available models</span></span>
-<span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/list_models.html">list_models</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">models</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/synthesizebio/rsynthbio" class="external-link">rsynthbio</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create a query for the bulk RNA-seq model</span></span>
-<span><span class="va">bulk_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
+<span><span class="co"># See available models</span></span>
+<span><span class="fu"><a href="reference/list_models.html">list_models</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create a query for the single-cell model</span></span>
-<span><span class="va">sc_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-sc"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span></code></pre>
-<p>Currently supported models:</p>
-<ul>
-<li>
-<strong><code>gem-1-bulk</code></strong>: Bulk RNA-seq data (supports both “sample generation” and “mean estimation” modes)</li>
-<li>
-<strong><code>gem-1-sc</code></strong>: Single-cell RNA-seq data (supports “mean estimation” mode only)</li>
-</ul>
-</div>
-<div class="section level4">
-<h4 id="query-structure">Query Structure<a class="anchor" aria-label="anchor" href="#query-structure"></a>
-</h4>
-<p>The <code><a href="reference/get_example_query.html">get_example_query()</a></code> function returns a correctly structured example query for a specific model:</p>
-<pre><code><span><span class="co"># Get a sample query for a specific model</span></span>
-<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
+<span><span class="co"># Get an example query for bulk RNA-seq</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Inspect the query structure</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></code></pre>
-<p>The query consists of:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong><code>mode</code></strong>: The prediction mode that controls how expression data is generated
-<ul>
-<li>
-<strong>“sample generation”</strong>: Realistic synthetic data with measurement error (bulk only)</li>
-<li>
-<strong>“mean estimation”</strong>: Stable mean estimates (bulk and single-cell)</li>
-</ul>
-</li>
-<li>
-<strong><code>inputs</code></strong>: A list of biological conditions to generate data for</li>
-</ol>
-<p>Each input contains:</p>
-<ul>
-<li>
-<strong><code>metadata</code></strong>: A list of metadata key-value pairs describing the biological sample</li>
-<li>
-<strong><code>num_samples</code></strong>: The number of samples to generate for this condition</li>
-</ul>
-<p>See the <a href="#query-parameters">Query Parameters</a> section below for detailed information on mode and other optional fields.</p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="making-predictions">Making Predictions<a class="anchor" aria-label="anchor" href="#making-predictions"></a>
-</h3>
-<p>The API uses an <strong>asynchronous model</strong>: the query is submitted, the system polls for completion, and results are downloaded when ready. This happens automatically:</p>
-<pre><code><span><span class="co"># Request raw counts data</span></span>
+<span><span class="co"># Generate synthetic expression data</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># The function will automatically:</span></span>
-<span><span class="co"># 1. Submit your query to the API</span></span>
-<span><span class="co"># 2. Poll for completion (default: checks every 2 seconds)</span></span>
-<span><span class="co"># 3. Download and parse results when ready</span></span>
-<span><span class="co"># 4. Return formatted data frames</span></span>
 <span></span>
 <span><span class="co"># Access the results</span></span>
 <span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">metadata</span></span>
-<span><span class="va">expression</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">expression</span></span></code></pre>
+<span><span class="va">expression</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">expression</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="advanced-options">Advanced Options<a class="anchor" aria-label="anchor" href="#advanced-options"></a>
-</h3>
-<p>You can customize the polling behavior and model parameters:</p>
-<pre><code><span><span class="co"># Adjust polling timeout (default: 15 minutes)</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span></span>
-<span>  <span class="va">query</span>,</span>
-<span>  model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span>,</span>
-<span>  poll_timeout_seconds <span class="op">=</span> <span class="fl">1800</span>,  <span class="co"># 30 minutes</span></span>
-<span>  poll_interval_seconds <span class="op">=</span> <span class="fl">5</span>      <span class="co"># Check every 5 seconds</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Get log-transformed CPM instead of raw counts</span></span>
-<span><span class="va">result_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Use deterministic latents for reproducible results</span></span>
-<span><span class="co"># (removes randomness from latent sampling)</span></span>
-<span><span class="va">query</span><span class="op">$</span><span class="va">deterministic_latents</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
-<span><span class="va">result_det</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Specify custom library size (total count)</span></span>
-<span><span class="va">query</span><span class="op">$</span><span class="va">total_count</span> <span class="op">&lt;-</span> <span class="fl">5000000</span></span>
-<span><span class="va">result_custom</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Combine multiple options in the query</span></span>
-<span><span class="va">query_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
-<span><span class="va">query_combined</span><span class="op">$</span><span class="va">total_count</span> <span class="op">&lt;-</span> <span class="fl">8000000</span></span>
-<span><span class="va">query_combined</span><span class="op">$</span><span class="va">deterministic_latents</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
-<span><span class="va">result_combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query_combined</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span></code></pre>
-<div class="section level4">
-<h4 id="query-parameters">Query Parameters<a class="anchor" aria-label="anchor" href="#query-parameters"></a>
-</h4>
-<p>In addition to the required fields, queries support several optional parameters:</p>
-<p><strong>mode</strong> (character, required)</p>
-<p>Controls the type of prediction the model generates:</p>
+<div class="section level2">
+<h2 id="available-models">Available Models<a class="anchor" aria-label="anchor" href="#available-models"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="27%">
+<col width="13%">
+<col width="29%">
+<col width="29%">
+</colgroup>
+<thead><tr class="header">
+<th>Model Type</th>
+<th>Bulk</th>
+<th>Single-Cell</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>Baseline</strong></td>
+<td><code>gem-1-bulk</code></td>
+<td><code>gem-1-sc</code></td>
+<td>Generate expression from metadata</td>
+</tr>
+<tr class="even">
+<td><strong>Reference Conditioning</strong></td>
+<td><code>gem-1-bulk_reference-conditioning</code></td>
+<td><code>gem-1-sc_reference-conditioning</code></td>
+<td>Generate expression anchored to a reference sample</td>
+</tr>
+<tr class="odd">
+<td><strong>Metadata Prediction</strong></td>
+<td><code>gem-1-bulk_predict-metadata</code></td>
+<td><code>gem-1-sc_predict-metadata</code></td>
+<td>Predict metadata from expression</td>
+</tr>
+</tbody>
+</table>
+<p>Only baseline models are available to all users. You can check which models are available programmatically, use <code><a href="reference/list_models.html">list_models()</a></code>. Contact us at <a href="mailto:support@synthesize.bio" class="email">support@synthesize.bio</a> if you have any questions.</p>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<p>For detailed usage instructions, see the vignettes:</p>
 <ul>
 <li>
-<strong>“sample generation”</strong>: The model creates a biological distribution, samples to predict gene expression distribution capturing measurement error, and then samples that distribution to generate realistic-looking synthetic data. This mode mimics real experimental measurements. <strong>Available for bulk queries only.</strong>
-</li>
+<a href="https://synthesizebio.github.io/rsynthbio/articles/getting-started.html">Getting Started</a> — Installation, authentication, and overview</li>
 <li>
-<strong>“mean estimation”</strong>: The model creates a biological distribution, samples to predict gene expression distribution capturing measurement error, and returns the mean as the prediction. Provides stable estimates. <strong>Available for bulk and single-cell queries.</strong>
-</li>
+<a href="https://synthesizebio.github.io/rsynthbio/articles/baseline.html">Baseline Models</a> — Generate expression from metadata</li>
+<li>
+<a href="https://synthesizebio.github.io/rsynthbio/articles/reference-conditioning.html">Reference Conditioning</a> — Condition on real expression data</li>
+<li>
+<a href="https://synthesizebio.github.io/rsynthbio/articles/metadata-prediction.html">Metadata Prediction</a> — Infer metadata from expression</li>
 </ul>
-<blockquote>
-<p><strong>Note:</strong> Single-cell queries only support “mean estimation” mode.</p>
-</blockquote>
-<p><strong>total_count</strong> (integer, optional)</p>
-<ul>
-<li>Library size for converting log CPM to raw counts</li>
-</ul>
-<p><strong>deterministic_latents</strong> (logical, optional)</p>
-<ul>
-<li>If <code>TRUE</code>, uses mean of latent distributions instead of sampling</li>
-<li>Produces deterministic, reproducible outputs</li>
-<li>Default: <code>FALSE</code>
-</li>
-</ul>
-<p><strong>seed</strong> (integer, optional)</p>
-<ul>
-<li>Random seed for reproducibility with stochastic sampling</li>
-</ul>
-<p>See the <a href="https://synthesizebio.github.io/rsynthbio/articles/getting-started.html">Getting Started guide</a> for detailed documentation on all available metadata fields and parameters.</p>
-</div>
-</div>
 </div>
 <div class="section level2">
 <h2 id="rate-limits">Rate Limits<a class="anchor" aria-label="anchor" href="#rate-limits"></a>
 </h2>
-<p>Free usage of Synthesize Bio is limited. If you exceed this limit, you will receive an error message stating that you’ve exceeded your limit. To generate more samples, please contact us at <a href="mailto:support@synthesize.bio">support@synthesize.bio</a>.</p>
+<p>Free usage of Synthesize Bio is limited. If you exceed this limit, you will receive an error message. To generate more samples, please contact us at <a href="mailto:support@synthesize.bio">support@synthesize.bio</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

@@ -2,6 +2,8 @@
 
 ## rsynthbio 4.0.0
 
+CRAN release: 2025-12-03
+
 ### Major Changes
 
 - **Model Agnostic Client**: The client has been updated to support any

@@ -20,211 +20,85 @@ For questions, suggestions, and support, email us at
 
 You can install `rsynthbio` from CRAN:
 
-    install.packages("rsynthbio")
+``` r
+install.packages("rsynthbio")
+```
 
-To install the development version from GitHub, use the `remotes`
-package:
+To install the development version from GitHub:
 
-    if (!("remotes" %in% installed.packages())) {
-      install.packages("remotes")
-    }
-    remotes::install_github("synthesizebio/rsynthbio")
-
-Once installed, load the package:
-
-    library(rsynthbio)
+``` r
+remotes::install_github("synthesizebio/rsynthbio")
+```
 
 ## Authentication
 
-Before using the Synthesize Bio API, you need to set up your API token.
-The package provides a secure way to handle authentication:
+Set up your API token (obtain one at
+[app.synthesize.bio](https://app.synthesize.bio)):
 
-    # Securely prompt for and store your API token
-    # The token will not be visible in the console
-    set_synthesize_token()
+``` r
+library(rsynthbio)
 
-    # You can also store the token in your system keyring for persistence
-    # across R sessions (requires the 'keyring' package)
-    set_synthesize_token(use_keyring = TRUE)
+# Securely prompt for your token (recommended)
+set_synthesize_token()
 
-Load your API token for a session:
+# Or store in system keyring for persistence across sessions
+set_synthesize_token(use_keyring = TRUE)
 
-    # In future sessions, load the stored token
-    load_synthesize_token_from_keyring()
+# Load from keyring in future sessions
+load_synthesize_token_from_keyring()
+```
 
-    # Check if a token is already set
-    has_synthesize_token()
+## Quick Start
 
-You can obtain an API token by registering at [Synthesize
-Bio](https://app.synthesize.bio).
+``` r
+library(rsynthbio)
 
-### Security Best Practices
+# See available models
+list_models()
 
-For security reasons, remember to clear your token when you’re done:
+# Get an example query for bulk RNA-seq
+query <- get_example_query(model_id = "gem-1-bulk")
 
-    # Clear token from current session
-    clear_synthesize_token()
+# Generate synthetic expression data
+result <- predict_query(query, model_id = "gem-1-bulk")
 
-    # Clear token from both session and keyring
-    clear_synthesize_token(remove_from_keyring = TRUE)
+# Access the results
+metadata <- result$metadata
+expression <- result$expression
+```
 
-Never hard-code your token in scripts that will be shared or committed
-to version control.
+## Available Models
 
-## Basic Usage
+| Model Type                 | Bulk                                | Single-Cell                       | Description                                        |
+|----------------------------|-------------------------------------|-----------------------------------|----------------------------------------------------|
+| **Baseline**               | `gem-1-bulk`                        | `gem-1-sc`                        | Generate expression from metadata                  |
+| **Reference Conditioning** | `gem-1-bulk_reference-conditioning` | `gem-1-sc_reference-conditioning` | Generate expression anchored to a reference sample |
+| **Metadata Prediction**    | `gem-1-bulk_predict-metadata`       | `gem-1-sc_predict-metadata`       | Predict metadata from expression                   |
 
-Please see the [Getting Started
-guide](https://synthesizebio.github.io/rsynthbio/articles/getting-started.html)
-for comprehensive documentation.
+Only baseline models are available to all users. You can check which
+models are available programmatically, use
+[`list_models()`](https://synthesizebio.github.io/rsynthbio/reference/list_models.md).
+Contact us at <support@synthesize.bio> if you have any questions.
 
-### Designing Queries
+## Documentation
 
-#### Choosing a Model
+For detailed usage instructions, see the vignettes:
 
-The first step is to identify which model you want to use for
-prediction:
-
-    # Check available models
-    models <- list_models()
-    print(models)
-
-    # Create a query for the bulk RNA-seq model
-    bulk_query <- get_example_query(model_id = "gem-1-bulk")$example_query
-
-    # Create a query for the single-cell model
-    sc_query <- get_example_query(model_id = "gem-1-sc")$example_query
-
-Currently supported models:
-
-- **`gem-1-bulk`**: Bulk RNA-seq data (supports both “sample generation”
-  and “mean estimation” modes)
-- **`gem-1-sc`**: Single-cell RNA-seq data (supports “mean estimation”
-  mode only)
-
-#### Query Structure
-
-The
-[`get_example_query()`](https://synthesizebio.github.io/rsynthbio/reference/get_example_query.md)
-function returns a correctly structured example query for a specific
-model:
-
-    # Get a sample query for a specific model
-    query <- get_example_query(model_id = "gem-1-bulk")$example_query
-
-    # Inspect the query structure
-    str(query)
-
-The query consists of:
-
-1.  **`mode`**: The prediction mode that controls how expression data is
-    generated
-    - **“sample generation”**: Realistic synthetic data with measurement
-      error (bulk only)
-    - **“mean estimation”**: Stable mean estimates (bulk and
-      single-cell)
-2.  **`inputs`**: A list of biological conditions to generate data for
-
-Each input contains:
-
-- **`metadata`**: A list of metadata key-value pairs describing the
-  biological sample
-- **`num_samples`**: The number of samples to generate for this
-  condition
-
-See the [Query Parameters](#query-parameters) section below for detailed
-information on mode and other optional fields.
-
-### Making Predictions
-
-The API uses an **asynchronous model**: the query is submitted, the
-system polls for completion, and results are downloaded when ready. This
-happens automatically:
-
-    # Request raw counts data
-    result <- predict_query(query, model_id = "gem-1-bulk")
-
-    # The function will automatically:
-    # 1. Submit your query to the API
-    # 2. Poll for completion (default: checks every 2 seconds)
-    # 3. Download and parse results when ready
-    # 4. Return formatted data frames
-
-    # Access the results
-    metadata <- result$metadata
-    expression <- result$expression
-
-### Advanced Options
-
-You can customize the polling behavior and model parameters:
-
-    # Adjust polling timeout (default: 15 minutes)
-    result <- predict_query(
-      query,
-      model_id = "gem-1-bulk",
-      poll_timeout_seconds = 1800,  # 30 minutes
-      poll_interval_seconds = 5      # Check every 5 seconds
-    )
-
-    # Get log-transformed CPM instead of raw counts
-    result_log <- predict_query(query, model_id = "gem-1-bulk")
-
-    # Use deterministic latents for reproducible results
-    # (removes randomness from latent sampling)
-    query$deterministic_latents <- TRUE
-    result_det <- predict_query(query, model_id = "gem-1-bulk")
-
-    # Specify custom library size (total count)
-    query$total_count <- 5000000
-    result_custom <- predict_query(query, model_id = "gem-1-bulk")
-
-    # Combine multiple options in the query
-    query_combined <- get_example_query(model_id = "gem-1-bulk")
-    query_combined$total_count <- 8000000
-    query_combined$deterministic_latents <- TRUE
-    result_combined <- predict_query(query_combined, model_id = "gem-1-bulk")
-
-#### Query Parameters
-
-In addition to the required fields, queries support several optional
-parameters:
-
-**mode** (character, required)
-
-Controls the type of prediction the model generates:
-
-- **“sample generation”**: The model creates a biological distribution,
-  samples to predict gene expression distribution capturing measurement
-  error, and then samples that distribution to generate
-  realistic-looking synthetic data. This mode mimics real experimental
-  measurements. **Available for bulk queries only.**
-- **“mean estimation”**: The model creates a biological distribution,
-  samples to predict gene expression distribution capturing measurement
-  error, and returns the mean as the prediction. Provides stable
-  estimates. **Available for bulk and single-cell queries.**
-
-> **Note:** Single-cell queries only support “mean estimation” mode.
-
-**total_count** (integer, optional)
-
-- Library size for converting log CPM to raw counts
-
-**deterministic_latents** (logical, optional)
-
-- If `TRUE`, uses mean of latent distributions instead of sampling
-- Produces deterministic, reproducible outputs
-- Default: `FALSE`
-
-**seed** (integer, optional)
-
-- Random seed for reproducibility with stochastic sampling
-
-See the [Getting Started
-guide](https://synthesizebio.github.io/rsynthbio/articles/getting-started.html)
-for detailed documentation on all available metadata fields and
-parameters.
+- [Getting
+  Started](https://synthesizebio.github.io/rsynthbio/articles/getting-started.html)
+  — Installation, authentication, and overview
+- [Baseline
+  Models](https://synthesizebio.github.io/rsynthbio/articles/baseline.html)
+  — Generate expression from metadata
+- [Reference
+  Conditioning](https://synthesizebio.github.io/rsynthbio/articles/reference-conditioning.html)
+  — Condition on real expression data
+- [Metadata
+  Prediction](https://synthesizebio.github.io/rsynthbio/articles/metadata-prediction.html)
+  — Infer metadata from expression
 
 ## Rate Limits
 
 Free usage of Synthesize Bio is limited. If you exceed this limit, you
-will receive an error message stating that you’ve exceeded your limit.
-To generate more samples, please contact us at <support@synthesize.bio>.
+will receive an error message. To generate more samples, please contact
+us at <support@synthesize.bio>.

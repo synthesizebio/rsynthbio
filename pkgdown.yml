@@ -2,8 +2,11 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  baseline: baseline.html
   getting-started: getting-started.html
-last_built: 2025-12-04T21:07Z
+  metadata-prediction: metadata-prediction.html
+  reference-conditioning: reference-conditioning.html
+last_built: 2025-12-19T23:23Z
 urls:
   reference: https://synthesizebio.github.io/rsynthbio/reference
   article: https://synthesizebio.github.io/rsynthbio/articles
