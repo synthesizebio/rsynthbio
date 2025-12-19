@@ -1,0 +1,239 @@
+---
+title: "Metadata Prediction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Metadata Prediction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE # Set to FALSE since API calls require credentials
+)
+```
+
+## Overview
+
+Metadata prediction models **infer biological metadata from observed expression data**. Given a gene expression profile, the model predicts the likely biological characteristics such as cell type, tissue, disease state, and more.
+
+This is useful when you want to:
+
+- Annotate samples of unknown origin
+- Validate sample labels against expression patterns
+- Discover potential mislabeled or contaminated samples
+- Understand the biological characteristics captured in expression data
+
+## Available Models
+
+- **`gem-1-bulk_predict-metadata`**: Bulk RNA-seq metadata prediction model
+- **`gem-1-sc_predict-metadata`**: Single-cell RNA-seq metadata prediction model
+
+> **Note:** These endpoints may require 1-2 minutes of startup time if they have been scaled down. Plan accordingly for interactive use.
+
+```{r}
+library(rsynthbio)
+```
+
+## How It Works
+
+Metadata prediction encodes your expression data into the model's latent space and then uses classifiers to predict the most likely metadata values for each sample. The model returns:
+
+1. **Classifier probabilities**: For each categorical metadata field, the probability distribution over possible values
+2. **Predicted labels**: The most likely value for each metadata field
+3. **Latent representations**: The biological, technical, and perturbation latent vectors
+
+## Creating a Query
+
+Metadata prediction queries are simpler than other model types—you only need to provide expression counts:
+
+```{r query-example, eval=FALSE}
+# Get the example query structure
+example_query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")
+
+# Inspect the query structure
+str(example_query)
+```
+
+The query structure includes:
+
+1. **`inputs`**: A list of count vectors, where each element is a named list with a `counts` field containing expression values
+
+2. **`seed`** (optional): Random seed for reproducibility
+
+## Example: Predicting Sample Metadata
+
+Here's a complete example predicting metadata for expression samples:
+
+```{r predict-metadata, eval=FALSE}
+# Start with example query structure
+query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")
+
+# Replace with your actual expression counts
+# Each input should be a list with a counts vector
+query$inputs <- list(
+  list(counts = sample1_counts),
+  list(counts = sample2_counts),
+  list(counts = sample3_counts)
+)
+
+# Optional: set seed for reproducibility
+query$seed <- 42
+
+# Submit the query
+result <- predict_query(query, model_id = "gem-1-bulk_predict-metadata")
+```
+
+## Example: Single Sample Prediction
+
+For predicting metadata of a single sample:
+
+```{r single-sample, eval=FALSE}
+query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")
+
+# Single sample
+query$inputs <- list(
+  list(counts = my_sample_counts)
+)
+
+result <- predict_query(query, model_id = "gem-1-bulk_predict-metadata")
+
+# Access the predictions
+print(result$metadata)
+```
+
+## Query Parameters
+
+### inputs (list, required)
+
+A list of expression count vectors. Each element should be a named list containing:
+
+- **`counts`**: A vector of non-negative integers representing gene expression counts
+
+```{r inputs-example, eval=FALSE}
+query$inputs <- list(
+  list(counts = c(0, 12, 5, 0, 33, 7, ...)), # Sample 1
+  list(counts = c(3, 0, 0, 7, 1, 0, ...)) # Sample 2
+)
+```
+
+### seed (integer, optional)
+
+Random seed for reproducibility.
+
+```{r seed-example, eval=FALSE}
+query$seed <- 123
+```
+
+## Understanding the Results
+
+The results from metadata prediction include several components:
+
+### Predicted Metadata
+
+The `metadata` data frame contains the predicted values for each sample:
+
+```{r metadata-results, eval=FALSE}
+# View predicted metadata
+head(result$outputs$metadata)
+
+# Access specific predictions
+result$outputs$metadata$cell_type_ontology_id
+result$outputs$metadata$tissue_ontology_id
+result$outputs$metadata$disease_ontology_id
+```
+
+### Classifier Probabilities
+
+For categorical metadata fields, the model returns probability distributions over all possible values. These are useful for understanding prediction confidence:
+
+```{r classifier-probs, eval=FALSE}
+# If probabilities are included in the output
+# Access cell type probabilities for first sample
+# The exact structure depends on the API response format
+
+# Example: viewing top predicted cell types
+cell_type_probs <- result$classifier_probs$cell_type[[1]]
+head(sort(cell_type_probs, decreasing = TRUE))
+```
+
+### Latent Representations
+
+The model also returns latent vectors that capture biological, technical, and perturbation characteristics:
+
+```{r latents, eval=FALSE}
+# Access latent representations (if returned)
+biological_latents <- result$latents$biological
+technical_latents <- result$latents$technical
+```
+
+## Use Cases
+
+### Sample Annotation
+
+Annotate unlabeled samples with predicted metadata:
+
+```{r annotation, eval=FALSE}
+# Load your unlabeled samples
+unlabeled_counts <- read.csv("unlabeled_samples.csv", row.names = 1)
+
+# Create query
+query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")
+query$inputs <- lapply(1:ncol(unlabeled_counts), function(i) {
+  list(counts = unlabeled_counts[, i])
+})
+
+# Predict metadata
+result <- predict_query(query, model_id = "gem-1-bulk_predict-metadata")
+
+# Combine with sample IDs
+annotations <- result$outputs$metadata
+annotations$sample_id <- colnames(unlabeled_counts)
+```
+
+### Quality Control
+
+Validate existing sample labels against predicted metadata:
+
+```{r qc, eval=FALSE}
+# Compare predicted vs. provided labels
+provided_labels <- c("UBERON:0002107", "UBERON:0002107", "UBERON:0000955", "UBERON:0000955")
+predicted_labels <- result$outputs$metadata$tissue_ontology_id
+
+# Identify potential mismatches
+mismatches <- which(provided_labels != predicted_labels)
+if (length(mismatches) > 0) {
+  message("Potential mislabeled samples: ", paste(mismatches, collapse = ", "))
+}
+```
+
+### Batch Characterization
+
+Understand batch-specific technical characteristics:
+
+```{r batch-char, eval=FALSE}
+# Group samples by batch
+batch_labels <- c("batch1", "batch1", "batch2", "batch2")
+
+# Check if technical predictions cluster by batch
+# This can help identify batch effects
+tapply(result$outputs$latents$technical[, 1], batch_labels, mean)
+```
+
+## Important Notes
+
+### Counts Vector Length
+
+The counts vector for each sample must match the model's expected number of genes. If the length doesn't match, the API will return a validation error.
+
+Use `get_example_query()` to see the expected structure.
+
+### Gene Order
+
+Ensure your counts are in the same gene order expected by the model. The gene order should match what the baseline model expects—you can retrieve this from any prediction result's `gene_order` field.
+
+### Non-Negative Counts
+
+All count values must be non-negative integers. Floats that are whole numbers (like `10.0`) are accepted, but negative values will cause validation errors.
