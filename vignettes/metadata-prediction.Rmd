@@ -137,12 +137,12 @@ The `metadata` data frame contains the predicted values for each sample:
 
 ```{r metadata-results, eval=FALSE}
 # View predicted metadata
-head(result$metadata)
+head(result$outputs$metadata)
 
 # Access specific predictions
-result$metadata$cell_type_ontology_id
-result$metadata$tissue_ontology_id
-result$metadata$disease_ontology_id
+result$outputs$metadata$cell_type_ontology_id
+result$outputs$metadata$tissue_ontology_id
+result$outputs$metadata$disease_ontology_id
 ```
 
 ### Classifier Probabilities
@@ -189,7 +189,7 @@ query$inputs <- lapply(1:ncol(unlabeled_counts), function(i) {
 result <- predict_query(query, model_id = "gem-1-bulk_predict-metadata")
 
 # Combine with sample IDs
-annotations <- result$metadata
+annotations <- result$outputs$metadata
 annotations$sample_id <- colnames(unlabeled_counts)
 ```
 
@@ -199,8 +199,8 @@ Validate existing sample labels against predicted metadata:
 
 ```{r qc, eval=FALSE}
 # Compare predicted vs. provided labels
-provided_labels <- c("liver", "liver", "brain", "brain")
-predicted_labels <- result$metadata$tissue_ontology_id
+provided_labels <- c("UBERON:0002107", "UBERON:0002107", "UBERON:0000955", "UBERON:0000955")
+predicted_labels <- result$outputs$metadata$tissue_ontology_id
 
 # Identify potential mismatches
 mismatches <- which(provided_labels != predicted_labels)
@@ -219,7 +219,7 @@ batch_labels <- c("batch1", "batch1", "batch2", "batch2")
 
 # Check if technical predictions cluster by batch
 # This can help identify batch effects
-tapply(result$latents$technical[, 1], batch_labels, mean)
+tapply(result$outputs$latents$technical[, 1], batch_labels, mean)
 ```
 
 ## Important Notes
