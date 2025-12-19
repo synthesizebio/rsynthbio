@@ -66,6 +66,8 @@ expression <- result$expression
 | **Reference Conditioning** | `gem-1-bulk_reference-conditioning` | `gem-1-sc_reference-conditioning` | Generate expression anchored to a reference sample |
 | **Metadata Prediction** | `gem-1-bulk_predict-metadata` | `gem-1-sc_predict-metadata` | Predict metadata from expression |
 
+Only baseline models are available to all users. You can check which models are available programmatically, use `list_models()`. Contact us at support@synthesize.bio if you have any questions.
+
 ## Documentation
 
 For detailed usage instructions, see the vignettes:
