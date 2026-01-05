@@ -36,7 +36,7 @@ The structure of the query required by the API is specific to each model. Use `g
 
 ```{r query-example}
 # Get the example query structure for a specific model
-example_query <- get_example_query(model_id = "gem-1-bulk")
+example_query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Inspect the query structure
 str(example_query)
@@ -57,7 +57,7 @@ Once your query is ready, send it to the API to generate gene expression data:
 
 ```{r predict, eval=FALSE}
 # Create a query for the bulk model
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Submit and get results
 result <- predict_query(query, model_id = "gem-1-bulk")
@@ -69,7 +69,7 @@ The result is a list containing two data frames: `metadata` and `expression`.
 
 ```{r sc-example, eval=FALSE}
 # Create a query for the single-cell model
-sc_query <- get_example_query(model_id = "gem-1-sc")
+sc_query <- get_example_query(model_id = "gem-1-sc")$example_query
 
 # Submit and get results
 sc_result <- predict_query(sc_query, model_id = "gem-1-sc")
@@ -93,15 +93,15 @@ Available modes:
 
 ```{r mode-examples, eval=FALSE}
 # Bulk query with sample generation
-bulk_query <- get_example_query(model_id = "gem-1-bulk")
+bulk_query <- get_example_query(model_id = "gem-1-bulk")$example_query
 bulk_query$sampling_strategy <- "sample generation"
 
 # Bulk query with mean estimation
-bulk_query_mean <- get_example_query(model_id = "gem-1-bulk")
+bulk_query_mean <- get_example_query(model_id = "gem-1-bulk")$example_query
 bulk_query_mean$sampling_strategy <- "mean estimation"
 
 # Single-cell query (must use mean estimation)
-sc_query <- get_example_query(model_id = "gem-1-sc")
+sc_query <- get_example_query(model_id = "gem-1-sc")$example_query
 sc_query$sampling_strategy <- "mean estimation" # Required for single-cell
 ```
 
@@ -113,7 +113,7 @@ Library size used when converting predicted log CPM back to raw counts. Higher v
 
 ```{r total-count-example, eval=FALSE}
 # Create a query and add custom total_count
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 query$total_count <- 5000000
 ```
 
@@ -125,7 +125,7 @@ If `TRUE`, the model uses the mean of each latent distribution (`p(z|metadata)`)
 
 ```{r deterministic-example, eval=FALSE}
 # Create a query and enable deterministic latents
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 query$deterministic_latents <- TRUE
 ```
 
@@ -135,7 +135,7 @@ Random seed for reproducibility when using stochastic sampling.
 
 ```{r seed-example, eval=FALSE}
 # Create a query with a specific seed
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 query$seed <- 42
 ```
 
@@ -145,7 +145,7 @@ You can combine multiple parameters in a single query:
 
 ```{r combined-params, eval=FALSE}
 # Create a query and add multiple parameters
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 query$total_count <- 8000000
 query$deterministic_latents <- TRUE
 query$sampling_strategy <- "mean estimation"
@@ -207,7 +207,7 @@ You can customize the query inputs to fit your specific research needs:
 
 ```{r modify-query, eval=FALSE}
 # Get a base query
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Adjust number of samples for the first input
 query$inputs[[1]]$num_samples <- 10

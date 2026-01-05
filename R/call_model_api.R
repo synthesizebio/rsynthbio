@@ -28,10 +28,10 @@ list_models <- function(api_base_url = API_BASE_URL) {
 #' @examples
 #' \dontrun{
 #' # Get example query for bulk RNA-seq model
-#' query <- get_example_query(model_id = "gem-1-bulk")
+#' query <- get_example_query(model_id = "gem-1-bulk")$example_query
 #'
 #' # Get example query for single-cell model
-#' query_sc <- get_example_query(model_id = "gem-1-sc")
+#' query_sc <- get_example_query(model_id = "gem-1-sc")$example_query
 #'
 #' # Modify the query structure
 #' query$inputs[[1]]$num_samples <- 10
@@ -304,7 +304,7 @@ make_api_request <- function(url, context_msg) {
 #' models <- list_models()
 #'
 #' # Create a query for a specific model
-#' query <- get_example_query(model_id = "gem-1-bulk")
+#' query <- get_example_query(model_id = "gem-1-bulk")$example_query
 #'
 #' # Request raw counts
 #' result <- predict_query(query, model_id = "gem-1-bulk")
