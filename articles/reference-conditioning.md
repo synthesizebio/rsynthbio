@@ -45,7 +45,7 @@ models:
 
 ``` r
 # Get the example query structure
-example_query <- get_example_query(model_id = "gem-1-bulk_reference-conditioning")
+example_query <- get_example_query(model_id = "gem-1-bulk_reference-conditioning")$example_query
 
 # Inspect the query structure
 str(example_query)
@@ -86,7 +86,7 @@ reference sample:
 
 ``` r
 # Start with example query structure
-query <- get_example_query(model_id = "gem-1-bulk_reference-conditioning")
+query <- get_example_query(model_id = "gem-1-bulk_reference-conditioning")$example_query
 
 # Replace with your actual reference counts
 # The counts vector must match the model's expected gene order and length
@@ -114,7 +114,7 @@ result <- predict_query(query, model_id = "gem-1-bulk_reference-conditioning")
 Simulate the effect of knocking out a specific gene:
 
 ``` r
-query <- get_example_query(model_id = "gem-1-bulk_reference-conditioning")
+query <- get_example_query(model_id = "gem-1-bulk_reference-conditioning")$example_query
 
 # Your reference sample counts
 query$inputs[[1]]$counts <- list(counts = control_sample_counts)

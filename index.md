@@ -57,7 +57,7 @@ library(rsynthbio)
 list_models()
 
 # Get an example query for bulk RNA-seq
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Generate synthetic expression data
 result <- predict_query(query, model_id = "gem-1-bulk")

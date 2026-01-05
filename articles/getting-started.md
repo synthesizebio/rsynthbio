@@ -136,7 +136,7 @@ Here’s a quick example using a baseline model:
 
 ``` r
 # Get an example query structure
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Submit the query and get results
 result <- predict_query(query, model_id = "gem-1-bulk")

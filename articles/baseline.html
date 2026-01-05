@@ -102,7 +102,7 @@ model. Use <code><a href="../reference/get_example_query.html">get_example_query
 structured example for your chosen model.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get the example query structure for a specific model</span></span>
-<span><span class="va">example_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
+<span><span class="va">example_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span></span>
 <span><span class="co"># Inspect the query structure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">example_query</span><span class="op">)</span></span></code></pre></div>
@@ -134,7 +134,7 @@ sample) and <code>num_samples</code> (how many samples to generate).</p>
 expression data:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a query for the bulk model</span></span>
-<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span></span>
 <span><span class="co"># Submit and get results</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span></code></pre></div>
@@ -145,7 +145,7 @@ expression data:</p>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a query for the single-cell model</span></span>
-<span><span class="va">sc_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-sc"</span><span class="op">)</span></span>
+<span><span class="va">sc_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-sc"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span></span>
 <span><span class="co"># Submit and get results</span></span>
 <span><span class="va">sc_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">sc_query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-sc"</span><span class="op">)</span></span></code></pre></div>
@@ -179,15 +179,15 @@ is useful when you want a stable estimate of expected expression levels.
 </ul>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Bulk query with sample generation</span></span>
-<span><span class="va">bulk_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
+<span><span class="va">bulk_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span><span class="va">bulk_query</span><span class="op">$</span><span class="va">sampling_strategy</span> <span class="op">&lt;-</span> <span class="st">"sample generation"</span></span>
 <span></span>
 <span><span class="co"># Bulk query with mean estimation</span></span>
-<span><span class="va">bulk_query_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
+<span><span class="va">bulk_query_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span><span class="va">bulk_query_mean</span><span class="op">$</span><span class="va">sampling_strategy</span> <span class="op">&lt;-</span> <span class="st">"mean estimation"</span></span>
 <span></span>
 <span><span class="co"># Single-cell query (must use mean estimation)</span></span>
-<span><span class="va">sc_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-sc"</span><span class="op">)</span></span>
+<span><span class="va">sc_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-sc"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span><span class="va">sc_query</span><span class="op">$</span><span class="va">sampling_strategy</span> <span class="op">&lt;-</span> <span class="st">"mean estimation"</span> <span class="co"># Required for single-cell</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -200,7 +200,7 @@ counts. Higher values scale counts up proportionally.</p>
 </ul>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a query and add custom total_count</span></span>
-<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">total_count</span> <span class="op">&lt;-</span> <span class="fl">5000000</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -215,7 +215,7 @@ outputs for the same inputs.</p>
 </ul>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a query and enable deterministic latents</span></span>
-<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">deterministic_latents</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -224,7 +224,7 @@ outputs for the same inputs.</p>
 <p>Random seed for reproducibility when using stochastic sampling.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a query with a specific seed</span></span>
-<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">seed</span> <span class="op">&lt;-</span> <span class="fl">42</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -233,7 +233,7 @@ outputs for the same inputs.</p>
 <p>You can combine multiple parameters in a single query:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a query and add multiple parameters</span></span>
-<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">total_count</span> <span class="op">&lt;-</span> <span class="fl">8000000</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">deterministic_latents</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">sampling_strategy</span> <span class="op">&lt;-</span> <span class="st">"mean estimation"</span></span>
@@ -351,7 +351,7 @@ return an error.</p>
 needs:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get a base query</span></span>
-<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span></span>
 <span><span class="co"># Adjust number of samples for the first input</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">num_samples</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>

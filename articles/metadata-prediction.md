@@ -47,7 +47,7 @@ need to provide expression counts:
 
 ``` r
 # Get the example query structure
-example_query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")
+example_query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")$example_query
 
 # Inspect the query structure
 str(example_query)
@@ -66,7 +66,7 @@ Here’s a complete example predicting metadata for expression samples:
 
 ``` r
 # Start with example query structure
-query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")
+query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")$example_query
 
 # Replace with your actual expression counts
 # Each input should be a list with a counts vector
@@ -88,7 +88,7 @@ result <- predict_query(query, model_id = "gem-1-bulk_predict-metadata")
 For predicting metadata of a single sample:
 
 ``` r
-query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")
+query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")$example_query
 
 # Single sample
 query$inputs <- list(
@@ -182,7 +182,7 @@ Annotate unlabeled samples with predicted metadata:
 unlabeled_counts <- read.csv("unlabeled_samples.csv", row.names = 1)
 
 # Create query
-query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")
+query <- get_example_query(model_id = "gem-1-bulk_predict-metadata")$example_query
 query$inputs <- lapply(1:ncol(unlabeled_counts), function(i) {
   list(counts = unlabeled_counts[, i])
 })
