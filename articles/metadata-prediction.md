@@ -98,7 +98,7 @@ query$inputs <- list(
 result <- predict_query(query, model_id = "gem-1-bulk_predict-metadata")
 
 # Access the predictions
-print(result$metadata)
+print(result$outputs$metadata)
 ```
 
 ## Query Parameters
@@ -156,7 +156,7 @@ understanding prediction confidence:
 # The exact structure depends on the API response format
 
 # Example: viewing top predicted cell types
-cell_type_probs <- result$classifier_probs$cell_type[[1]]
+cell_type_probs <- result$outputs$classifier_probs$cell_type[[1]]
 head(sort(cell_type_probs, decreasing = TRUE))
 ```
 
@@ -167,8 +167,8 @@ technical, and perturbation characteristics:
 
 ``` r
 # Access latent representations (if returned)
-biological_latents <- result$latents$biological
-technical_latents <- result$latents$technical
+biological_latents <- result$outputs$latents$biological
+technical_latents <- result$outputs$latents$technical
 ```
 
 ## Use Cases
@@ -209,19 +209,6 @@ mismatches <- which(provided_labels != predicted_labels)
 if (length(mismatches) > 0) {
   message("Potential mislabeled samples: ", paste(mismatches, collapse = ", "))
 }
-```
-
-### Batch Characterization
-
-Understand batch-specific technical characteristics:
-
-``` r
-# Group samples by batch
-batch_labels <- c("batch1", "batch1", "batch2", "batch2")
-
-# Check if technical predictions cluster by batch
-# This can help identify batch effects
-tapply(result$outputs$latents$technical[, 1], batch_labels, mean)
 ```
 
 ## Important Notes

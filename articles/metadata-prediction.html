@@ -181,7 +181,7 @@ samples:</p>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_query.html">predict_query</a></span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk_predict-metadata"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Access the predictions</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">metadata</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">outputs</span><span class="op">$</span><span class="va">metadata</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="query-parameters">Query Parameters<a class="anchor" aria-label="anchor" href="#query-parameters"></a>
@@ -240,7 +240,7 @@ understanding prediction confidence:</p>
 <span><span class="co"># The exact structure depends on the API response format</span></span>
 <span></span>
 <span><span class="co"># Example: viewing top predicted cell types</span></span>
-<span><span class="va">cell_type_probs</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">classifier_probs</span><span class="op">$</span><span class="va">cell_type</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">cell_type_probs</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">outputs</span><span class="op">$</span><span class="va">classifier_probs</span><span class="op">$</span><span class="va">cell_type</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">cell_type_probs</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -250,8 +250,8 @@ understanding prediction confidence:</p>
 technical, and perturbation characteristics:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Access latent representations (if returned)</span></span>
-<span><span class="va">biological_latents</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">latents</span><span class="op">$</span><span class="va">biological</span></span>
-<span><span class="va">technical_latents</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">latents</span><span class="op">$</span><span class="va">technical</span></span></code></pre></div>
+<span><span class="va">biological_latents</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">outputs</span><span class="op">$</span><span class="va">latents</span><span class="op">$</span><span class="va">biological</span></span>
+<span><span class="va">technical_latents</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">outputs</span><span class="op">$</span><span class="va">latents</span><span class="op">$</span><span class="va">technical</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -292,18 +292,6 @@ technical, and perturbation characteristics:</p>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mismatches</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Potential mislabeled samples: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">mismatches</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="batch-characterization">Batch Characterization<a class="anchor" aria-label="anchor" href="#batch-characterization"></a>
-</h3>
-<p>Understand batch-specific technical characteristics:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Group samples by batch</span></span>
-<span><span class="va">batch_labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"batch1"</span>, <span class="st">"batch1"</span>, <span class="st">"batch2"</span>, <span class="st">"batch2"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Check if technical predictions cluster by batch</span></span>
-<span><span class="co"># This can help identify batch effects</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">outputs</span><span class="op">$</span><span class="va">latents</span><span class="op">$</span><span class="va">technical</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="va">batch_labels</span>, <span class="va">mean</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
