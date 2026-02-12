@@ -1,7 +1,7 @@
 Type: Package
 Package: rsynthbio
 Title: Synthesize Bio API Wrapper
-Version: 4.0.0
+Version: 4.0.1
 Authors@R: person(given = "Synthesize Bio",
     email = "candace@synthesize.bio",
     role = c("aut", "cre"))

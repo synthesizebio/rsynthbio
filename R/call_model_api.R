@@ -293,6 +293,7 @@ make_api_request <- function(url, context_msg) {
 #'         contains `download_url` and empty `metadata` and `expression` data frames.
 #' @importFrom httr POST GET add_headers content http_status status_code timeout
 #' @importFrom jsonlite toJSON fromJSON
+#' @importFrom utils modifyList
 #' @examples
 #' # Set your API key (in practice, use a more secure method)
 #' \dontrun{

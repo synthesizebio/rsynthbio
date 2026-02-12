@@ -10,7 +10,8 @@ predict_query(
   api_base_url = API_BASE_URL,
   poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
   poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
-  return_download_url = FALSE
+  return_download_url = FALSE,
+  ...
 )
 }
 \arguments{
@@ -39,6 +40,9 @@ Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).}
 
 \item{return_download_url}{Logical, if TRUE, returns a list containing the signed
 download URL instead of parsing into data frames. Default is FALSE.}
+
+\item{...}{Additional parameters to include in the query body. These are passed
+directly to the API and validated server-side.}
 }
 \value{
 A list. If `return_download_url` is `FALSE` (default), the list contains
@@ -63,7 +67,7 @@ set_synthesize_token()
 models <- list_models()
 
 # Create a query for a specific model
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Request raw counts
 result <- predict_query(query, model_id = "gem-1-bulk")
