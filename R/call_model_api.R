@@ -286,11 +286,14 @@ make_api_request <- function(url, context_msg) {
 #'        Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).
 #' @param return_download_url Logical, if TRUE, returns a list containing the signed
 #'        download URL instead of parsing into data frames. Default is FALSE.
+#' @param ... Additional parameters to include in the query body. These are passed
+#'        directly to the API and validated server-side.
 #' @return A list. If `return_download_url` is `FALSE` (default), the list contains
 #'         two data frames: `metadata` and `expression`. If `TRUE`, the list
 #'         contains `download_url` and empty `metadata` and `expression` data frames.
 #' @importFrom httr POST GET add_headers content http_status status_code timeout
 #' @importFrom jsonlite toJSON fromJSON
+#' @importFrom utils modifyList
 #' @examples
 #' # Set your API key (in practice, use a more secure method)
 #' \dontrun{
@@ -330,7 +333,8 @@ predict_query <- function(query,
                           api_base_url = API_BASE_URL,
                           poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
                           poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
-                          return_download_url = FALSE) {
+                          return_download_url = FALSE,
+                          ...) {
   if (!has_synthesize_token()) {
     stop("Please set your API key for Synthesize Bio using set_synthesize_token()")
   }
@@ -348,6 +352,12 @@ predict_query <- function(query,
 
   # Add source field for reporting
   query$source <- "rsynthbio"
+
+  # Merge any additional ... args into the query (validated server-side)
+  extra_args <- list(...)
+  if (length(extra_args) > 0) {
+    query <- modifyList(query, extra_args)
+  }
 
   # Start async query
   model_query_id <- start_model_query(
