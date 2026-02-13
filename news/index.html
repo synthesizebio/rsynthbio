@@ -6,7 +6,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,22 +35,11 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="4.0.0" id="rsynthbio-400">rsynthbio 4.0.0<a class="anchor" aria-label="anchor" href="#rsynthbio-400"></a></h2><p class="text-muted">CRAN release: 2025-12-03</p>
+<h2 class="pkg-version" data-toc-text="4.0.1" id="rsynthbio-401">rsynthbio 4.0.1<a class="anchor" aria-label="anchor" href="#rsynthbio-401"></a></h2>
 <div class="section level3">
-<h3 id="major-changes-4-0-0">Major Changes<a class="anchor" aria-label="anchor" href="#major-changes-4-0-0"></a></h3>
+<h3 id="new-features-4-0-1">New Features<a class="anchor" aria-label="anchor" href="#new-features-4-0-1"></a></h3>
 <ul><li>
-<strong>Model Agnostic Client</strong>: The client has been updated to support any model ID via the <code>model_id</code> parameter, enabling support for all current and future Synthesize Bio models without package updates.</li>
-<li>
-<strong>Dynamic Model Support</strong>: Removed hardcoded model lists and validations to allow flexible usage of new models.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="breaking-changes-4-0-0">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-4-0-0"></a></h3>
-<ul><li>
-<strong><code><a href="../reference/predict_query.html">predict_query()</a></code></strong>: Now requires <code>model_id</code> parameter.</li>
-<li>
-<strong>New Query Helper</strong>: <code>get_example_query(model_id)</code> replaces <code>get_valid_query()</code>.</li>
-<li>
-<strong>Removed Functions</strong>: <code>get_valid_query()</code>, <code>get_valid_modalities()</code>, and <code>validate_modality()</code> have been removed in favor of dynamic model support.</li>
+<code><a href="../reference/predict_query.html">predict_query()</a></code> now accepts <code>...</code> for passing additional parameters directly to the API, validated server-side.</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

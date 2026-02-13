@@ -29,10 +29,10 @@ A list representing a valid query structure for the specified model.
 ``` r
 if (FALSE) { # \dontrun{
 # Get example query for bulk RNA-seq model
-query <- get_example_query(model_id = "gem-1-bulk")
+query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
 # Get example query for single-cell model
-query_sc <- get_example_query(model_id = "gem-1-sc")
+query_sc <- get_example_query(model_id = "gem-1-sc")$example_query
 
 # Modify the query structure
 query$inputs[[1]]$num_samples <- 10

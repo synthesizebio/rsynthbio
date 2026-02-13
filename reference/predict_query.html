@@ -10,7 +10,7 @@ to the API and processes the response into usable data frames."><meta property="
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,8 @@ to the API and processes the response into usable data frames.</p>
 <span>  api_base_url <span class="op">=</span> <span class="va">API_BASE_URL</span>,</span>
 <span>  poll_interval_seconds <span class="op">=</span> <span class="va">DEFAULT_POLL_INTERVAL_SECONDS</span>,</span>
 <span>  poll_timeout_seconds <span class="op">=</span> <span class="va">DEFAULT_POLL_TIMEOUT_SECONDS</span>,</span>
-<span>  return_download_url <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  return_download_url <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,6 +97,11 @@ Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).</p></dd>
 <dd><p>Logical, if TRUE, returns a list containing the signed
 download URL instead of parsing into data frames. Default is FALSE.</p></dd>
 
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional parameters to include in the query body. These are passed
+directly to the API and validated server-side.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -118,7 +124,7 @@ download URL instead of parsing into data frames. Default is FALSE.</p></dd>
 <span class="r-in"><span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="list_models.html">list_models</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a query for a specific model</span></span></span>
-<span class="r-in"><span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Request raw counts</span></span></span>
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">predict_query</span><span class="op">(</span><span class="va">query</span>, model_id <span class="op">=</span> <span class="st">"gem-1-bulk"</span><span class="op">)</span></span></span>
