@@ -54,45 +54,38 @@ transform_baseline_output <- function(final_json) {
 
 #' Transform Metadata Model Output (Internal)
 #'
-#' @description Default output transformer, does not modify the response from the server.
+#' @description Extracts the outputs list from a metadata prediction API response.
+#' Each output contains classifier_probs, latents, metadata, and decoder_sample.
 #'
 #' @param final_json The parsed API response list
-#' @return the same final_json
+#' @return A list of metadata output objects
 #' @keywords internal
-default_output_transformer <- function(final_json) {
-  # return the entire output
-  return (final_json)
+transform_metadata_output <- function(final_json) {
+  return(final_json$outputs)
 }
 
 #' Output Transformer Registry
 #'
 #' @description A registry mapping model IDs to their corresponding output transformer functions.
-#' Models not in the registry will use the default standard transformer.
 #' @keywords internal
 OUTPUT_TRANSFORMERS <- list(
   "gem-1-bulk" = transform_baseline_output,
   "gem-1-sc" = transform_baseline_output,
   "gem-1-bulk_reference-conditioning" = transform_baseline_output,
-  "gem-1-sc_reference-conditioning" = transform_baseline_output
+  "gem-1-sc_reference-conditioning" = transform_baseline_output,
+  "gem-1-bulk_condition-on-sample-ids" = transform_baseline_output,
+  "gem-1-bulk_predict-metadata" = transform_metadata_output,
+  "gem-1-sc_predict-metadata" = transform_metadata_output
 )
 
 #' Get Output Transformer for Model (Internal)
 #'
 #' @description Looks up the appropriate output transformer for a given model ID.
-#' Returns the standard transformer as the default if no specific transformer is registered.
+#' Returns NULL if no transformer is registered.
 #'
 #' @param model_id Character string specifying the model ID
-#' @return A transformer function that accepts (final_json) and returns
-#'         a list with metadata, expression, and optionally latents
+#' @return A transformer function, or NULL if not registered
 #' @keywords internal
 get_output_transformer <- function(model_id) {
-  # Look up transformer in registry
-  transformer <- OUTPUT_TRANSFORMERS[[model_id]]
-
-  # If not found, use standard transformer as default
-  if (is.null(transformer)) {
-    transformer <- default_output_transformer
-  }
-
-  return(transformer)
+  return(OUTPUT_TRANSFORMERS[[model_id]])
 }
