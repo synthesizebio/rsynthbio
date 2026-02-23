@@ -2,6 +2,8 @@
 
 ## rsynthbio 4.0.1
 
+CRAN release: 2026-02-13
+
 ### New Features
 
 - [`predict_query()`](https://synthesizebio.github.io/rsynthbio/reference/predict_query.md)
