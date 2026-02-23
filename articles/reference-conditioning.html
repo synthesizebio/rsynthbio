@@ -137,7 +137,7 @@ contains:</p>
 <ul>
 <li>
 <strong><code>counts</code></strong>: The reference expression
-counts (a named list with a <code>counts</code> vector)</li>
+counts (a numeric vector)</li>
 <li>
 <strong><code>metadata</code></strong>: Perturbation-only metadata
 (see below)</li>
@@ -179,14 +179,14 @@ reference sample:</p>
 <span></span>
 <span><span class="co"># Replace with your actual reference counts</span></span>
 <span><span class="co"># The counts vector must match the model's expected gene order and length</span></span>
-<span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">your_reference_counts</span><span class="op">)</span></span>
+<span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="va">your_reference_counts</span></span>
 <span></span>
 <span><span class="co"># Specify the perturbation</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  perturbation_ontology_id <span class="op">=</span> <span class="st">"CHEMBL25"</span>, <span class="co"># Aspirin (ChEMBL ID)</span></span>
 <span>  perturbation_type <span class="op">=</span> <span class="st">"compound"</span>,</span>
-<span>  perturbation_time <span class="op">=</span> <span class="st">"24h"</span>,</span>
-<span>  perturbation_dose <span class="op">=</span> <span class="st">"10uM"</span></span>
+<span>  perturbation_time <span class="op">=</span> <span class="st">"24 hours"</span>,</span>
+<span>  perturbation_dose <span class="op">=</span> <span class="st">"10 um"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">num_samples</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
@@ -205,7 +205,7 @@ reference sample:</p>
 <code class="sourceCode R"><span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_example_query.html">get_example_query</a></span><span class="op">(</span>model_id <span class="op">=</span> <span class="st">"gem-1-bulk_reference-conditioning"</span><span class="op">)</span><span class="op">$</span><span class="va">example_query</span></span>
 <span></span>
 <span><span class="co"># Your reference sample counts</span></span>
-<span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">control_sample_counts</span><span class="op">)</span></span>
+<span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="va">control_sample_counts</span></span>
 <span></span>
 <span><span class="co"># CRISPR knockout of TP53</span></span>
 <span><span class="va">query</span><span class="op">$</span><span class="va">inputs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -325,11 +325,13 @@ This produces deterministic, reproducible outputs.</p>
 </tr>
 <tr class="odd">
 <td><code>perturbation_time</code></td>
-<td>Time since perturbation (e.g., “24h”, “48h”)</td>
+<td>Time since perturbation, as a number and unit separated by a space
+(e.g., “24 hours”, “48 hours”)</td>
 </tr>
 <tr class="even">
 <td><code>perturbation_dose</code></td>
-<td>Dose of perturbation (e.g., “10uM”, “1mg/kg”)</td>
+<td>Dose of perturbation, as a number and unit separated by a space
+(e.g., “10 um”, “1 mg/kg”)</td>
 </tr>
 </tbody>
 </table>
