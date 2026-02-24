@@ -54,14 +54,60 @@ transform_baseline_output <- function(final_json) {
 
 #' Transform Metadata Model Output (Internal)
 #'
-#' @description Extracts the outputs list from a metadata prediction API response.
-#' Each output contains classifier_probs, latents, metadata, and decoder_sample.
+#' @description Extracts metadata prediction outputs and converts them to
+#' data.frames for metadata, latents, classifier_probs, and expression
+#' (from decoder_sample counts).
+#'
+#' Uses the same direct column-access pattern as transform_baseline_output,
+#' since jsonlite with simplifyDataFrame=TRUE converts the outputs array
+#' into a columnar structure.
 #'
 #' @param final_json The parsed API response list
-#' @return A list of metadata output objects
+#' @return A list with:
+#'         - metadata: data.frame of predicted metadata
+#'         - latents: data.frame with biological/technical/perturbation columns
+#'         - classifier_probs: data.frame of per-category probability dicts
+#'         - expression: data.frame of decoder sample counts
 #' @keywords internal
 transform_metadata_output <- function(final_json) {
-  return(final_json$outputs)
+  outputs <- final_json$outputs
+
+  metadata <- outputs$metadata
+  latents <- outputs$latents
+  classifier_probs <- outputs$classifier_probs
+
+  # Extract expression counts from decoder_sample.
+  # Each output's decoder_sample is {"counts": [...]}.
+  # jsonlite may simplify this to a data.frame with a "counts" column,
+  # or keep it as a nested list.
+  decoder_sample <- outputs$decoder_sample
+  if (is.data.frame(decoder_sample)) {
+    counts_list <- decoder_sample$counts
+  } else if (is.list(decoder_sample)) {
+    counts_list <- lapply(decoder_sample, function(x) x$counts)
+  } else {
+    counts_list <- list()
+  }
+
+  # Handle jsonlite wrapping counts in a single-column data.frame
+  if (is.data.frame(counts_list) && ncol(counts_list) == 1) {
+    counts_list <- counts_list[[1]]
+  }
+
+  expression <- do.call(rbind, lapply(counts_list, function(x) as.numeric(x)))
+  expression <- as.data.frame(expression)
+
+  gene_order <- final_json$gene_order
+  if (!is.null(gene_order)) {
+    colnames(expression) <- gene_order
+  }
+
+  return(list(
+    metadata = metadata,
+    latents = latents,
+    classifier_probs = classifier_probs,
+    expression = expression
+  ))
 }
 
 #' Output Transformer Registry
