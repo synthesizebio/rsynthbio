@@ -11,6 +11,7 @@ predict_query(
   poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
   poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
   return_download_url = FALSE,
+  raw_response = FALSE,
   ...
 )
 }
@@ -40,6 +41,9 @@ Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).}
 
 \item{return_download_url}{Logical, if TRUE, returns a list containing the signed
 download URL instead of parsing into data frames. Default is FALSE.}
+
+\item{raw_response}{Logical, if TRUE, returns the raw (unformatted) JSON response
+from the API without applying any output transformers. Default is FALSE.}
 
 \item{...}{Additional parameters to include in the query body. These are passed
 directly to the API and validated server-side.}
