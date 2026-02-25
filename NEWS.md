@@ -7,6 +7,5 @@
 
 ## New Features
 
-- Added `raw_response` parameter to `predict_query()`. When `TRUE`, returns the raw API JSON without any client-side formatting.
-- Added output transformer for `gem-1-bulk_condition-on-sample-ids`.
 - Added output transformer for `gem-1-bulk_predict-metadata` and `gem-1-sc_predict-metadata` that converts results to data.frames.
+- Added output transformer for `gem-1-bulk_condition-on-sample-ids`.
