@@ -10,7 +10,7 @@ to the API and processes the response into usable data frames."><meta property="
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,6 +54,7 @@ to the API and processes the response into usable data frames.</p>
 <span>  poll_interval_seconds <span class="op">=</span> <span class="va">DEFAULT_POLL_INTERVAL_SECONDS</span>,</span>
 <span>  poll_timeout_seconds <span class="op">=</span> <span class="va">DEFAULT_POLL_TIMEOUT_SECONDS</span>,</span>
 <span>  return_download_url <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  raw_response <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -96,6 +97,11 @@ Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).</p></dd>
 <dt id="arg-return-download-url">return_download_url<a class="anchor" aria-label="anchor" href="#arg-return-download-url"></a></dt>
 <dd><p>Logical, if TRUE, returns a list containing the signed
 download URL instead of parsing into data frames. Default is FALSE.</p></dd>
+
+
+<dt id="arg-raw-response">raw_response<a class="anchor" aria-label="anchor" href="#arg-raw-response"></a></dt>
+<dd><p>Logical, if TRUE, returns the raw (unformatted) JSON response
+from the API without applying any output transformers. Default is FALSE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

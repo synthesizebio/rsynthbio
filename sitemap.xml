@@ -18,7 +18,6 @@
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/DEFAULT_TIMEOUT.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/OUTPUT_TRANSFORMERS.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/clear_synthesize_token.html</loc></url>
-<url><loc>https://synthesizebio.github.io/rsynthbio/reference/default_output_transformer.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/get_example_query.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/get_json.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/get_output_transformer.html</loc></url>
@@ -32,5 +31,6 @@
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/set_synthesize_token.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/start_model_query.html</loc></url>
 <url><loc>https://synthesizebio.github.io/rsynthbio/reference/transform_baseline_output.html</loc></url>
+<url><loc>https://synthesizebio.github.io/rsynthbio/reference/transform_metadata_output.html</loc></url>
 </urlset>
 

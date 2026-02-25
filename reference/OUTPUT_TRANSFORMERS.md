@@ -1,8 +1,7 @@
 # Output Transformer Registry
 
 A registry mapping model IDs to their corresponding output transformer
-functions. Models not in the registry will use the default standard
-transformer.
+functions.
 
 ## Usage
 
@@ -12,4 +11,4 @@ OUTPUT_TRANSFORMERS
 
 ## Format
 
-An object of class `list` of length 4.
+An object of class `list` of length 7.

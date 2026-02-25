@@ -1,8 +1,7 @@
 # Get Output Transformer for Model (Internal)
 
 Looks up the appropriate output transformer for a given model ID.
-Returns the standard transformer as the default if no specific
-transformer is registered.
+Returns NULL if no transformer is registered.
 
 ## Usage
 
@@ -18,5 +17,4 @@ get_output_transformer(model_id)
 
 ## Value
 
-A transformer function that accepts (final_json) and returns a list with
-metadata, expression, and optionally latents
+A transformer function, or NULL if not registered

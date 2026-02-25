@@ -6,7 +6,7 @@
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
     <img src="https://github.com/synthesizebio/rsynthbio/blob/main/assets/whitelogo.png?raw=true" width="200px"><a class="navbar-brand me-2" href="../index.html">rsynthbio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">4.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,11 +35,17 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="4.0.1" id="rsynthbio-401">rsynthbio 4.0.1<a class="anchor" aria-label="anchor" href="#rsynthbio-401"></a></h2><p class="text-muted">CRAN release: 2026-02-13</p>
+<h2 class="pkg-version" data-toc-text="4.1.0" id="rsynthbio-410">rsynthbio 4.1.0<a class="anchor" aria-label="anchor" href="#rsynthbio-410"></a></h2>
 <div class="section level3">
-<h3 id="new-features-4-0-1">New Features<a class="anchor" aria-label="anchor" href="#new-features-4-0-1"></a></h3>
+<h3 id="breaking-changes-4-1-0">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-4-1-0"></a></h3>
 <ul><li>
-<code><a href="../reference/predict_query.html">predict_query()</a></code> now accepts <code>...</code> for passing additional parameters directly to the API, validated server-side.</li>
+<code><a href="../reference/predict_query.html">predict_query()</a></code> now raises an error when called with a <code>model_id</code> that has no registered output transformer. Pass <code>raw_response = TRUE</code> to get the unformatted JSON response.</li>
+<li>Metadata prediction models (<code>gem-1-bulk_predict-metadata</code>, <code>gem-1-sc_predict-metadata</code>) now return a named list with <code>metadata</code>, <code>latents</code>, <code>classifier_probs</code>, and <code>expression</code> data.frames instead of the raw outputs list.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-4-1-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-4-1-0"></a></h3>
+<ul><li>Added output transformer for <code>gem-1-bulk_predict-metadata</code> and <code>gem-1-sc_predict-metadata</code> that converts results to data.frames.</li>
+<li>Added output transformer for <code>gem-1-bulk_condition-on-sample-ids</code>.</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

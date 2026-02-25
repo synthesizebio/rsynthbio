@@ -14,6 +14,7 @@ predict_query(
   poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
   poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
   return_download_url = FALSE,
+  raw_response = FALSE,
   ...
 )
 ```
@@ -60,6 +61,11 @@ predict_query(
 
   Logical, if TRUE, returns a list containing the signed download URL
   instead of parsing into data frames. Default is FALSE.
+
+- raw_response:
+
+  Logical, if TRUE, returns the raw (unformatted) JSON response from the
+  API without applying any output transformers. Default is FALSE.
 
 - ...:
 
