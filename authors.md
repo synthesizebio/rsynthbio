@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/synthesizebio/rsynthbio/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/synthesizebio/rsynthbio/blob/v4.1.0/DESCRIPTION)
 
 Synthesize Bio (2026). *rsynthbio: Synthesize Bio API Wrapper*. R
 package version 4.1.0, <https://github.com/synthesizebio/rsynthbio>.
