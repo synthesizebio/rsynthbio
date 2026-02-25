@@ -5,13 +5,12 @@
 \alias{OUTPUT_TRANSFORMERS}
 \title{Output Transformer Registry}
 \format{
-An object of class \code{list} of length 4.
+An object of class \code{list} of length 7.
 }
 \usage{
 OUTPUT_TRANSFORMERS
 }
 \description{
 A registry mapping model IDs to their corresponding output transformer functions.
-Models not in the registry will use the default standard transformer.
 }
 \keyword{internal}

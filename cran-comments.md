@@ -4,9 +4,10 @@
 
 ## Release summary
 
-This is a patch release (4.0.1):
+This is a patch release (4.1.0):
 
-- `predict_query()` now accepts `...` for passing additional parameters directly to the API.
+- Added output transformer for `gem-1-bulk_predict-metadata` and `gem-1-sc_predict-metadata` that converts results to data.frames.
+- Added output transformer for `gem-1-bulk_condition-on-sample-ids`.
 
 ## Test environments
 

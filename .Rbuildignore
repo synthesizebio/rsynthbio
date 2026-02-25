@@ -13,3 +13,4 @@ assets/*
 .gemini/*
 _pkgdown.yml
 pkgdown/*
+^cran-comments\.md$

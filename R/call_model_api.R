@@ -286,6 +286,8 @@ make_api_request <- function(url, context_msg) {
 #'        Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).
 #' @param return_download_url Logical, if TRUE, returns a list containing the signed
 #'        download URL instead of parsing into data frames. Default is FALSE.
+#' @param raw_response Logical, if TRUE, returns the raw (unformatted) JSON response
+#'        from the API without applying any output transformers. Default is FALSE.
 #' @param ... Additional parameters to include in the query body. These are passed
 #'        directly to the API and validated server-side.
 #' @return A list. If `return_download_url` is `FALSE` (default), the list contains
@@ -334,6 +336,7 @@ predict_query <- function(query,
                           poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
                           poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
                           return_download_url = FALSE,
+                          raw_response = FALSE,
                           ...) {
   if (!has_synthesize_token()) {
     stop("Please set your API key for Synthesize Bio using set_synthesize_token()")
@@ -419,11 +422,18 @@ predict_query <- function(query,
   # Fetch the final results JSON and transform to data frames
   final_json <- get_json(download_url)
 
-  # Get appropriate transformer for this model
+  if (isTRUE(raw_response)) {
+    return(final_json)
+  }
+
   transformer <- get_output_transformer(model_id)
+  if (is.null(transformer)) {
+    stop(paste0(
+      "No output formatter registered for model_id '", model_id, "'. ",
+      "To receive raw (unformatted) JSON, pass raw_response = TRUE ",
+      "to predict_query()."
+    ))
+  }
 
-  # Apply transformation
-  result <- transformer(final_json)
-
-  return(result)
+  return(transformer(final_json))
 }

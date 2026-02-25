@@ -54,45 +54,84 @@ transform_baseline_output <- function(final_json) {
 
 #' Transform Metadata Model Output (Internal)
 #'
-#' @description Default output transformer, does not modify the response from the server.
+#' @description Extracts metadata prediction outputs and converts them to
+#' data.frames for metadata, latents, classifier_probs, and expression
+#' (from decoder_sample counts).
+#'
+#' Uses the same direct column-access pattern as transform_baseline_output,
+#' since jsonlite with simplifyDataFrame=TRUE converts the outputs array
+#' into a columnar structure.
 #'
 #' @param final_json The parsed API response list
-#' @return the same final_json
+#' @return A list with:
+#'         - metadata: data.frame of predicted metadata
+#'         - latents: data.frame with biological/technical/perturbation columns
+#'         - classifier_probs: data.frame of per-category probability dicts
+#'         - expression: data.frame of decoder sample counts
 #' @keywords internal
-default_output_transformer <- function(final_json) {
-  # return the entire output
-  return (final_json)
+transform_metadata_output <- function(final_json) {
+  outputs <- final_json$outputs
+
+  metadata <- outputs$metadata
+  latents <- outputs$latents
+  classifier_probs <- outputs$classifier_probs
+
+  # Extract expression counts from decoder_sample.
+  # Each output's decoder_sample is {"counts": [...]}.
+  # jsonlite may simplify this to a data.frame with a "counts" column,
+  # or keep it as a nested list.
+  decoder_sample <- outputs$decoder_sample
+  if (is.data.frame(decoder_sample)) {
+    counts_list <- decoder_sample$counts
+  } else if (is.list(decoder_sample)) {
+    counts_list <- lapply(decoder_sample, function(x) x$counts)
+  } else {
+    counts_list <- list()
+  }
+
+  # Handle jsonlite wrapping counts in a single-column data.frame
+  if (is.data.frame(counts_list) && ncol(counts_list) == 1) {
+    counts_list <- counts_list[[1]]
+  }
+
+  expression <- do.call(rbind, lapply(counts_list, function(x) as.numeric(x)))
+  expression <- as.data.frame(expression)
+
+  gene_order <- final_json$gene_order
+  if (!is.null(gene_order)) {
+    colnames(expression) <- gene_order
+  }
+
+  return(list(
+    metadata = metadata,
+    latents = latents,
+    classifier_probs = classifier_probs,
+    expression = expression
+  ))
 }
 
 #' Output Transformer Registry
 #'
 #' @description A registry mapping model IDs to their corresponding output transformer functions.
-#' Models not in the registry will use the default standard transformer.
 #' @keywords internal
 OUTPUT_TRANSFORMERS <- list(
   "gem-1-bulk" = transform_baseline_output,
   "gem-1-sc" = transform_baseline_output,
   "gem-1-bulk_reference-conditioning" = transform_baseline_output,
-  "gem-1-sc_reference-conditioning" = transform_baseline_output
+  "gem-1-sc_reference-conditioning" = transform_baseline_output,
+  "gem-1-bulk_condition-on-sample-ids" = transform_baseline_output,
+  "gem-1-bulk_predict-metadata" = transform_metadata_output,
+  "gem-1-sc_predict-metadata" = transform_metadata_output
 )
 
 #' Get Output Transformer for Model (Internal)
 #'
 #' @description Looks up the appropriate output transformer for a given model ID.
-#' Returns the standard transformer as the default if no specific transformer is registered.
+#' Returns NULL if no transformer is registered.
 #'
 #' @param model_id Character string specifying the model ID
-#' @return A transformer function that accepts (final_json) and returns
-#'         a list with metadata, expression, and optionally latents
+#' @return A transformer function, or NULL if not registered
 #' @keywords internal
 get_output_transformer <- function(model_id) {
-  # Look up transformer in registry
-  transformer <- OUTPUT_TRANSFORMERS[[model_id]]
-
-  # If not found, use standard transformer as default
-  if (is.null(transformer)) {
-    transformer <- default_output_transformer
-  }
-
-  return(transformer)
+  return(OUTPUT_TRANSFORMERS[[model_id]])
 }
