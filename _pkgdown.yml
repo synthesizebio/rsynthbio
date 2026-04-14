@@ -43,6 +43,7 @@ articles:
     navbar: ~
     contents:
       - getting-started
+      - available-metadata
   - title: "Model Types"
     desc: "Detailed documentation for each model type"
     contents:
