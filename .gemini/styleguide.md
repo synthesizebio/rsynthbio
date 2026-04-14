@@ -1,3 +1,13 @@
+Security Review Override
+This security section takes precedence over the rest of this file when review guidance conflicts. Prioritize actionable security, credential-handling, dependency, and workflow findings over style nits.
+
+Review focus:
+- Flag API keys, tokens, passwords, or real secrets committed to R code, tests, docs, examples, `.Renviron`, `.env` files, or logs.
+- Flag dependency changes that bypass `renv` when it is in use, omit `renv.lock`, `.Rprofile`, or `renv/settings.json` when those files are touched, or add unnecessary package surface in `DESCRIPTION`.
+- Flag GitHub Actions that use third-party actions by tag instead of full commit SHA, omit explicit `permissions:`, use long-lived cloud credentials, or use unsafe `pull_request_target` patterns.
+- Flag Docker or release automation that passes secrets through `ARG`, installs dependencies without a reviewed lockfile where applicable, or runs runtime containers as root.
+- Treat `DESCRIPTION`, renv files, release workflows, and examples that show authentication patterns as security-sensitive.
+
 R Package API Wrapper Style Guide
 This style guide outlines conventions and best practices for developing an R package that serves as an API wrapper. Adhering to these guidelines will ensure a consistent, robust, and user-friendly package that interacts gracefully with external APIs.
 

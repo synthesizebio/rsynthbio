@@ -1,0 +1,13 @@
+---
+description: Security posture for R packaging, secrets, workflows, and releases
+alwaysApply: true
+---
+
+# Security Posture
+
+- Treat `DESCRIPTION`, `renv.lock`, `.Rprofile`, `renv/settings.json`, GitHub Actions workflows, and env templates as security-sensitive files.
+- Never commit API keys, tokens, passwords, or real secrets in R code, tests, examples, `.Renviron`, `.env` files, or logs.
+- Prefer `renv` for reproducible environments: commit `renv.lock`, `.Rprofile`, and `renv/settings.json`, use `renv::restore()` for installs, and use `renv::snapshot()` when dependency changes are intentional.
+- Keep package dependencies minimal and explicit in `DESCRIPTION`; review dependency diffs carefully, especially when new packages or repository sources appear.
+- In GitHub Actions, pin third-party actions to full commit SHAs with version comments, declare explicit `permissions:`, and prefer short-lived credentials over stored long-lived secrets.
+- If Docker or publishing workflows are touched, use lockfile-based installs where applicable, BuildKit secrets instead of Docker `ARG`, and non-root runtime containers.

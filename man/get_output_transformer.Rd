@@ -10,11 +10,10 @@ get_output_transformer(model_id)
 \item{model_id}{Character string specifying the model ID}
 }
 \value{
-A transformer function that accepts (final_json) and returns
-        a list with metadata, expression, and optionally latents
+A transformer function, or NULL if not registered
 }
 \description{
 Looks up the appropriate output transformer for a given model ID.
-Returns the standard transformer as the default if no specific transformer is registered.
+Returns NULL if no transformer is registered.
 }
 \keyword{internal}
