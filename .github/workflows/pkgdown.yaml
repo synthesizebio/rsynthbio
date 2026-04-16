@@ -14,7 +14,6 @@ name: pkgdown
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
-    # Only restrict concurrency for non-PR jobs
     concurrency:
       group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
@@ -22,7 +21,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - uses: r-lib/actions/setup-pandoc@6f6e5bc62fba3a704f74e7ad7ef7676c5c6a2590 # v2
 
