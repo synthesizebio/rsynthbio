@@ -4,7 +4,7 @@
 
 To generate datasets without code, use our [web platform](https://app.synthesize.bio/datasets/).
 
-[Get started](https://synthesizebio.mintlify.app/r-sdk/getting-started) | [Full R SDK docs](https://synthesizebio.mintlify.app/r-sdk)
+[Get started](https://docs.synthesize.bio/r-sdk/getting-started) | [Full R SDK docs](https://docs.synthesize.bio/r-sdk)
 
 User-facing documentation lives in [`synthesizebio/mintlify-docs`](https://github.com/synthesizebio/mintlify-docs) under [`r-sdk/`](https://github.com/synthesizebio/mintlify-docs/tree/main/r-sdk). To update the docs, open a PR there.
 
@@ -74,13 +74,13 @@ Only baseline models are available to all users. Check programmatically with `li
 
 ## Documentation
 
-For detailed usage and guides, see the [R SDK section of the Synthesize Bio docs](https://synthesizebio.mintlify.app/r-sdk):
+For detailed usage and guides, see the [R SDK section of the Synthesize Bio docs](https://docs.synthesize.bio/r-sdk):
 
-- [Getting started](https://synthesizebio.mintlify.app/r-sdk/getting-started) — Installation, authentication, and overview
-- [Baseline models](https://synthesizebio.mintlify.app/r-sdk/models/baseline) — Generate expression from metadata
-- [Reference conditioning](https://synthesizebio.mintlify.app/r-sdk/models/reference-conditioning) — Condition on real expression data
-- [Metadata prediction](https://synthesizebio.mintlify.app/r-sdk/models/metadata-prediction) — Infer metadata from expression
-- [Function reference](https://synthesizebio.mintlify.app/r-sdk/reference) — All exported functions
+- [Getting started](https://docs.synthesize.bio/r-sdk/getting-started) — Installation, authentication, and overview
+- [Baseline models](https://docs.synthesize.bio/r-sdk/models/baseline) — Generate expression from metadata
+- [Reference conditioning](https://docs.synthesize.bio/r-sdk/models/reference-conditioning) — Condition on real expression data
+- [Metadata prediction](https://docs.synthesize.bio/r-sdk/models/metadata-prediction) — Infer metadata from expression
+- [Function reference](https://docs.synthesize.bio/r-sdk/reference) — All exported functions
 
 ## Rate limits
 
