@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>rsynthbio docs have moved</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://synthesizebio.mintlify.app/r-sdk" />
+    <script>
+      (function () {
+        var base = "https://synthesizebio.mintlify.app/r-sdk";
+        var articleMap = {
+          "getting-started": "/getting-started",
+          "baseline": "/models/baseline",
+          "reference-conditioning": "/models/reference-conditioning",
+          "metadata-prediction": "/models/metadata-prediction"
+        };
+        var path = window.location.pathname.replace(/^\/rsynthbio/, "");
+        var target = base;
+        var articleMatch = path.match(/\/articles\/([^/]+?)(?:\.html)?\/?$/);
+        if (articleMatch && articleMap[articleMatch[1]]) {
+          target = base + articleMap[articleMatch[1]];
+        } else if (/^\/reference(\/|$)/.test(path)) {
+          target = base + "/reference";
+        }
+        window.location.replace(target);
+      })();
+    </script>
+    <meta http-equiv="refresh" content="1; url=https://synthesizebio.mintlify.app/r-sdk" />
+    <style>
+      body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 36rem; margin: 4rem auto; padding: 0 1rem; color: #0f172a; }
+      a { color: #15803d; }
+    </style>
+  </head>
+  <body>
+    <h1>rsynthbio docs have moved</h1>
+    <p>
+      The R SDK documentation now lives at
+      <a href="https://synthesizebio.mintlify.app/r-sdk">synthesizebio.mintlify.app/r-sdk</a>.
+    </p>
+    <p>Redirecting…</p>
+  </body>
+</html>

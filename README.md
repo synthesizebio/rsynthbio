@@ -4,11 +4,15 @@
 
 To generate datasets without code, use our [web platform](https://app.synthesize.bio/datasets/).
 
-[See the full documentation here](https://synthesizebio.github.io/rsynthbio/).
+[Get started](https://synthesizebio.mintlify.app/r-sdk/getting-started) | [Full R SDK docs](https://synthesizebio.mintlify.app/r-sdk)
+
+User-facing documentation lives in [`synthesizebio/mintlify-docs`](https://github.com/synthesizebio/mintlify-docs) under [`r-sdk/`](https://github.com/synthesizebio/mintlify-docs/tree/main/r-sdk). To update the docs, open a PR there.
+
+For function-level reference, use R's built-in help (`?predict_query`, `help(package = "rsynthbio")`) or the [CRAN reference manual PDF](https://cran.r-project.org/web/packages/rsynthbio/rsynthbio.pdf).
 
 For questions, suggestions, and support, email us at [support@synthesize.bio](mailto:support@synthesize.bio).
 
-## How to Install
+## How to install
 
 You can install `rsynthbio` from CRAN:
 
@@ -39,7 +43,7 @@ set_synthesize_token(use_keyring = TRUE)
 load_synthesize_token_from_keyring()
 ```
 
-## Quick Start
+## Quick start
 
 ```r
 library(rsynthbio)
@@ -58,25 +62,26 @@ metadata <- result$metadata
 expression <- result$expression
 ```
 
-## Available Models
+## Available models
 
-| Model Type | Bulk | Single-Cell | Description |
-|------------|------|-------------|-------------|
-| **Baseline** | `gem-1-bulk` | `gem-1-sc` | Generate expression from metadata |
-| **Reference Conditioning** | `gem-1-bulk_reference-conditioning` | `gem-1-sc_reference-conditioning` | Generate expression anchored to a reference sample |
-| **Metadata Prediction** | `gem-1-bulk_predict-metadata` | `gem-1-sc_predict-metadata` | Predict metadata from expression |
+| Model type                 | Bulk                                  | Single-cell                          | Description                                       |
+| -------------------------- | ------------------------------------- | ------------------------------------ | ------------------------------------------------- |
+| **Baseline**               | `gem-1-bulk`                          | `gem-1-sc`                           | Generate expression from metadata                 |
+| **Reference conditioning** | `gem-1-bulk_reference-conditioning`   | `gem-1-sc_reference-conditioning`    | Generate expression anchored to a reference sample|
+| **Metadata prediction**    | `gem-1-bulk_predict-metadata`         | `gem-1-sc_predict-metadata`          | Predict metadata from expression                  |
 
-Only baseline models are available to all users. You can check which models are available programmatically, use `list_models()`. Contact us at support@synthesize.bio if you have any questions.
+Only baseline models are available to all users. Check programmatically with `list_models()`. Contact us at [support@synthesize.bio](mailto:support@synthesize.bio) if you have any questions.
 
 ## Documentation
 
-For detailed usage instructions, see the vignettes:
+For detailed usage and guides, see the [R SDK section of the Synthesize Bio docs](https://synthesizebio.mintlify.app/r-sdk):
 
-- [Getting Started](https://synthesizebio.github.io/rsynthbio/articles/getting-started.html) — Installation, authentication, and overview
-- [Baseline Models](https://synthesizebio.github.io/rsynthbio/articles/baseline.html) — Generate expression from metadata
-- [Reference Conditioning](https://synthesizebio.github.io/rsynthbio/articles/reference-conditioning.html) — Condition on real expression data
-- [Metadata Prediction](https://synthesizebio.github.io/rsynthbio/articles/metadata-prediction.html) — Infer metadata from expression
+- [Getting started](https://synthesizebio.mintlify.app/r-sdk/getting-started) — Installation, authentication, and overview
+- [Baseline models](https://synthesizebio.mintlify.app/r-sdk/models/baseline) — Generate expression from metadata
+- [Reference conditioning](https://synthesizebio.mintlify.app/r-sdk/models/reference-conditioning) — Condition on real expression data
+- [Metadata prediction](https://synthesizebio.mintlify.app/r-sdk/models/metadata-prediction) — Infer metadata from expression
+- [Function reference](https://synthesizebio.mintlify.app/r-sdk/reference) — All exported functions
 
-## Rate Limits
+## Rate limits
 
-Free usage of Synthesize Bio is limited. If you exceed this limit, you will receive an error message. To generate more samples, please contact us at [support@synthesize.bio](mailto:support@synthesize.bio).
+Free usage of Synthesize Bio is limited. If you exceed this limit, you'll receive an error message. To generate more samples, please contact us at [support@synthesize.bio](mailto:support@synthesize.bio).
