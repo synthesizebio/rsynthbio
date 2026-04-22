@@ -79,7 +79,7 @@ For detailed usage instructions, see the vignettes:
 
 ## Mintlify source
 
-This repo now also includes a Mintlify-compatible docs source under `docs-mintlify/` so the shared docs site can aggregate the R SDK docs directly from `rsynthbio`.
+This repo now also includes public Mintlify-compatible docs source under `docs-external/` so the shared docs site can aggregate the R SDK docs directly from `rsynthbio`.
 
 - `vignettes/*.Rmd` and `_pkgdown.yml` remain the primary authored docs inputs
 - `man/*.Rd` remains the source for generated function-level reference docs
@@ -91,7 +91,7 @@ Regenerate the Mintlify docs after changing vignettes, package exports, or roxyg
 python3 scripts/generate_mintlify_docs.py
 ```
 
-The generated pages are committed in `docs-mintlify/` so changes are reviewable in PRs. `pkgdown` stays in place during the transition, and GitHub Pages remains the current public docs host until the shared docs site is ready to switch over.
+The generated pages are committed in `docs-external/` so changes are reviewable in PRs. `pkgdown` stays in place during the transition, and GitHub Pages remains the current public docs host until the shared docs site is ready to switch over.
 
 ## Rate Limits
 

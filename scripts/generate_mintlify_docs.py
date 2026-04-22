@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT_DIR = ROOT / "docs-mintlify"
+OUTPUT_DIR = ROOT / "docs-external"
 REPO_PREFIX = "/rsynthbio"
 
 VIGNETTE_PAGES = [
