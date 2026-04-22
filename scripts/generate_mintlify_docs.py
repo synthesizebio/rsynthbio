@@ -21,6 +21,13 @@ VIGNETTE_PAGES = [
         "remove_sections": ["How to install", "Session info", "Additional Resources"],
     },
     {
+        "source": ROOT / "vignettes" / "available-metadata.Rmd",
+        "target": OUTPUT_DIR / "available-metadata.mdx",
+        "title": "Available metadata",
+        "description": "Browse and download the metadata vocabularies that each Synthesize Bio model accepts.",
+        "remove_sections": [],
+    },
+    {
         "source": ROOT / "vignettes" / "baseline.Rmd",
         "target": OUTPUT_DIR / "models" / "baseline.mdx",
         "title": "Baseline models",
@@ -68,6 +75,7 @@ LINK_REPLACEMENTS = {
     "reference-conditioning.html": f"{REPO_PREFIX}/models/reference-conditioning",
     "metadata-prediction.html": f"{REPO_PREFIX}/models/metadata-prediction",
     "getting-started.html": f"{REPO_PREFIX}/getting-started",
+    "available-metadata.html": f"{REPO_PREFIX}/available-metadata",
 }
 
 
@@ -311,6 +319,7 @@ def build_docs_json(symbols: list[str]) -> dict[str, object]:
         "index",
         "installation",
         "getting-started",
+        "available-metadata",
         {
             "group": "Models",
             "pages": [
