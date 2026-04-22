@@ -169,6 +169,22 @@
 </ul>
 </div>
 <div class="section level2">
+<h2 id="mintlify-source">Mintlify source<a class="anchor" aria-label="anchor" href="#mintlify-source"></a>
+</h2>
+<p>This repo now also includes public Mintlify-compatible docs source under <code>docs-external/</code> so the shared docs site can aggregate the R SDK docs directly from <code>rsynthbio</code>.</p>
+<ul>
+<li>
+<code>vignettes/*.Rmd</code> and <code>_pkgdown.yml</code> remain the primary authored docs inputs</li>
+<li>
+<code>man/*.Rd</code> remains the source for generated function-level reference docs</li>
+<li>
+<code>scripts/generate_mintlify_docs.py</code> regenerates the committed Mintlify output tree</li>
+</ul>
+<p>Regenerate the Mintlify docs after changing vignettes, package exports, or roxygen docs:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="ex">python3</span> scripts/generate_mintlify_docs.py</span></code></pre></div>
+<p>The generated pages are committed in <code>docs-external/</code> so changes are reviewable in PRs. <code>pkgdown</code> stays in place during the transition, and GitHub Pages remains the current public docs host until the shared docs site is ready to switch over.</p>
+</div>
+<div class="section level2">
 <h2 id="rate-limits">Rate Limits<a class="anchor" aria-label="anchor" href="#rate-limits"></a>
 </h2>
 <p>Free usage of Synthesize Bio is limited. If you exceed this limit, you will receive an error message. To generate more samples, please contact us at <a href="mailto:support@synthesize.bio">support@synthesize.bio</a>.</p>

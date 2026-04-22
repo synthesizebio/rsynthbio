@@ -130,6 +130,17 @@ You can check which models are available programmatically:
 list_models()
 ```
 
+### Exploring Available Metadata
+
+Each model accepts a specific set of metadata fields with defined
+vocabularies (valid ontology IDs, cell lines, tissues, etc.). You can
+browse and download these vocabularies at
+[app.synthesize.bio/docs/vocab](https://app.synthesize.bio/docs/vocab).
+
+See the [Available
+Metadata](https://synthesizebio.github.io/rsynthbio/articles/available-metadata.md)
+vignette for more details.
+
 ## Quick Start
 
 Here’s a quick example using a baseline model:

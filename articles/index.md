@@ -4,6 +4,8 @@
 
 - [Getting
   Started](https://synthesizebio.github.io/rsynthbio/articles/getting-started.md):
+- [Available
+  Metadata](https://synthesizebio.github.io/rsynthbio/articles/available-metadata.md):
 
 ### Model Types
 

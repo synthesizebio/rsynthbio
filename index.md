@@ -97,6 +97,31 @@ For detailed usage instructions, see the vignettes:
   Prediction](https://synthesizebio.github.io/rsynthbio/articles/metadata-prediction.html)
   — Infer metadata from expression
 
+## Mintlify source
+
+This repo now also includes public Mintlify-compatible docs source under
+`docs-external/` so the shared docs site can aggregate the R SDK docs
+directly from `rsynthbio`.
+
+- `vignettes/*.Rmd` and `_pkgdown.yml` remain the primary authored docs
+  inputs
+- `man/*.Rd` remains the source for generated function-level reference
+  docs
+- `scripts/generate_mintlify_docs.py` regenerates the committed Mintlify
+  output tree
+
+Regenerate the Mintlify docs after changing vignettes, package exports,
+or roxygen docs:
+
+``` bash
+python3 scripts/generate_mintlify_docs.py
+```
+
+The generated pages are committed in `docs-external/` so changes are
+reviewable in PRs. `pkgdown` stays in place during the transition, and
+GitHub Pages remains the current public docs host until the shared docs
+site is ready to switch over.
+
 ## Rate Limits
 
 Free usage of Synthesize Bio is limited. If you exceed this limit, you
