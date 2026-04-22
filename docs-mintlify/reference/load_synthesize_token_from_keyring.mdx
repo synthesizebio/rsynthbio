@@ -1,0 +1,29 @@
+---
+title: "load_synthesize_token_from_keyring"
+description: "Load Synthesize Bio API Token from Keyring."
+---
+
+
+Loads the previously stored Synthesize Bio API token from the system
+keyring and sets it in the environment for the current session.
+
+## Usage
+
+```r
+load_synthesize_token_from_keyring()
+```
+
+## Returns
+
+Invisibly returns TRUE if successful, FALSE if token not found in keyring.
+
+## Examples
+
+```r
+# Load token from keyring
+load_synthesize_token_from_keyring()
+```
+
+## Source
+
+Generated from [`R/key-handlers.R`](https://github.com/synthesizebio/rsynthbio/blob/main/R/key-handlers.R) and the package help files in `man/`.

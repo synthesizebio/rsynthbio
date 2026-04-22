@@ -13,4 +13,5 @@ assets/*
 .gemini/*
 _pkgdown.yml
 pkgdown/*
+^docs-mintlify$
 ^cran-comments\.md$

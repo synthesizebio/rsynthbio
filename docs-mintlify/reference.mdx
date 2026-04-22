@@ -1,0 +1,40 @@
+---
+title: "Function reference"
+description: "Generated reference pages for exported rsynthbio functions and constants."
+---
+
+
+`rsynthbio` ships its function-level docs with the package itself. The pages below are generated from the package help files in `man/` so the shared docs site can mirror the current exported reference.
+
+<CardGroup cols={2}>
+  <Card title="In R" icon="terminal">
+    ```r
+    ?predict_query
+    ?set_synthesize_token
+    help(package = "rsynthbio")
+    ```
+  </Card>
+  <Card title="CRAN reference manual (PDF)" icon="file-pdf" href="https://cran.r-project.org/web/packages/rsynthbio/rsynthbio.pdf">
+    The full reference for the latest CRAN release, in one file.
+  </Card>
+</CardGroup>
+
+## Predictions
+
+- [`predict_query`](/rsynthbio/reference/predict_query) — Predict Gene Expression. Sends a query to the Synthesize Bio API for prediction
+- [`get_example_query`](/rsynthbio/reference/get_example_query) — Get Example Query for Model. Retrieves an example query structure for a specific model.
+- [`list_models`](/rsynthbio/reference/list_models) — List Available Models. Returns a list of all models available in the Synthesize Bio API.
+
+## Authentication
+
+- [`set_synthesize_token`](/rsynthbio/reference/set_synthesize_token) — Set Synthesize Bio API Token. Securely prompts for and stores the Synthesize Bio API token in the
+- [`load_synthesize_token_from_keyring`](/rsynthbio/reference/load_synthesize_token_from_keyring) — Load Synthesize Bio API Token from Keyring. Loads the previously stored Synthesize Bio API token from the system
+- [`has_synthesize_token`](/rsynthbio/reference/has_synthesize_token) — Check if Synthesize Bio API Token is Set. Checks whether a Synthesize Bio API token is currently set in the
+- [`clear_synthesize_token`](/rsynthbio/reference/clear_synthesize_token) — Clear Synthesize Bio API Token. Clears the Synthesize Bio API token from the environment for the
+
+## Constants
+
+- [`API_BASE_URL`](/rsynthbio/reference/API_BASE_URL) — API Base URL. Base URL for the Synthesize Bio API
+- [`DEFAULT_TIMEOUT`](/rsynthbio/reference/DEFAULT_TIMEOUT) — Default Timeout. Default timeout (seconds) for outbound HTTP requests
+- [`DEFAULT_POLL_INTERVAL_SECONDS`](/rsynthbio/reference/DEFAULT_POLL_INTERVAL_SECONDS) — Default Poll Interval. Default polling interval (seconds) for async model queries
+- [`DEFAULT_POLL_TIMEOUT_SECONDS`](/rsynthbio/reference/DEFAULT_POLL_TIMEOUT_SECONDS) — Default Poll Timeout. Default maximum timeout (seconds) for async model queries
