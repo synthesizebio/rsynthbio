@@ -27,8 +27,8 @@ ignore_patterns:
   - "renv/library/"         # renv installed packages
   - "renv/activate.R"       # renv activation script
   - "data/"                 # Directory typically containing large data objects in R packages
-  - "docs/"                 # pkgdown documentation output
-  - "pkgdown/"              # pkgdown specific files
+  - "docs-external/"        # Generated Mintlify source for docs.synthesize.bio (auto-generated)
+  - "docs-redirect/"        # Static redirect site for the retired pkgdown URLs
   - "inst/extdata/"         # External data
   - "*.rds"                 # R serialized objects (often data)
   - "*.Rds"
