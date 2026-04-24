@@ -3,7 +3,6 @@
 .github/*
 ^CRAN-SUBMISSION$
 cran-comments.md
-docs/*
 ^LICENSE\.md$
 CONTRIBUTING.md
 assets/*
@@ -11,7 +10,7 @@ assets/*
 ^Meta$
 .quarto/*
 .gemini/*
-_pkgdown.yml
-pkgdown/*
 ^docs-external$
+^docs-redirect$
+^scripts$
 ^cran-comments\.md$

@@ -1,0 +1,35 @@
+name: Deploy docs redirect site
+
+# The rsynthbio docs have moved to https://docs.synthesize.bio/rsynthbio.
+# This workflow keeps the legacy https://synthesizebio.github.io/rsynthbio/
+# URL alive by publishing a tiny redirect site to the gh-pages branch so
+# external links in papers, slides, and bookmarks don't break.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs-redirect/**"
+      - ".github/workflows/deploy-docs-redirect.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Deploy redirect site to gh-pages
+        uses: JamesIves/github-pages-deploy-action@ba1486788b0490a235422264426c45848eac35c6 # v4.4.1
+        with:
+          branch: gh-pages
+          folder: docs-redirect
+          clean: true
+          single-commit: true
+          commit-message: "Deploy docs redirect site (legacy pkgdown URLs)"

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>rsynthbio docs have moved</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://docs.synthesize.bio/rsynthbio" />
+    <meta http-equiv="refresh" content="0; url=https://docs.synthesize.bio/rsynthbio" />
+    <script>
+      (function () {
+        var base = "https://docs.synthesize.bio/rsynthbio";
+
+        // Map old pkgdown article slugs to their new Mintlify paths.
+        var articleMap = {
+          "getting-started": "/getting-started",
+          "available-metadata": "/available-metadata",
+          "baseline": "/models/baseline",
+          "reference-conditioning": "/models/reference-conditioning",
+          "metadata-prediction": "/models/metadata-prediction"
+        };
+
+        // GitHub Pages serves this site under /rsynthbio/, so strip that prefix
+        // before pattern-matching the legacy pkgdown paths.
+        var path = window.location.pathname.replace(/^\/rsynthbio/, "");
+        var target = base;
+
+        var articleMatch = path.match(/\/articles\/([^/]+?)(?:\.html)?\/?$/);
+        var referenceMatch = path.match(/\/reference\/([^/]+?)(?:\.html)?\/?$/);
+
+        if (articleMatch && articleMap[articleMatch[1]]) {
+          target = base + articleMap[articleMatch[1]];
+        } else if (referenceMatch) {
+          target = base + "/reference/" + referenceMatch[1];
+        } else if (/^\/reference\/?$/.test(path)) {
+          target = base + "/reference";
+        }
+
+        window.location.replace(target);
+      })();
+    </script>
+    <style>
+      body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 36rem; margin: 4rem auto; padding: 0 1rem; color: #0f172a; }
+      a { color: #2C4A73; }
+      code { background: #f1f5f9; padding: 0.1em 0.3em; border-radius: 0.25rem; }
+    </style>
+  </head>
+  <body>
+    <h1>rsynthbio docs have moved</h1>
+    <p>
+      The R SDK documentation now lives at
+      <a href="https://docs.synthesize.bio/rsynthbio">docs.synthesize.bio/rsynthbio</a>.
+    </p>
+    <p>If you aren't redirected automatically, click the link above.</p>
+  </body>
+</html>
