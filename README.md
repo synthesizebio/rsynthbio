@@ -70,28 +70,14 @@ Only baseline models are available to all users. You can check which models are 
 
 ## Documentation
 
-For detailed usage instructions, see the vignettes:
+For detailed usage instructions, start with the shared docs site:
 
-- [Getting Started](https://synthesizebio.github.io/rsynthbio/articles/getting-started.html) — Installation, authentication, and overview
-- [Baseline Models](https://synthesizebio.github.io/rsynthbio/articles/baseline.html) — Generate expression from metadata
-- [Reference Conditioning](https://synthesizebio.github.io/rsynthbio/articles/reference-conditioning.html) — Condition on real expression data
-- [Metadata Prediction](https://synthesizebio.github.io/rsynthbio/articles/metadata-prediction.html) — Infer metadata from expression
-
-## Mintlify source
-
-This repo now also includes public Mintlify-compatible docs source under `docs-external/` so the shared docs site can aggregate the R SDK docs directly from `rsynthbio`.
-
-- `vignettes/*.Rmd` and `_pkgdown.yml` remain the primary authored docs inputs
-- `man/*.Rd` remains the source for generated function-level reference docs
-- `scripts/generate_mintlify_docs.py` regenerates the committed Mintlify output tree
-
-Regenerate the Mintlify docs after changing vignettes, package exports, or roxygen docs:
-
-```bash
-python3 scripts/generate_mintlify_docs.py
-```
-
-The generated pages are committed in `docs-external/` so changes are reviewable in PRs. `pkgdown` stays in place during the transition, and GitHub Pages remains the current public docs host until the shared docs site is ready to switch over.
+- [R SDK overview](https://docs.synthesize.bio/rsynthbio) — Canonical public docs landing page
+- [Getting Started](https://docs.synthesize.bio/rsynthbio/getting-started) — Installation, authentication, and overview
+- [Baseline Models](https://docs.synthesize.bio/rsynthbio/models/baseline) — Generate expression from metadata
+- [Reference Conditioning](https://docs.synthesize.bio/rsynthbio/models/reference-conditioning) — Condition on real expression data
+- [Metadata Prediction](https://docs.synthesize.bio/rsynthbio/models/metadata-prediction) — Infer metadata from expression
+- [Legacy pkgdown site](https://synthesizebio.github.io/rsynthbio/) — Still available for the package-native reference experience
 
 ## Rate Limits
 
