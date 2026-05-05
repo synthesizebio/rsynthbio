@@ -4,7 +4,7 @@
 
 To generate datasets without code, use our [web platform](https://app.synthesize.bio/datasets/).
 
-[See the full documentation here](https://synthesizebio.github.io/rsynthbio/).
+[See the full documentation here](https://docs.synthesize.bio/rsynthbio).
 
 For questions, suggestions, and support, email us at [support@synthesize.bio](mailto:support@synthesize.bio).
 
@@ -77,7 +77,6 @@ For detailed usage instructions, start with the shared docs site:
 - [Baseline Models](https://docs.synthesize.bio/rsynthbio/models/baseline) — Generate expression from metadata
 - [Reference Conditioning](https://docs.synthesize.bio/rsynthbio/models/reference-conditioning) — Condition on real expression data
 - [Metadata Prediction](https://docs.synthesize.bio/rsynthbio/models/metadata-prediction) — Infer metadata from expression
-- [Legacy pkgdown site](https://synthesizebio.github.io/rsynthbio/) — Still available for the package-native reference experience
 
 ## Mintlify source
 
@@ -93,7 +92,7 @@ Regenerate the Mintlify docs after changing vignettes, package exports, or roxyg
 python3 scripts/generate_mintlify_docs.py
 ```
 
-The generated pages are committed in `docs-external/` so changes are reviewable in PRs. `docs.synthesize.bio/rsynthbio` is now the canonical shared-docs route, and `pkgdown` remains available alongside it for the package-native reference experience.
+The generated pages are committed in `docs-external/` so changes are reviewable in PRs. `docs.synthesize.bio/rsynthbio` is now the canonical shared-docs route.
 
 ## Rate Limits
 
