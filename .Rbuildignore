@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.cursor$
 .github/*
 ^CRAN-SUBMISSION$
 cran-comments.md

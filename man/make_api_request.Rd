@@ -4,12 +4,15 @@
 \alias{make_api_request}
 \title{Make Authenticated API Request}
 \usage{
-make_api_request(url, context_msg)
+make_api_request(url, context_msg, self_hosted = FALSE)
 }
 \arguments{
 \item{url}{The URL to fetch}
 
 \item{context_msg}{String describing the request context for error messages}
+
+\item{self_hosted}{Logical; when TRUE, do not require an API key (used for
+self-hosted containers running with authentication disabled).}
 }
 \value{
 The parsed JSON content

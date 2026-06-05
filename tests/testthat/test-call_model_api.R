@@ -254,7 +254,7 @@ test_that("list_models mock test", {
   on.exit(restore_api_key(original_api_key))
 
   # Stub make_api_request to return mock data
-  stub(list_models, "make_api_request", function(url, context_msg) {
+  stub(list_models, "make_api_request", function(url, context_msg, ...) {
     list(
       list(id = "gem-1-bulk", name = "GEM-1 Bulk"),
       list(id = "gem-1-sc", name = "GEM-1 Single Cell")
@@ -271,7 +271,7 @@ test_that("get_example_query mock test", {
   on.exit(restore_api_key(original_api_key))
 
   # Stub make_api_request to return mock data
-  stub(get_example_query, "make_api_request", function(url, context_msg) {
+  stub(get_example_query, "make_api_request", function(url, context_msg, ...) {
     list(
       inputs = list(
         list(
