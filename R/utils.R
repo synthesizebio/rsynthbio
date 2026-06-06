@@ -8,6 +8,14 @@ API_BASE_URL <- Sys.getenv("SYNTHESIZE_API_BASE_URL", unset = "https://app.synth
 #' @export
 DEFAULT_TIMEOUT <- 300
 
+#' @title Self-Hosted Timeout
+#' @description Timeout (seconds) for synchronous self-hosted container
+#' predictions. These run on the partner's GPU box and can take minutes for
+#' large sample counts, so they use a longer timeout than hosted control-plane
+#' calls.
+#' @export
+SELF_HOSTED_TIMEOUT <- 600
+
 #' @title Default Poll Interval
 #' @description Default polling interval (seconds) for async model queries
 #' @export

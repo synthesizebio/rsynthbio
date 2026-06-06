@@ -236,7 +236,7 @@ predict_query_self_hosted <- function(query, model_id, api_base_url, raw_respons
       build_arrow_post_headers(),
       body = query_json,
       encode = "json",
-      timeout(DEFAULT_TIMEOUT)
+      timeout(SELF_HOSTED_TIMEOUT)
     ),
     error = function(e) {
       stop(paste0("Self-hosted predict request failed due to a network issue: ", e$message))
