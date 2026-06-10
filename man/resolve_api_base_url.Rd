@@ -4,18 +4,23 @@
 \alias{resolve_api_base_url}
 \title{Resolve the API Base URL (Internal)}
 \usage{
-resolve_api_base_url(api_base_url = NULL)
+resolve_api_base_url(api_base_url = NULL, model_id = NULL)
 }
 \arguments{
 \item{api_base_url}{An explicit base URL, or NULL to resolve from the
 environment.}
+
+\item{model_id}{Optional model slug used to look up a per-model variable.}
 }
 \value{
 A character scalar base URL.
 }
 \description{
-An explicit `api_base_url` always wins. Otherwise the value is
-read from the `SYNTHESIZE_API_BASE_URL` environment variable, falling back to
-the production default when that variable is unset/empty.
+Resolves the base URL in precedence order: an explicit
+`api_base_url` argument, then the per-model environment variable
+`SYNTHESIZE_API_BASE_URL__<MODEL>` (when `model_id` is supplied), then the
+global `SYNTHESIZE_API_BASE_URL`, then the production default. The per-model
+variable lets a scientist point each model at its own self-hosted container
+once and never pass a URL on every call.
 }
 \keyword{internal}

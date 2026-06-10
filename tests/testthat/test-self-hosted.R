@@ -378,6 +378,52 @@ test_that("resolve_api_base_url prefers explicit arg, then env var, then default
   expect_equal(rsynthbio:::resolve_api_base_url(NULL), API_BASE_URL)
 })
 
+test_that("per_model_env_var builds the model-specific variable name", {
+  expect_equal(rsynthbio:::per_model_env_var("gem-1-bulk"), "SYNTHESIZE_API_BASE_URL__GEM_1_BULK")
+  expect_equal(rsynthbio:::per_model_env_var("gem-1-sc"), "SYNTHESIZE_API_BASE_URL__GEM_1_SC")
+  # Variant slugs normalize to their base model's variable.
+  expect_equal(
+    rsynthbio:::per_model_env_var("gem-1-bulk_predict-metadata"),
+    "SYNTHESIZE_API_BASE_URL__GEM_1_BULK"
+  )
+  expect_equal(
+    rsynthbio:::per_model_env_var("gem-1-sc_reference-conditioning"),
+    "SYNTHESIZE_API_BASE_URL__GEM_1_SC"
+  )
+})
+
+test_that("resolve_api_base_url routes per-model without per-call URLs", {
+  saved <- c("SYNTHESIZE_API_BASE_URL", "SYNTHESIZE_API_BASE_URL__GEM_1_BULK", "SYNTHESIZE_API_BASE_URL__GEM_1_SC")
+  originals <- vapply(saved, function(v) Sys.getenv(v, unset = NA_character_), character(1))
+  on.exit({
+    for (v in saved) {
+      if (is.na(originals[[v]])) Sys.unsetenv(v) else do.call(Sys.setenv, setNames(list(originals[[v]]), v))
+    }
+  })
+
+  Sys.unsetenv("SYNTHESIZE_API_BASE_URL")
+  Sys.setenv(SYNTHESIZE_API_BASE_URL__GEM_1_BULK = "http://bulk:8080")
+  Sys.setenv(SYNTHESIZE_API_BASE_URL__GEM_1_SC = "http://sc:8080")
+
+  # Each model resolves to its own host.
+  expect_equal(rsynthbio:::resolve_api_base_url(model_id = "gem-1-bulk"), "http://bulk:8080")
+  expect_equal(rsynthbio:::resolve_api_base_url(model_id = "gem-1-sc"), "http://sc:8080")
+  # Variant slugs share the base model's host.
+  expect_equal(rsynthbio:::resolve_api_base_url(model_id = "gem-1-bulk_predict-metadata"), "http://bulk:8080")
+  expect_equal(rsynthbio:::resolve_api_base_url(model_id = "gem-1-sc_reference-conditioning"), "http://sc:8080")
+  # Explicit arg still wins over the per-model env var.
+  expect_equal(
+    rsynthbio:::resolve_api_base_url("http://explicit:9000", model_id = "gem-1-bulk"),
+    "http://explicit:9000"
+  )
+
+  # Per-model wins over the global, but a model without its own var uses the global.
+  Sys.setenv(SYNTHESIZE_API_BASE_URL = "http://global:8080")
+  expect_equal(rsynthbio:::resolve_api_base_url(model_id = "gem-1-sc"), "http://sc:8080")
+  Sys.unsetenv("SYNTHESIZE_API_BASE_URL__GEM_1_BULK")
+  expect_equal(rsynthbio:::resolve_api_base_url(model_id = "gem-1-bulk"), "http://global:8080")
+})
+
 test_that("resolve_self_hosted prefers explicit arg over env var", {
   original <- Sys.getenv("SYNTHESIZE_SELF_HOSTED", unset = NA_character_)
   on.exit({

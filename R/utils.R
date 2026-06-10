@@ -42,17 +42,58 @@ env_flag <- function(name, default = FALSE) {
   tolower(trimws(value)) %in% c("1", "true", "yes", "on")
 }
 
+# A model's variant slugs (reference-conditioning, predict-metadata) are served
+# by the same container as their base model, so they resolve to the same host.
+MODEL_ID_SUFFIXES <- c("_reference-conditioning", "_predict-metadata")
+
+#' @title Reduce a Model Slug to its Base Model (Internal)
+#' @description Strips the variant suffixes so all slugs backed by one container
+#' map to the same per-model environment variable.
+#' @param model_id A model slug.
+#' @return The base model id.
+#' @keywords internal
+base_model_id <- function(model_id) {
+  for (suffix in MODEL_ID_SUFFIXES) {
+    if (endsWith(model_id, suffix)) {
+      return(substr(model_id, 1, nchar(model_id) - nchar(suffix)))
+    }
+  }
+  model_id
+}
+
+#' @title Per-Model Base URL Environment Variable Name (Internal)
+#' @description Builds the env var that holds the self-hosted base URL for a
+#' specific model, e.g. `gem-1-bulk` (and its variants) ->
+#' `SYNTHESIZE_API_BASE_URL__GEM_1_BULK`. Mirrors the pysynthbio naming.
+#' @param model_id A model slug.
+#' @return The environment variable name.
+#' @keywords internal
+per_model_env_var <- function(model_id) {
+  key <- gsub("[^A-Z0-9]+", "_", toupper(base_model_id(model_id)))
+  paste0("SYNTHESIZE_API_BASE_URL__", key)
+}
+
 #' @title Resolve the API Base URL (Internal)
-#' @description An explicit `api_base_url` always wins. Otherwise the value is
-#' read from the `SYNTHESIZE_API_BASE_URL` environment variable, falling back to
-#' the production default when that variable is unset/empty.
+#' @description Resolves the base URL in precedence order: an explicit
+#' `api_base_url` argument, then the per-model environment variable
+#' `SYNTHESIZE_API_BASE_URL__<MODEL>` (when `model_id` is supplied), then the
+#' global `SYNTHESIZE_API_BASE_URL`, then the production default. The per-model
+#' variable lets a scientist point each model at its own self-hosted container
+#' once and never pass a URL on every call.
 #' @param api_base_url An explicit base URL, or NULL to resolve from the
 #'        environment.
+#' @param model_id Optional model slug used to look up a per-model variable.
 #' @return A character scalar base URL.
 #' @keywords internal
-resolve_api_base_url <- function(api_base_url = NULL) {
+resolve_api_base_url <- function(api_base_url = NULL, model_id = NULL) {
   if (!is.null(api_base_url)) {
     return(api_base_url)
+  }
+  if (!is.null(model_id)) {
+    per_model <- Sys.getenv(per_model_env_var(model_id), unset = NA_character_)
+    if (!is.na(per_model) && nzchar(per_model)) {
+      return(per_model)
+    }
   }
   Sys.getenv("SYNTHESIZE_API_BASE_URL", unset = API_BASE_URL)
 }

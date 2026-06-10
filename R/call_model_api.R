@@ -69,7 +69,7 @@ list_models <- function(api_base_url = NULL, self_hosted = NULL) {
 #' @importFrom jsonlite fromJSON
 #' @export
 get_example_query <- function(model_id, api_base_url = NULL, self_hosted = NULL) {
-  api_base_url <- resolve_api_base_url(api_base_url)
+  api_base_url <- resolve_api_base_url(api_base_url, model_id = model_id)
   self_hosted <- resolve_self_hosted(self_hosted)
   url <- paste0(api_base_url, "/api/models/", model_id, "/example-query")
   return(make_api_request(url, "Get example query", self_hosted = self_hosted))
@@ -411,7 +411,7 @@ predict_query <- function(query,
                           raw_response = FALSE,
                           self_hosted = NULL,
                           ...) {
-  api_base_url <- resolve_api_base_url(api_base_url)
+  api_base_url <- resolve_api_base_url(api_base_url, model_id = model_id)
   self_hosted <- resolve_self_hosted(self_hosted)
 
   # Validate base URL
