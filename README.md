@@ -6,7 +6,7 @@ To generate datasets without code, use our [web platform](https://app.synthesize
 
 [Get started](https://docs.synthesize.bio/rsynthbio/getting-started) | [Full R SDK docs](https://docs.synthesize.bio/rsynthbio)
 
-For function-level reference, use R's built-in help (`?predict_query`, `help(package = "rsynthbio")`) or the [CRAN reference manual PDF](https://cran.r-project.org/web/packages/rsynthbio/rsynthbio.pdf).
+For function-level reference, use R's built-in help (`?predict_query`, `help(package = "rsynthbio")`) or the [CRAN reference manual](https://CRAN.R-project.org/package=rsynthbio).
 
 For questions, suggestions, and support, email us at [support@synthesize.bio](mailto:support@synthesize.bio).
 
