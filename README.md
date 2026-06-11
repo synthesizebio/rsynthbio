@@ -78,6 +78,10 @@ synchronous request and decodes the Apache Arrow IPC stream response into the
 same data frames as the hosted path (no polling, no download URL). It requires
 the optional `arrow` package and does not require an API key.
 
+Self-hosted deployment is a model deployment option available within a
+Synthesize Bio partnership. To learn more or request access, contact
+[partnerships@synthesize.bio](mailto:partnerships@synthesize.bio).
+
 ```r
 install.packages("arrow")
 
