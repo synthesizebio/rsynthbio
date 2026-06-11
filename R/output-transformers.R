@@ -8,7 +8,7 @@
 #'         - metadata: data.frame containing sample metadata
 #'         - expression: data.frame containing combined gene expression data
 #'         - latents: data.frame containing embeddings (if requested)
-#' @keywords internal
+#' @noRd
 transform_baseline_output <- function(final_json) {
   # Extract the expression matrices and combine them
   counts_list <- final_json$outputs$counts
@@ -68,7 +68,7 @@ transform_baseline_output <- function(final_json) {
 #'         - latents: data.frame with biological/technical/perturbation columns
 #'         - classifier_probs: data.frame of per-category probability dicts
 #'         - expression: data.frame of decoder sample counts
-#' @keywords internal
+#' @noRd
 transform_metadata_output <- function(final_json) {
   outputs <- final_json$outputs
 
@@ -113,7 +113,7 @@ transform_metadata_output <- function(final_json) {
 #' Output Transformer Registry
 #'
 #' @description A registry mapping model IDs to their corresponding output transformer functions.
-#' @keywords internal
+#' @noRd
 OUTPUT_TRANSFORMERS <- list(
   "gem-1-bulk" = transform_baseline_output,
   "gem-1-sc" = transform_baseline_output,
@@ -131,7 +131,7 @@ OUTPUT_TRANSFORMERS <- list(
 #'
 #' @param model_id Character string specifying the model ID
 #' @return A transformer function, or NULL if not registered
-#' @keywords internal
+#' @noRd
 get_output_transformer <- function(model_id) {
   return(OUTPUT_TRANSFORMERS[[model_id]])
 }

@@ -1,7 +1,7 @@
 #' @title Arrow IPC Stream Content Type
 #' @description MIME type used by the self-hosted container for synchronous
 #' Apache Arrow IPC stream responses.
-#' @keywords internal
+#' @noRd
 ARROW_STREAM_CONTENT_TYPE <- "application/vnd.apache.arrow.stream"
 
 #' @title Ensure the arrow Package is Available (Internal)
@@ -9,7 +9,7 @@ ARROW_STREAM_CONTENT_TYPE <- "application/vnd.apache.arrow.stream"
 #' requested but the optional `arrow` package is not installed. The production
 #' (async JSON) path never calls this, so `arrow` remains a soft dependency.
 #' @return Invisibly TRUE when `arrow` is available; otherwise throws an error.
-#' @keywords internal
+#' @noRd
 require_arrow <- function() {
   if (!requireNamespace("arrow", quietly = TRUE)) {
     stop(
@@ -29,7 +29,7 @@ require_arrow <- function() {
 #' against containers that run with authentication disabled.
 #' @return An httr `request` object produced by [httr::add_headers()].
 #' @importFrom httr add_headers
-#' @keywords internal
+#' @noRd
 build_arrow_post_headers <- function() {
   api_key <- Sys.getenv("SYNTHESIZE_API_KEY")
   if (nzchar(api_key)) {
@@ -50,7 +50,7 @@ build_arrow_post_headers <- function() {
 #' file) and returns an Arrow `Table` so schema-level metadata can be inspected.
 #' @param raw_bytes A raw vector containing the Arrow IPC stream.
 #' @return An Arrow `Table`.
-#' @keywords internal
+#' @noRd
 read_arrow_stream <- function(raw_bytes) {
   tryCatch(
     arrow::read_ipc_stream(raw_bytes, as_data_frame = FALSE),
@@ -66,7 +66,7 @@ read_arrow_stream <- function(raw_bytes) {
 #' @title Extract Schema-Level Metadata from an Arrow Table (Internal)
 #' @param table An Arrow `Table`.
 #' @return A named list of metadata strings (possibly empty).
-#' @keywords internal
+#' @noRd
 arrow_schema_metadata <- function(table) {
   metadata <- table$schema$metadata
   if (is.null(metadata)) list() else metadata
@@ -78,7 +78,7 @@ arrow_schema_metadata <- function(table) {
 #' @param raw_value The raw `gene_order` metadata string, or NULL.
 #' @return A character vector of gene ids, or NULL.
 #' @importFrom jsonlite fromJSON
-#' @keywords internal
+#' @noRd
 parse_gene_order <- function(raw_value) {
   if (is.null(raw_value) || !nzchar(raw_value)) {
     return(NULL)
@@ -93,7 +93,7 @@ parse_gene_order <- function(raw_value) {
 #' @param table An Arrow `Table`.
 #' @param name The column name to extract.
 #' @return A base R list, or NULL when the column is absent.
-#' @keywords internal
+#' @noRd
 arrow_list_column <- function(table, name) {
   if (!(name %in% names(table))) {
     return(NULL)
@@ -105,7 +105,7 @@ arrow_list_column <- function(table, name) {
 #' @param table An Arrow `Table`.
 #' @param name The column name to extract.
 #' @return A base data.frame, or NULL when the column is absent.
-#' @keywords internal
+#' @noRd
 arrow_struct_column <- function(table, name) {
   if (!(name %in% names(table))) {
     return(NULL)
@@ -121,7 +121,7 @@ arrow_struct_column <- function(table, name) {
 #' @param table An Arrow `Table`.
 #' @param gene_order Character vector of gene ids (column order for `counts`).
 #' @return A list with `gene_order` and `outputs` (counts, metadata, latents).
-#' @keywords internal
+#' @noRd
 build_baseline_json <- function(table, gene_order) {
   outputs <- list(
     counts = arrow_list_column(table, "counts"),
@@ -149,7 +149,7 @@ build_baseline_json <- function(table, gene_order) {
 #' @param table An Arrow `Table`.
 #' @param gene_order Character vector of gene ids, or NULL.
 #' @return A list with `gene_order` and `outputs`.
-#' @keywords internal
+#' @noRd
 build_metadata_json <- function(table, gene_order) {
   list(
     gene_order = gene_order,
@@ -170,7 +170,7 @@ build_metadata_json <- function(table, gene_order) {
 #' @param table An Arrow `Table`.
 #' @return A named list of data.frames (see [transform_baseline_output()] /
 #'         [transform_metadata_output()]).
-#' @keywords internal
+#' @noRd
 transform_arrow_table <- function(table) {
   metadata <- arrow_schema_metadata(table)
   request_type <- metadata$request_type
@@ -197,7 +197,7 @@ transform_arrow_table <- function(table) {
 #' for callers that pass `raw_response = TRUE`.
 #' @param table An Arrow `Table`.
 #' @return A list with `table`, `model_version`, `request_type`, `gene_order`.
-#' @keywords internal
+#' @noRd
 arrow_raw_result <- function(table) {
   metadata <- arrow_schema_metadata(table)
   list(
@@ -223,7 +223,7 @@ arrow_raw_result <- function(table) {
 #'         `raw_response = TRUE`.
 #' @importFrom httr POST content status_code timeout
 #' @importFrom jsonlite toJSON
-#' @keywords internal
+#' @noRd
 predict_query_self_hosted <- function(query, model_id, api_base_url, raw_response = FALSE) {
   require_arrow()
 

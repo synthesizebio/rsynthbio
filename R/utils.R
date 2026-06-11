@@ -33,7 +33,7 @@ DEFAULT_POLL_TIMEOUT_SECONDS <- 15 * 60
 #' @param name The environment variable name.
 #' @param default Logical value to return when the variable is unset/empty.
 #' @return A length-one logical.
-#' @keywords internal
+#' @noRd
 env_flag <- function(name, default = FALSE) {
   value <- Sys.getenv(name, unset = NA_character_)
   if (is.na(value) || !nzchar(value)) {
@@ -51,7 +51,7 @@ MODEL_ID_SUFFIXES <- c("_reference-conditioning", "_predict-metadata")
 #' map to the same per-model environment variable.
 #' @param model_id A model slug.
 #' @return The base model id.
-#' @keywords internal
+#' @noRd
 base_model_id <- function(model_id) {
   for (suffix in MODEL_ID_SUFFIXES) {
     if (endsWith(model_id, suffix)) {
@@ -67,7 +67,7 @@ base_model_id <- function(model_id) {
 #' `SYNTHESIZE_API_BASE_URL__GEM_1_BULK`. Mirrors the pysynthbio naming.
 #' @param model_id A model slug.
 #' @return The environment variable name.
-#' @keywords internal
+#' @noRd
 per_model_env_var <- function(model_id) {
   key <- gsub("[^A-Z0-9]+", "_", toupper(base_model_id(model_id)))
   paste0("SYNTHESIZE_API_BASE_URL__", key)
@@ -84,7 +84,7 @@ per_model_env_var <- function(model_id) {
 #'        environment.
 #' @param model_id Optional model slug used to look up a per-model variable.
 #' @return A character scalar base URL.
-#' @keywords internal
+#' @noRd
 resolve_api_base_url <- function(api_base_url = NULL, model_id = NULL) {
   if (!is.null(api_base_url)) {
     return(api_base_url)
@@ -106,7 +106,7 @@ resolve_api_base_url <- function(api_base_url = NULL, model_id = NULL) {
 #' @param self_hosted An explicit logical, or NULL to resolve from the
 #'        environment.
 #' @return A length-one logical.
-#' @keywords internal
+#' @noRd
 resolve_self_hosted <- function(self_hosted = NULL) {
   if (!is.null(self_hosted)) {
     return(isTRUE(self_hosted))

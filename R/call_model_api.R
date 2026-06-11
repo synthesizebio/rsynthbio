@@ -83,7 +83,7 @@ get_example_query <- function(model_id, api_base_url = NULL, self_hosted = NULL)
 #' @return The model query ID
 #' @importFrom httr POST add_headers content status_code timeout
 #' @importFrom jsonlite toJSON fromJSON
-#' @keywords internal
+#' @noRd
 start_model_query <- function(api_base_url, model_id, query) {
   url <- paste0(api_base_url, "/api/models/", model_id, "/predict")
   query_json <- toJSON(query, auto_unbox = TRUE)
@@ -142,7 +142,7 @@ start_model_query <- function(api_base_url, model_id, query) {
 #' @return A list with status and payload
 #' @importFrom httr GET add_headers content status_code timeout
 #' @importFrom jsonlite fromJSON
-#' @keywords internal
+#' @noRd
 poll_model_query <- function(api_base_url, model_query_id, poll_interval, timeout_seconds) {
   start_time <- Sys.time()
   status_url <- paste0(api_base_url, "/api/model-queries/", model_query_id, "/status")
@@ -210,7 +210,7 @@ poll_model_query <- function(api_base_url, model_query_id, poll_interval, timeou
 #' @return The parsed JSON content
 #' @importFrom httr GET content status_code timeout
 #' @importFrom jsonlite fromJSON
-#' @keywords internal
+#' @noRd
 get_json <- function(url) {
   response <- tryCatch(
     {
@@ -250,7 +250,7 @@ get_json <- function(url) {
 #' @param self_hosted Logical; when TRUE, allow requests without a key.
 #' @return An httr `request` object produced by [httr::add_headers()].
 #' @importFrom httr add_headers
-#' @keywords internal
+#' @noRd
 build_auth_headers <- function(self_hosted = FALSE) {
   api_key <- Sys.getenv("SYNTHESIZE_API_KEY")
   if (self_hosted && !nzchar(api_key)) {
@@ -271,7 +271,7 @@ build_auth_headers <- function(self_hosted = FALSE) {
 #' @return The parsed JSON content
 #' @importFrom httr GET add_headers content status_code timeout
 #' @importFrom jsonlite fromJSON
-#' @keywords internal
+#' @noRd
 make_api_request <- function(url, context_msg, self_hosted = FALSE) {
   if (!self_hosted && !has_synthesize_token()) {
     stop("Please set your API key for Synthesize Bio using set_synthesize_token()")
