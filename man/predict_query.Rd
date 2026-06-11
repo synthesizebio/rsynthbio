@@ -7,11 +7,12 @@
 predict_query(
   query,
   model_id,
-  api_base_url = API_BASE_URL,
+  api_base_url = NULL,
   poll_interval_seconds = DEFAULT_POLL_INTERVAL_SECONDS,
   poll_timeout_seconds = DEFAULT_POLL_TIMEOUT_SECONDS,
   return_download_url = FALSE,
   raw_response = FALSE,
+  self_hosted = NULL,
   ...
 )
 }
@@ -31,7 +32,13 @@ optional fields:
 \item{model_id}{Character string specifying the model ID (e.g., "gem-1-bulk", "gem-1-sc").
 Use `list_models()` to see available models.}
 
-\item{api_base_url}{The base URL for the API server. Default is API_BASE_URL.}
+\item{api_base_url}{The base URL for the API server. When NULL (default), it
+is resolved in order from the per-model environment variable
+`SYNTHESIZE_API_BASE_URL__<MODEL>` (e.g.
+`SYNTHESIZE_API_BASE_URL__GEM_1_BULK`), then the global
+`SYNTHESIZE_API_BASE_URL`, then the production default (API_BASE_URL).
+The per-model variable lets you point each self-hosted model at its own
+container once and omit `api_base_url` on every call.}
 
 \item{poll_interval_seconds}{Seconds between polling attempts of the status endpoint.
 Default is DEFAULT_POLL_INTERVAL_SECONDS (2).}
@@ -42,16 +49,30 @@ Default is DEFAULT_POLL_TIMEOUT_SECONDS (900 = 15 minutes).}
 \item{return_download_url}{Logical, if TRUE, returns a list containing the signed
 download URL instead of parsing into data frames. Default is FALSE.}
 
-\item{raw_response}{Logical, if TRUE, returns the raw (unformatted) JSON response
-from the API without applying any output transformers. Default is FALSE.}
+\item{raw_response}{Logical, if TRUE, returns the raw (unformatted) response
+from the API without applying any output transformers. For the
+production path this is the parsed JSON; for `self_hosted = TRUE` it is
+the parsed Arrow `Table` together with its schema metadata. Default is FALSE.}
+
+\item{self_hosted}{Logical, if TRUE, sends a single synchronous request to a
+self-hosted model container that returns predictions as an Apache Arrow
+IPC stream (no polling, no download URL). Requires the optional `arrow`
+package and an `api_base_url` pointing at the container. Unlike the
+production path, no API key is required (one is only sent if configured).
+When NULL (default), it is resolved from the `SYNTHESIZE_SELF_HOSTED`
+environment variable (truthy for 1/true/yes/on), defaulting to FALSE.}
 
 \item{...}{Additional parameters to include in the query body. These are passed
 directly to the API and validated server-side.}
 }
 \value{
-A list. If `return_download_url` is `FALSE` (default), the list contains
-        two data frames: `metadata` and `expression`. If `TRUE`, the list
-        contains `download_url` and empty `metadata` and `expression` data frames.
+A list. For the production path, if `return_download_url` is `FALSE`
+        (default) the list contains `metadata` and `expression` data frames;
+        if `TRUE` it contains `download_url` and empty data frames. For
+        `self_hosted = TRUE`, the list contains the transformed data frames
+        (`metadata`, `expression`, and `latents`; plus `classifier_probs` for
+        metadata-prediction models) with `model_version` and `request_type`
+        attached as attributes.
 }
 \description{
 Sends a query to the Synthesize Bio API for prediction
@@ -90,5 +111,13 @@ result_det <- predict_query(query, model_id = "gem-1-bulk")
 # Specify a custom total count (library size)
 query$total_count <- 5000000
 result_custom <- predict_query(query, model_id = "gem-1-bulk")
+
+# Self-hosted container returning a synchronous Apache Arrow IPC stream
+result_sh <- predict_query(
+  query,
+  model_id = "gem-1-bulk",
+  api_base_url = "https://gem-1-bulk.internal.partner.example",
+  self_hosted = TRUE
+)
 }
 }

@@ -4,10 +4,18 @@
 \alias{list_models}
 \title{List Available Models}
 \usage{
-list_models(api_base_url = API_BASE_URL)
+list_models(api_base_url = NULL, self_hosted = NULL)
 }
 \arguments{
-\item{api_base_url}{The base URL for the API server. Default is API_BASE_URL.}
+\item{api_base_url}{The base URL for the API server. When NULL (default), it
+is resolved from the `SYNTHESIZE_API_BASE_URL` environment variable,
+falling back to the production default (API_BASE_URL). Point this at a
+self-hosted model container to list its models.}
+
+\item{self_hosted}{Logical; when TRUE, the request targets a self-hosted
+container and does not require an API key (one is only sent if set).
+When NULL (default), it is resolved from the `SYNTHESIZE_SELF_HOSTED`
+environment variable (truthy for 1/true/yes/on), defaulting to FALSE.}
 }
 \value{
 A list or data frame containing available models with their IDs and metadata.
@@ -21,5 +29,11 @@ Each model has a unique ID that can be used with predict_query() and get_example
 # Get all available models
 models <- list_models()
 print(models)
+
+# List models from a self-hosted container (no API key required)
+models <- list_models(
+  api_base_url = "https://gem-1-bulk.internal.partner.example",
+  self_hosted = TRUE
+)
 }
 }

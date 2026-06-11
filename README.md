@@ -70,6 +70,37 @@ expression <- result$expression
 
 Only baseline models are available to all users. Check programmatically with `list_models()`. Contact us at [support@synthesize.bio](mailto:support@synthesize.bio) if you have any questions.
 
+## Self-hosted models
+
+Partners who run Synthesize models inside their own environment can point the
+same client at a self-hosted container. Self-hosted mode sends a single
+synchronous request and decodes the Apache Arrow IPC stream response into the
+same data frames as the hosted path (no polling, no download URL). It requires
+the optional `arrow` package and does not require an API key.
+
+```r
+install.packages("arrow")
+
+# Point each model at its own container once (per-model environment variables)
+Sys.setenv(
+  SYNTHESIZE_SELF_HOSTED = "1",
+  SYNTHESIZE_API_BASE_URL__GEM_1_BULK = "https://gem-1-bulk.internal.example",
+  SYNTHESIZE_API_BASE_URL__GEM_1_SC   = "https://gem-1-sc.internal.example"
+)
+
+query <- get_example_query("gem-1-bulk", self_hosted = TRUE)$example_query
+result <- predict_query(query, model_id = "gem-1-bulk", self_hosted = TRUE)
+result$expression
+```
+
+You can also pass `api_base_url` explicitly per call instead of using the
+environment variables. Base-URL resolution precedence is: explicit
+`api_base_url` -> per-model `SYNTHESIZE_API_BASE_URL__<MODEL>` -> global
+`SYNTHESIZE_API_BASE_URL` -> production default. If the container is started
+with authentication enabled, set `SYNTHESIZE_API_KEY` and the client will send
+it as a bearer token. See the [Self-Hosted Models](https://docs.synthesize.bio/rsynthbio/self-hosted)
+vignette for details.
+
 ## Documentation
 
 For detailed usage and guides, see the [R SDK section of the Synthesize Bio docs](https://docs.synthesize.bio/rsynthbio):
@@ -79,6 +110,7 @@ For detailed usage and guides, see the [R SDK section of the Synthesize Bio docs
 - [Baseline models](https://docs.synthesize.bio/rsynthbio/models/baseline) — Generate expression from metadata
 - [Reference conditioning](https://docs.synthesize.bio/rsynthbio/models/reference-conditioning) — Condition on real expression data
 - [Metadata prediction](https://docs.synthesize.bio/rsynthbio/models/metadata-prediction) — Infer metadata from expression
+- [Self-hosted models](https://docs.synthesize.bio/rsynthbio/self-hosted) — Run models in your own environment via Arrow streaming
 - [Function reference](https://docs.synthesize.bio/rsynthbio/reference) — All exported functions
 
 The legacy pkgdown site at `synthesizebio.github.io/rsynthbio` redirects to the

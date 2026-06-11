@@ -18,6 +18,7 @@
               "models/metadata-prediction"
             ]
           },
+          "self-hosted",
           {
             "group": "Reference",
             "pages": [

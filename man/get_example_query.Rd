@@ -4,12 +4,20 @@
 \alias{get_example_query}
 \title{Get Example Query for Model}
 \usage{
-get_example_query(model_id, api_base_url = API_BASE_URL)
+get_example_query(model_id, api_base_url = NULL, self_hosted = NULL)
 }
 \arguments{
 \item{model_id}{Character string specifying the model ID (e.g., "gem-1-bulk", "gem-1-sc").}
 
-\item{api_base_url}{The base URL for the API server. Default is API_BASE_URL.}
+\item{api_base_url}{The base URL for the API server. When NULL (default), it
+is resolved from the `SYNTHESIZE_API_BASE_URL` environment variable,
+falling back to the production default (API_BASE_URL). Point this at a
+self-hosted model container to fetch its example query.}
+
+\item{self_hosted}{Logical; when TRUE, the request targets a self-hosted
+container and does not require an API key (one is only sent if set).
+When NULL (default), it is resolved from the `SYNTHESIZE_SELF_HOSTED`
+environment variable (truthy for 1/true/yes/on), defaulting to FALSE.}
 }
 \value{
 A list representing a valid query structure for the specified model.
@@ -28,5 +36,12 @@ query_sc <- get_example_query(model_id = "gem-1-sc")$example_query
 
 # Modify the query structure
 query$inputs[[1]]$num_samples <- 10
+
+# Fetch from a self-hosted container (no API key required)
+query <- get_example_query(
+  model_id = "gem-1-bulk",
+  api_base_url = "https://gem-1-bulk.internal.partner.example",
+  self_hosted = TRUE
+)$example_query
 }
 }

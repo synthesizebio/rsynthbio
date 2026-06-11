@@ -1,0 +1,20 @@
+---
+title: "SELF_HOSTED_TIMEOUT"
+description: "Self-Hosted Timeout."
+---
+
+
+Timeout (seconds) for synchronous self-hosted container
+predictions. These run on the partner's GPU box and can take minutes for
+large sample counts, so they use a longer timeout than hosted control-plane
+calls.
+
+## Usage
+
+```r
+SELF_HOSTED_TIMEOUT
+```
+
+## Source
+
+Generated from [`R/utils.R`](https://github.com/synthesizebio/rsynthbio/blob/main/R/utils.R) and the package help files in `man/`.
