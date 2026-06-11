@@ -6,7 +6,7 @@ To generate datasets without code, use our [web platform](https://app.synthesize
 
 [Get started](https://docs.synthesize.bio/rsynthbio/getting-started) | [Full R SDK docs](https://docs.synthesize.bio/rsynthbio)
 
-For function-level reference, use R's built-in help (`?predict_query`, `help(package = "rsynthbio")`) or the [CRAN reference manual PDF](https://cran.r-project.org/web/packages/rsynthbio/rsynthbio.pdf).
+For function-level reference, use R's built-in help (`?predict_query`, `help(package = "rsynthbio")`) or the [CRAN reference manual](https://CRAN.R-project.org/package=rsynthbio).
 
 For questions, suggestions, and support, email us at [support@synthesize.bio](mailto:support@synthesize.bio).
 
@@ -77,6 +77,10 @@ same client at a self-hosted container. Self-hosted mode sends a single
 synchronous request and decodes the Apache Arrow IPC stream response into the
 same data frames as the hosted path (no polling, no download URL). It requires
 the optional `arrow` package and does not require an API key.
+
+Self-hosted deployment is a model deployment option available within a
+Synthesize Bio partnership. To learn more or request access, contact
+[partnerships@synthesize.bio](mailto:partnerships@synthesize.bio).
 
 ```r
 install.packages("arrow")
