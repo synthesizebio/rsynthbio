@@ -33,8 +33,12 @@ optional fields:
 Use `list_models()` to see available models.}
 
 \item{api_base_url}{The base URL for the API server. When NULL (default), it
-is resolved from the `SYNTHESIZE_API_BASE_URL` environment variable,
-falling back to the production default (API_BASE_URL).}
+is resolved in order from the per-model environment variable
+`SYNTHESIZE_API_BASE_URL__<MODEL>` (e.g.
+`SYNTHESIZE_API_BASE_URL__GEM_1_BULK`), then the global
+`SYNTHESIZE_API_BASE_URL`, then the production default (API_BASE_URL).
+The per-model variable lets you point each self-hosted model at its own
+container once and omit `api_base_url` on every call.}
 
 \item{poll_interval_seconds}{Seconds between polling attempts of the status endpoint.
 Default is DEFAULT_POLL_INTERVAL_SECONDS (2).}

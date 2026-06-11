@@ -1,3 +1,22 @@
+# rsynthbio 4.2.0
+
+## New Features
+
+- Added self-hosted model support: `predict_query()` and `get_example_query()`
+  gain a `self_hosted` argument (also resolved from the `SYNTHESIZE_SELF_HOSTED`
+  environment variable). When enabled, the client sends a single synchronous
+  request to a partner-hosted model container and decodes the Apache Arrow IPC
+  stream response into the same data frames as the production path (no polling,
+  no download URL). Requires the optional `arrow` package; no API key is
+  required (one is only sent when `SYNTHESIZE_API_KEY` is set).
+- Added per-model base-URL resolution: set `SYNTHESIZE_API_BASE_URL__<MODEL>`
+  (e.g. `SYNTHESIZE_API_BASE_URL__GEM_1_BULK`) to point each model at its own
+  self-hosted container once and omit `api_base_url` on every call. Resolution
+  precedence is: explicit `api_base_url` -> per-model variable -> global
+  `SYNTHESIZE_API_BASE_URL` -> production default.
+- Self-hosted predictions use a longer 600s request timeout to accommodate
+  large sample counts on partner GPU hosts.
+
 # rsynthbio 4.1.0
 
 ## Breaking Changes

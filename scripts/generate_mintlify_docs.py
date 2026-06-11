@@ -48,6 +48,13 @@ VIGNETTE_PAGES = [
         "description": "Infer biological metadata from observed expression data.",
         "remove_sections": [],
     },
+    {
+        "source": ROOT / "vignettes" / "self-hosted.Rmd",
+        "target": OUTPUT_DIR / "self-hosted.mdx",
+        "title": "Self-hosted models",
+        "description": "Run Synthesize Bio models in your own environment via synchronous Apache Arrow streaming.",
+        "remove_sections": ["Installation", "Session info"],
+    },
 ]
 
 REFERENCE_GROUPS = {
@@ -328,6 +335,7 @@ def build_docs_json(symbols: list[str]) -> dict[str, object]:
                 "models/metadata-prediction",
             ],
         },
+        "self-hosted",
         {
             "group": "Reference",
             "pages": [

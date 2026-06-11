@@ -329,8 +329,12 @@ make_api_request <- function(url, context_msg, self_hosted = FALSE) {
 #' @param model_id Character string specifying the model ID (e.g., "gem-1-bulk", "gem-1-sc").
 #'        Use `list_models()` to see available models.
 #' @param api_base_url The base URL for the API server. When NULL (default), it
-#'        is resolved from the `SYNTHESIZE_API_BASE_URL` environment variable,
-#'        falling back to the production default (API_BASE_URL).
+#'        is resolved in order from the per-model environment variable
+#'        `SYNTHESIZE_API_BASE_URL__<MODEL>` (e.g.
+#'        `SYNTHESIZE_API_BASE_URL__GEM_1_BULK`), then the global
+#'        `SYNTHESIZE_API_BASE_URL`, then the production default (API_BASE_URL).
+#'        The per-model variable lets you point each self-hosted model at its own
+#'        container once and omit `api_base_url` on every call.
 #' @param poll_interval_seconds Seconds between polling attempts of the status endpoint.
 #'        Default is DEFAULT_POLL_INTERVAL_SECONDS (2).
 #' @param poll_timeout_seconds Maximum total seconds to wait before timing out.
