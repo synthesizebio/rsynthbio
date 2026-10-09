@@ -224,7 +224,12 @@ arrow_raw_result <- function(table) {
 #' @importFrom httr POST content status_code timeout
 #' @importFrom jsonlite toJSON
 #' @noRd
-predict_query_self_hosted <- function(query, model_id, api_base_url, raw_response = FALSE) {
+predict_query_self_hosted <- function(query, model_id, api_base_url, raw_response = FALSE,
+                                      timeout_seconds = SELF_HOSTED_TIMEOUT) {
+  if (!is.numeric(timeout_seconds) || length(timeout_seconds) != 1L ||
+      !is.finite(timeout_seconds) || timeout_seconds <= 0) {
+    stop("self_hosted_timeout_seconds must be a positive finite number", call. = FALSE)
+  }
   require_arrow()
 
   url <- paste0(api_base_url, "/api/models/", model_id, "/predict")
@@ -236,7 +241,7 @@ predict_query_self_hosted <- function(query, model_id, api_base_url, raw_respons
       build_arrow_post_headers(),
       body = query_json,
       encode = "json",
-      timeout(SELF_HOSTED_TIMEOUT)
+      timeout(timeout_seconds)
     ),
     error = function(e) {
       stop(paste0("Self-hosted predict request failed due to a network issue: ", e$message))

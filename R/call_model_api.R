@@ -352,6 +352,9 @@ make_api_request <- function(url, context_msg, self_hosted = FALSE) {
 #'        production path, no API key is required (one is only sent if configured).
 #'        When NULL (default), it is resolved from the `SYNTHESIZE_SELF_HOSTED`
 #'        environment variable (truthy for 1/true/yes/on), defaulting to FALSE.
+#' @param self_hosted_timeout_seconds Positive finite seconds to wait for a
+#'        self-hosted prediction (default 600). Increase this for models that
+#'        need longer to start from idle. Does not change hosted API polling.
 #' @param ... Additional parameters to include in the query body. These are passed
 #'        directly to the API and validated server-side.
 #' @return A list. For the production path, if `return_download_url` is `FALSE`
@@ -414,6 +417,7 @@ predict_query <- function(query,
                           return_download_url = FALSE,
                           raw_response = FALSE,
                           self_hosted = NULL,
+                          self_hosted_timeout_seconds = SELF_HOSTED_TIMEOUT,
                           ...) {
   api_base_url <- resolve_api_base_url(api_base_url, model_id = model_id)
   self_hosted <- resolve_self_hosted(self_hosted)
@@ -445,7 +449,8 @@ predict_query <- function(query,
       query = query,
       model_id = model_id,
       api_base_url = api_base_url,
-      raw_response = raw_response
+      raw_response = raw_response,
+      timeout_seconds = self_hosted_timeout_seconds
     ))
   }
 

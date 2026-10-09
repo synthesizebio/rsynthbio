@@ -481,3 +481,47 @@ test_that("list_models resolves base URL from the env var when not supplied", {
   list_models()
   expect_equal(seen_url, "https://gem-1-bulk.internal.partner.example/api/models")
 })
+
+test_that("self-hosted wait limit is forwarded without becoming model input", {
+  for (seconds in c(600, 1800)) {
+    dispatch <- mockery::mock(list(dispatched = TRUE))
+    fn <- predict_query
+    stub(fn, "predict_query_self_hosted", dispatch)
+    args <- list(query = list(inputs = list()), model_id = "gem2-preview",
+                 api_base_url = "https://host", self_hosted = TRUE)
+    if (seconds != 600) args$self_hosted_timeout_seconds <- seconds
+    do.call(fn, args)
+    call_args <- mockery::mock_args(dispatch)[[1]]
+    expect_equal(call_args$timeout_seconds, seconds)
+    expect_false("self_hosted_timeout_seconds" %in% names(call_args$query))
+  }
+})
+
+test_that("self-hosted HTTP timeout accepts the configured wait", {
+  skip_if_not_installed("arrow")
+  raw_bytes <- make_baseline_stream(c("g1", "g2"), list(as.integer(c(3, 4))),
+                                   data.frame(sex = "female"))
+  fn <- rsynthbio:::predict_query_self_hosted
+  observed <- NULL
+  stub(fn, "timeout", function(seconds) {
+    observed <<- seconds
+    httr::timeout(seconds)
+  })
+  stub(fn, "POST", function(...) {
+    invisible(list(...))
+    structure(list(status_code = 200), class = "response")
+  })
+  stub(fn, "status_code", function(x) 200)
+  stub(fn, "content", function(x, as) raw_bytes)
+  fn(list(inputs = list()), "gem2-preview", "https://host", timeout_seconds = 1800)
+  expect_equal(observed, 1800)
+})
+
+test_that("invalid self-hosted timeouts fail before HTTP", {
+  fn <- rsynthbio:::predict_query_self_hosted
+  stub(fn, "POST", function(...) stop("HTTP must not run"))
+  for (value in list(NULL, TRUE, 0, -1, Inf, NaN, "1800", c(1, 2))) {
+    expect_error(fn(list(), "gem2-preview", "https://host", timeout_seconds = value),
+                 "positive finite")
+  }
+})

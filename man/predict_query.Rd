@@ -13,6 +13,7 @@ predict_query(
   return_download_url = FALSE,
   raw_response = FALSE,
   self_hosted = NULL,
+  self_hosted_timeout_seconds = SELF_HOSTED_TIMEOUT,
   ...
 )
 }
@@ -61,6 +62,10 @@ package and an `api_base_url` pointing at the container. Unlike the
 production path, no API key is required (one is only sent if configured).
 When NULL (default), it is resolved from the `SYNTHESIZE_SELF_HOSTED`
 environment variable (truthy for 1/true/yes/on), defaulting to FALSE.}
+
+\item{self_hosted_timeout_seconds}{Positive finite seconds to wait for a
+self-hosted prediction (default 600). Increase this for models that
+need longer to start from idle. Does not change hosted API polling.}
 
 \item{...}{Additional parameters to include in the query body. These are passed
 directly to the API and validated server-side.}
