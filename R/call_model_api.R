@@ -75,6 +75,46 @@ get_example_query <- function(model_id, api_base_url = NULL, self_hosted = NULL)
   return(make_api_request(url, "Get example query", self_hosted = self_hosted))
 }
 
+# Retain validation details on an error condition while presenting corrections.
+# Other HTTP errors keep their existing message and condition behavior.
+stop_api_error <- function(response, context_msg) {
+  status <- status_code(response)
+  body <- content(response, "text", encoding = "UTF-8")
+  message <- paste0(context_msg, " request failed with status ", status, ": ", body)
+  if (!(status %in% c(400L, 422L))) {
+    stop(message)
+  }
+
+  payload <- tryCatch(
+    fromJSON(body, simplifyVector = FALSE),
+    error = function(e) NULL
+  )
+  errors <- if (is.list(payload)) payload[["errors"]] else NULL
+  scalar_text <- function(x) is.character(x) && length(x) == 1L && !is.na(x)
+  valid_issue <- function(x) {
+    is.list(x) && scalar_text(x[["path"]]) && scalar_text(x[["message"]]) &&
+      nzchar(trimws(x[["message"]]))
+  }
+  if (is.list(errors) && is.null(names(errors)) && length(errors) > 0L &&
+      all(vapply(errors, valid_issue, logical(1)))) {
+    summary <- payload[["error"]]
+    if (!scalar_text(summary) || !nzchar(trimws(summary))) {
+      summary <- "Invalid request"
+    }
+    lines <- vapply(errors, function(issue) {
+      path <- if (nzchar(issue$path)) issue$path else "(request)"
+      paste0("- ", path, ": ", issue$message)
+    }, character(1))
+    message <- paste(c(paste0(summary, " (", status, "):"), lines), collapse = "\n")
+  }
+  condition <- structure(
+    list(message = message, call = NULL, status_code = status,
+         response_body = body, response_json = payload),
+    class = c("synthesize_validation_error", "simpleError", "error", "condition")
+  )
+  stop(condition)
+}
+
 #' @title Start Model Query
 #' @description Internal function to start an async model query
 #' @param api_base_url The base URL for the API
@@ -108,10 +148,7 @@ start_model_query <- function(api_base_url, model_id, query) {
   )
 
   if (status_code(response) >= 400) {
-    stop(paste0(
-      "Predict request failed with status ",
-      status_code(response), ": ", content(response, "text")
-    ))
+    stop_api_error(response, "Predict")
   }
 
   parsed_content <- tryCatch(

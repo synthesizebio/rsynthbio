@@ -103,3 +103,24 @@ expression <- result$expression
 ```
 
 For more detailed examples and advanced usage, see the model-specific vignettes linked above.
+
+## Request validation errors
+
+For hosted HTTP 400/422 responses, `predict_query()` raises a
+`synthesize_validation_error` condition. When Platform returns field corrections,
+its message displays one path and message per line. Older or malformed response
+formats retain their original error text. Catch it using `tryCatch()`; the complete
+response remains available for programmatic handling:
+
+```r
+result <- tryCatch(
+  predict_query(query, model_id = "gem-2-sc"),
+  synthesize_validation_error = function(error) {
+    message(conditionMessage(error)) # readable field corrections
+    print(error$status_code)         # HTTP status
+    print(error$response_body)       # original response text
+    print(error$response_json)       # parsed JSON, or NULL if invalid JSON
+    NULL
+  }
+)
+```

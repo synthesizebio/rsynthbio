@@ -15,3 +15,13 @@ assets/*
 ^docs-redirect$
 ^scripts$
 ^cran-comments\.md$
+
+^\.agents$
+^\.sbio$
+^\.sbio\.toml$
+^\.sbio-version$
+^AGENTS\.md$
+^CLAUDE\.md$
+^plans$
+^\.git$
+^\.claude$
