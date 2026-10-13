@@ -112,7 +112,7 @@ Only baseline models are available to all users. You can check which models are 
 
 You can check which models are available programmatically:
 
-```{r models}
+```{r models, eval=FALSE}
 # Check available models
 list_models()
 ```
