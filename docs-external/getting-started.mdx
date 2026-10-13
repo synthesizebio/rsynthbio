@@ -43,6 +43,8 @@ You can obtain an API token by registering at [Synthesize Bio](https://app.synth
 
 Synthesize Bio provides several types of models for different use cases:
 
+This guide uses GEM-1 models. GEM-2 is currently available only to Synthesize Bio staff.
+
 ### Baseline Models
 
 Generate synthetic gene expression data from metadata alone. You describe the biological conditions (tissue type, disease state, perturbations, etc.) and the model generates realistic expression profiles.
@@ -70,7 +72,7 @@ Infer metadata from observed expression data. Given a gene expression profile, p
 
 See the [Metadata Prediction](/rsynthbio/models/metadata-prediction) vignette for detailed usage.
 
-Only baseline models are available to all users. You can check which models are available programmatically, use `list_models()`. Contact us at support@synthesize.bio if you have any questions.
+Only the GEM-1 baseline models listed here are available to all users. You can check which models are available programmatically, use `list_models()`. Contact us at support@synthesize.bio if you have any questions.
 
 ### Listing Available Models
 
@@ -114,7 +116,7 @@ response remains available for programmatic handling:
 
 ```r
 result <- tryCatch(
-  predict_query(query, model_id = "gem-2-sc"),
+  predict_query(query, model_id = "gem-1-bulk"),
   synthesize_validation_error = function(error) {
     message(conditionMessage(error)) # readable field corrections
     print(error$status_code)         # HTTP status
