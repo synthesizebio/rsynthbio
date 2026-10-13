@@ -16,12 +16,6 @@ assets/*
 ^scripts$
 ^cran-comments\.md$
 
-^\.agents$
-^\.sbio$
-^\.sbio\.toml$
-^\.sbio-version$
-^AGENTS\.md$
-^CLAUDE\.md$
-^plans$
+# Exclude local Git worktree metadata and scratch artifacts.
 ^\.git$
-^\.claude$
+^\.sbio$

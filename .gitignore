@@ -49,6 +49,3 @@ rsconnect/
 /.quarto/
 /doc/
 /Meta/
-
-# Generated local Claude adapter; signed API commits cannot preserve symlink mode.
-.claude/skills
