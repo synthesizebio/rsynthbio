@@ -1,3 +1,10 @@
+# rsynthbio (development)
+
+- Hosted prediction HTTP 400/422 errors now expose `status_code`, `response_body` and
+  `response_json` on a catchable `synthesize_validation_error` condition.
+  Structured field corrections display one path and message per line; legacy
+  response text and nonvalidation HTTP errors retain their existing behavior.
+
 # rsynthbio 4.2.0
 
 ## New Features

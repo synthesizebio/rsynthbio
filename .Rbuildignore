@@ -15,3 +15,7 @@ assets/*
 ^docs-redirect$
 ^scripts$
 ^cran-comments\.md$
+
+# Exclude local Git worktree metadata and scratch artifacts.
+^\.git$
+^\.sbio$
