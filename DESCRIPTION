@@ -2,9 +2,12 @@ Type: Package
 Package: rsynthbio
 Title: Synthesize Bio API Wrapper
 Version: 4.2.1
-Authors@R: person(given = "Synthesize Bio",
-    email = "candace@synthesize.bio",
-    role = c("aut", "cre"))
+Authors@R: c(
+    person(given = "Synthesize Bio", role = "aut"),
+    person(given = "Alex", family = "David",
+        email = "alex@synthesize.bio",
+        role = c("aut", "cre"))
+    )
 Description: Access Synthesize Bio models from their API <https://app.synthesize.bio/> using
   this wrapper that provides a convenient interface to the Synthesize Bio API, allowing users
   to generate realistic gene expression data based on specified biological conditions. This package
