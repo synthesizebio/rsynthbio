@@ -1,24 +1,19 @@
-## R CMD check results
+## Release summary
+
+This patch release (4.2.1) makes hosted request-validation errors readable while retaining structured response details and existing error compatibility.
+
+- Adds regression coverage for structured, malformed, and legacy error responses.
+- Uses GEM-1 in public SDK examples; GEM-2 remains staff-only.
+- Marks two existing authenticated API vignette examples as nonexecuting so CRAN checks do not require credentials or a live API.
+
+## Check results
 
 0 errors | 0 warnings | 0 notes
 
-## Release summary
-
-This is a minor release (4.2.0):
-
-- Added self-hosted model support: `predict_query()` and `get_example_query()`
-  gain a `self_hosted` argument (also resolved from the `SYNTHESIZE_SELF_HOSTED`
-  environment variable) for querying partner-hosted model containers that
-  return an Apache Arrow IPC stream.
-- Added per-model base-URL resolution via `SYNTHESIZE_API_BASE_URL__<MODEL>`.
-- Self-hosted predictions use a longer 600s request timeout.
+R CMD check --as-cran --no-manual passed, including vignette rebuilding.
+All 227 testthat assertions passed. API credentials are not required for checks.
 
 ## Test environments
 
-- local macOS (Sequoia 15.7.3), R 4.5.1
-- win-builder (R-devel and R-release)
-- GitHub Actions (ubuntu-24.04, windows-latest, macOS-latest), R release
-
-## Downstream dependencies
-
-There are currently no downstream dependencies for this package.
+- Local macOS, R 4.5.1.
+- GitHub Actions: Linux, macOS, and Windows (release R) passed on the merged error-handling revision. Release-candidate CI is tracked in the release PR.

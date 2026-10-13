@@ -34,7 +34,7 @@ library(rsynthbio)
 
 The structure of the query required by the API is specific to each model. Use `get_example_query()` to get a correctly structured example for your chosen model.
 
-```{r query-example}
+```{r query-example, eval=FALSE}
 # Get the example query structure for a specific model
 example_query <- get_example_query(model_id = "gem-1-bulk")$example_query
 
