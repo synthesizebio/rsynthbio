@@ -1,3 +1,8 @@
+# rsynthbio 4.2.2
+
+- Updated the maintainer to Alex David <alex@synthesize.bio>, retaining
+  Synthesize Bio as an author.
+
 # rsynthbio 4.2.1
 
 - Hosted prediction HTTP 400/422 errors now expose `status_code`, `response_body` and
