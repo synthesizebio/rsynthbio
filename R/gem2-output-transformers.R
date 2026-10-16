@@ -23,7 +23,10 @@ gem2_output_frame <- function(rows, field, list_columns = FALSE) {
   result <- data.frame(row.names = seq_along(rows))
   for (key in fields) {
     column <- lapply(values, function(value) value[[key]])
-    if (list_columns) {
+    scalar <- vapply(column, function(value) {
+      is.null(value) || (is.atomic(value) && length(value) == 1L)
+    }, logical(1))
+    if (list_columns || !all(scalar)) {
       result[[key]] <- I(column)
     } else {
       result[[key]] <- unlist(lapply(column, function(value) if (is.null(value)) NA else value), use.names = FALSE)

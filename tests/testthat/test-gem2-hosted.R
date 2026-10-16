@@ -45,3 +45,19 @@ for (operation in c("predict-expression", "predict-expression-from-reference", "
     }
   }
 }
+
+
+test_that("GEM-2 retains nested molecule metadata in the formatted results", {
+  molecules <- list(list(smiles = "CCO"), list(entity_ontology_id = "CHEMBL3261331"))
+  row <- list(counts = c(16777217, 2), metadata = list(
+    sample_type = "primary tissue", bioactive_entity_perturbations = molecules,
+    gene_perturbations = list()), latents = list(generated = c(0.1, 0.2)))
+  content <- jsonlite::fromJSON(jsonlite::toJSON(list(outputs = list(row, row),
+    gene_order = c("gene1", "gene2")), auto_unbox = TRUE, digits = NA), simplifyMatrix = FALSE)
+  result <- rsynthbio:::transform_gem2_output(content, "predict-expression")
+  expect_equal(nrow(result$metadata), 2L)
+  expect_equal(result$metadata$bioactive_entity_perturbations[[1]], molecules)
+  expect_equal(result$metadata$bioactive_entity_perturbations[[2]], molecules)
+  expect_equal(result$metadata$gene_perturbations[[1]], list())
+  expect_equal(result$metadata$sample_type, rep("primary tissue", 2))
+})
