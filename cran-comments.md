@@ -1,33 +1,27 @@
 ## Release summary
 
-This is a patch release as version 4.2.2 following CRAN's request that the new
-maintainer submit a new version with updated maintainer information.
+This patch release fixes hosted GEM-2 result formatting for baseline expression,
+reference-based expression, metadata prediction and reconstruction. It preserves
+nested metadata, aligns classifier labels/probabilities and avoids rounding
+prediction values while reading JSON results.
 
-The designated maintainer is now Alex David <alex@synthesize.bio>, replacing
-Synthesize Bio <candace@synthesize.bio>. Synthesize Bio remains credited as an
-author. The maintainer transfer has been discussed with CRAN in the existing
-correspondence. Version 4.2.1 was published on 2026-10-13 with the previous
-maintainer's details. No runtime code or dependencies have changed since 4.2.1.
+Version 4.2.2 was published on 2026-10-14 to complete the maintainer transfer.
+The short interval for 4.2.3 is intentional: this is a corrective patch for
+existing GEM-2 operations, including metadata results that could not previously
+be formatted correctly. Maintainer details and package dependencies are unchanged.
 
 ## Check results
 
-All 227 testthat assertions passed locally with no failures, warnings, or skips.
-API credentials are not required for checks.
+All 340 testthat assertions passed locally with no failures, warnings or skips.
+No API credentials are required for the checks.
 
-Local R CMD check --as-cran --no-manual completed with 0 errors, 0 warnings,
-and 2 notes, including successful vignette rebuilding. The incoming-check note
-reports the maintainer change and the one-day interval since the last release;
-this update is being submitted at CRAN's request. The other note is the local
-environment's inability to verify the current time.
+R CMD build completed successfully, including rebuilding all vignettes.
+R CMD check --as-cran --no-manual completed with 0 errors, 0 warnings and 2 notes:
 
-GitHub Actions on Linux, macOS, and Windows with R 4.6.1 completed with 0 errors,
-0 warnings, and 0 notes. All 227 testthat assertions passed on each platform. CI uses
---as-cran --no-manual --no-build-vignettes; rendered vignettes are included in
-the source package. The submission tarball was built and checked with R 4.6.1
-on macOS. R-devel was not available in the configured validation environments.
+- The incoming feasibility check reports two days since the previous update;
+  the reason for this corrective release is explained above.
+- The local environment could not verify the current time.
 
-## Test environments
+## Test environment
 
-- Local macOS 26.5, R 4.4.2.
-- GitHub Actions: Ubuntu 24.04 and macOS (release R 4.6.1).
-- GitHub Actions: Windows Server 2022 (release R 4.6.1).
+- Local macOS 26.5, R 4.4.2, arm64.
