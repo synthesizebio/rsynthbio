@@ -148,3 +148,44 @@ reviewable in PRs.
 ## Rate limits
 
 Free usage of Synthesize Bio is limited. If you exceed this limit, you'll receive an error message. To generate more samples, please contact us at [support@synthesize.bio](mailto:support@synthesize.bio).
+
+## Hosted GEM-2 operations
+
+Use `predict_query(..., model_id = "gem-2")` with a release supporting the
+requested `operation`: `predict-expression`, `predict-expression-from-reference`,
+`predict-metadata`, or `autoencode`. The server checks the release and modality.
+
+```r
+query <- list(
+  operation = "predict-expression",
+  inputs = list(modality = "bulk", items = list(list(
+    metadata = list(
+      sample_type = "primary tissue",
+      library_layout = "PAIRED",
+      library_selection = "cDNA",
+      tissue = "liver",
+      bioactive_entity_perturbations = list(list(smiles = "CCO")),
+      gene_perturbations = list(), infection_perturbations = list()
+    ),
+    num_samples = 1,
+    output_total = list(type = "custom", value = 8478)
+  ))),
+  options = list(seed = 42, sampling_strategy = "mean estimation")
+)
+result <- rsynthbio::predict_query(query, model_id = "gem-2")
+```
+
+SMILES and direct ChEMBL IDs require an enabled molecule release. Replace
+`list(smiles = "CCO")` with `list(entity_ontology_id = "CHEMBL3261331")` to use
+an ID. Supply exactly one of `entity`, `entity_ontology_id`, or `smiles` per
+molecule; `entity` retains the supported-name lookup. The optional request field
+`release` selects an explicit release for candidate testing.
+
+Expression results contain `expression`, `metadata`, and `latents` data frames.
+Metadata prediction returns predicted `metadata`, `classifier_probs`, and
+`latents` with an `encoded` list column. It does not generate expression counts,
+so `expression` has one row per result and zero columns. Reconstruction
+(`autoencode`) retains counts and adds a `provenance` data frame with each row's
+`model_release_id` and `vae_run_id`; `latents` has zero columns. Missing sample
+metadata retains row alignment. Existing GEM-2 compatibility model names also
+use these formats. `raw_response = TRUE` returns the original response unchanged.
