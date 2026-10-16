@@ -61,3 +61,29 @@ test_that("GEM-2 retains nested molecule metadata in the formatted results", {
   expect_equal(result$metadata$gene_perturbations[[1]], list())
   expect_equal(result$metadata$sample_type, rep("primary tissue", 2))
 })
+
+test_that("GEM-2 formatting preserves exact floating-point values in both JSON representations", {
+  values <- c(pi, 1/3, -0.12345678901234566, .Machine$double.eps)
+  row <- list(counts = c(16777217, 2), metadata = NULL,
+              latents = list(z_target = values))
+  nested <- data.frame(row.names = 1:2)
+  nested$counts <- I(list(row$counts, row$counts))
+  nested$metadata <- I(list(NULL, list(tissue = "liver")))
+  nested$latents <- data.frame(z_target = I(list(values, values)))
+  for (outputs in list(list(row, row), nested)) {
+    content <- list(outputs = outputs, gene_order = c("gene1", "gene2"))
+    before <- content
+    result <- rsynthbio:::transform_gem2_output(content, "predict-expression-from-reference")
+    expect_identical(result$latents$z_target[[1]], values)
+    expect_identical(result$latents$z_target[[2]], values)
+    expect_equal(nrow(result$metadata), 2L)
+    expect_identical(as.numeric(result$expression[1, ]), row$counts)
+    expect_identical(content, before)
+  }
+  row <- list(predicted_metadata = list(tissue_ontology_id = "UBERON:0002107", age_years = NULL),
+              classifier_probabilities = list(tissue_ontology_id = list("UBERON:0002107" = 1/3)),
+              latents = list(encoded = values))
+  result <- rsynthbio:::transform_gem2_output(list(outputs = list(row), gene_order = c("gene1", "gene2")), "predict-metadata")
+  expect_identical(result$latents$encoded[[1]], values)
+  expect_identical(result$classifier_probs$tissue_ontology_id[[1]][[1]], 1/3)
+})
