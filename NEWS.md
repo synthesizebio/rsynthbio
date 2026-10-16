@@ -1,3 +1,11 @@
+# rsynthbio 4.2.3
+
+- Format hosted GEM-2 baseline, reference-based expression, metadata prediction
+  and reconstruction results through the standard prediction client.
+- Preserve nested metadata, classifier labels/probabilities and full numeric
+  precision when reading prediction results.
+- Keep requested input/output column order and missing values aligned.
+
 # rsynthbio 4.2.2
 
 - Updated the maintainer to Alex David <alex@synthesize.bio>, retaining
