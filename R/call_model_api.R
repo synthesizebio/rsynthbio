@@ -554,7 +554,8 @@ predict_query <- function(query,
     return(final_json)
   }
 
-  transformer <- get_output_transformer(model_id)
+  transformer <- gem2_output_transformer(model_id, query)
+  if (is.null(transformer)) transformer <- get_output_transformer(model_id)
   if (is.null(transformer)) {
     stop(paste0(
       "No output formatter registered for model_id '", model_id, "'. ",
