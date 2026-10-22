@@ -29,16 +29,25 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
   }
   base <- sub("/+$", "", api_base_url)
   encode <- function(value) utils::URLencode(value, reserved = TRUE)
+  validate_key <- function(value) {
+    if (!is.character(value) || length(value) != 1L || is.na(value) ||
+        !nzchar(trimws(value)) || nchar(value) > 180L) {
+      stop("idempotency_key must be one nonblank string of at most 180 characters", call. = FALSE)
+    }
+    value
+  }
   send <- function(method, path, body = NULL, idempotency_key = NULL) {
     headers <- c(Authorization = paste("Bearer", api_key))
     if (!is.null(idempotency_key)) headers <- c(headers, `Idempotency-Key` = idempotency_key)
     response <- httr::VERB(method, paste0(base, "/api/v1/", path),
       httr::add_headers(.headers = headers), httr::timeout(timeout),
       httr::config(followlocation = 0L), body = body, encode = "json")
-    result <- tryCatch(jsonlite::fromJSON(httr::content(response, "text", encoding = "UTF-8"),
-      simplifyVector = FALSE), error = function(e) list(error = "non_json_response"))
+    raw_body <- httr::content(response, "text", encoding = "UTF-8")
+    result <- tryCatch(jsonlite::fromJSON(raw_body, simplifyVector = FALSE), error = function(e) e)
+    malformed <- inherits(result, "error")
+    if (malformed) result <- list(error = "non_json_response", body = raw_body)
     status <- httr::status_code(response)
-    if (status < 200L || status >= 300L) {
+    if (malformed || status < 200L || status >= 300L) {
       failure <- structure(list(message = paste("VERDICT HTTP", status,
         jsonlite::toJSON(result, auto_unbox = TRUE)), call = NULL,
         status_code = status, details = result),
@@ -56,6 +65,7 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
       send("GET", path)
     },
     predict = function(model, operation, input, idempotency_key, release = NULL) {
+      idempotency_key <- validate_key(idempotency_key)
       body <- list(operation = operation, input = input)
       if (!is.null(release)) body$release <- release
       send("POST", paste0("models/", encode(model), "/predict"), body, idempotency_key)
@@ -64,6 +74,7 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     result = function(id) send("GET", paste0("runs/", encode(id), "/result")),
     workflows = function() send("GET", "workflows"),
     submit_workflow = function(input, idempotency_key) {
+      idempotency_key <- validate_key(idempotency_key)
       send("POST", "workflows", list(input = input, idempotencyKey = idempotency_key))
     },
     wait = function(id, timeout = 1800, interval = 5) {

@@ -5,6 +5,24 @@ test_that("VERDICT rejects plaintext credentials and does not change Platform de
   expect_true(is.function(verdict_client("key")$predict))
 })
 
+test_that("VERDICT rejects malformed success responses and unusable submission keys", {
+  reply <- structure(list(url = "https://verdict.synthesize.bio/api/v1/models", status_code = 200L, headers = list(`content-type` = "text/plain"),
+    content = charToRaw("upstream unavailable")), class = "response")
+  mockery::stub(verdict_client, "httr::VERB", function(...) reply)
+  client <- verdict_client("key")
+  failure <- tryCatch(client$result("saved-id"), verdict_api_error = function(e) e)
+  expect_s3_class(failure, "verdict_api_error")
+  expect_identical(failure$details$body, "upstream unavailable")
+  reply$status_code <- 502L
+  failure <- tryCatch(client$models(), verdict_api_error = function(e) e)
+  expect_identical(failure$status_code, 502L)
+  expect_identical(failure$details$body, "upstream unavailable")
+  for (key in list(NULL, NA_character_, "", "  ", c("a", "b"))) {
+    expect_error(client$predict("safety", "predict", list(), key), "idempotency_key")
+    expect_error(client$submit_workflow(list(), key), "idempotency_key")
+  }
+})
+
 test_that("VERDICT preserves model JSON and structured validation errors", {
   reply <- structure(list(url = "https://verdict.synthesize.bio/api/v1/models", status_code = 200L, headers = list(`content-type` = "application/json"),
     content = charToRaw('{"result":{"unsupported":true,"release":"pilot"}}')),
