@@ -1,0 +1,90 @@
+---
+title: "VERDICT API"
+description: "Call GEM-2, Safety, Outcome, and trial workflows with verdict_client()."
+---
+
+`verdict_client()` connects to VERDICT independently of the legacy Platform functions.
+
+<Note>
+This interface targets rsynthbio 4.3.0. The API is in preview; client publication and live model qualification are separate rollout steps. Use an API-enabled deployment and a client build that includes `verdict_client()`.
+</Note>
+
+## Connect
+
+Create a key on your VERDICT deployment's **API keys** page at `/app/api-keys`. Set `VERDICT_API_KEY` in your environment. For a preview deployment, also set `VERDICT_API_BASE_URL` to its HTTPS origin without an `/api/v1` suffix.
+
+```r
+client <- rsynthbio::verdict_client()
+models <- client$models()
+```
+
+The default origin is `https://verdict.synthesize.bio`. You can also pass `api_key`, `api_base_url`, and an HTTP `timeout` in seconds to `verdict_client()`. Existing Platform functions and credentials keep their existing behavior. A Platform key cannot authorize VERDICT requests.
+
+## Run a model
+
+```r
+example <- client$example("safety")
+run <- client$predict(
+  "safety", example$operation, example$input,
+  idempotency_key = "safety-notebook-1"
+)
+run_id <- run$id  # Persist this before polling
+status <- client$wait(run_id, timeout = 1800, interval = 5)
+print(status$status)
+print(status$failureCode)
+
+# A terminal run may be failed or scientifically unavailable.
+if (!is.null(status$result)) {
+  result <- client$result(run_id)
+}
+```
+
+`wait()` returns all terminal states, including failures. Inspect the status and scientific result before using predictions. If polling times out, resume with `client$run(run_id)` or `client$wait(run_id)`. Polling does not resubmit inference.
+
+For GEM-2, choose an operation explicitly:
+
+```r
+example <- client$example("gem-2", operation = "baseline")
+run <- client$predict(
+  "gem-2", example$operation, example$input,
+  idempotency_key = "gem2-notebook-1"
+)
+```
+
+Other GEM-2 operations are `reference_conditioned`, `predict_metadata`, and `autoencode`. Outcome uses model `outcome` with operation `predict_analysis_outcome`. Read the [model guide](/platform/verdict/models) for schemas, count ordering, and release behavior. An optional `release` argument pins an exact advertised release.
+
+## Submit a trial workflow
+
+Save the [workflow example](/platform/verdict/workflows) as `workflow-input.json`, then:
+
+```r
+workflow_input <- jsonlite::fromJSON(
+  "workflow-input.json", simplifyVector = FALSE
+)
+run <- client$submit_workflow(
+  workflow_input, idempotency_key = "trial-notebook-1"
+)
+run_id <- run$id
+status <- client$wait(run_id)
+history <- client$workflows()
+```
+
+Keep `simplifyVector = FALSE` when loading scientific request JSON so arrays and nested objects retain their structure. Use `client$result(run_id)` to retrieve the saved consolidated report once it is available. Workflow history includes your UI and API trials; independent model calls are retrieved by ID.
+
+## Handle errors and retries
+
+```r
+tryCatch(
+  client$run(run_id),
+  verdict_api_error = function(error) {
+    print(error$status_code)
+    print(error$details)
+  }
+)
+```
+
+HTTP errors preserve status and structured server details in a `verdict_api_error` condition. Non-JSON responses use the same condition. Transport errors propagate separately.
+
+Both `predict()` and `submit_workflow()` require an explicit `idempotency_key`: one nonblank string of at most 180 characters. Save it before submitting and reuse it with unchanged input after an uncertain transport failure.
+
+Results remain nested lists. The client does not force every model output into a matrix or data frame. Preserve the full saved JSON, including provenance and unavailable values. See the [HTTP reference](/platform/verdict/reference) for limits and error codes.
