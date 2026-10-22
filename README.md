@@ -151,27 +151,9 @@ Free usage of Synthesize Bio is limited. If you exceed this limit, you'll receiv
 
 ## VERDICT models and trials
 
-Create a key at [VERDICT API keys](https://verdict.synthesize.bio/app/api-keys)
-and set `VERDICT_API_KEY`. The new client leaves all existing Platform functions
-and defaults unchanged. Set `VERDICT_API_BASE_URL` to use a preview HTTPS origin.
-
-```r
-client <- rsynthbio::verdict_client()
-models <- client$models()
-example <- client$example("safety")
-run <- client$predict("safety", example$operation, example$input,
-                      idempotency_key = "safety-1")
-status <- client$wait(run$id)
-result <- client$result(run$id)
-```
-
-GEM-2, Safety, Outcome and full VERDICT workflows use the same transport.
-Use `client$submit_workflow(workflow_input, idempotency_key = "trial-1")` for a
-full trial. Keep the idempotency key for uncertain submission retries and the
-run ID to resume polling. Results remain nested lists, including unsupported
-values and provenance. HTTP errors have class `verdict_api_error`, with
-`status_code` and `details`. GEM-1 remains on legacy Platform; there is no silent
-fallback. Package publication follows deployed API qualification.
+Sign in to [VERDICT API docs](https://verdict.synthesize.bio/app/api-docs/r)
+for the R client guide, API keys, model calls, and trial workflows.
+An approved VERDICT account is required.
 
 ## Hosted GEM-2 operations
 
