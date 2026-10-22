@@ -90,8 +90,10 @@ test_that("VERDICT polling resumes saved IDs and caps waits at the deadline", {
   expect_identical(client$wait("saved-id")$status, "failed")
   statuses <- "running"
   sleeps <- numeric()
+  polls_before <- length(urls)
   expect_error(client$wait("saved-id", timeout = 2, interval = 5), "resume polling")
   expect_identical(sleeps, 2)
+  expect_length(urls, polls_before + 1L)
   statuses <- "complete"
   expect_identical(client$wait("saved-id")$status, "complete")
   expect_true(all(urls == "https://verdict.synthesize.bio/api/v1/runs/saved-id"))

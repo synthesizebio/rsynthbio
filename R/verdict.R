@@ -80,13 +80,14 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     wait = function(id, timeout = 1800, interval = 5) {
       if (timeout <= 0 || interval <= 0) stop("timeout and interval must be positive")
       deadline <- proc.time()[["elapsed"]] + timeout
-      repeat {
+      while (proc.time()[["elapsed"]] < deadline) {
         value <- run(id)
         if (!value$status %in% c("queued", "running")) return(value)
         remaining <- deadline - proc.time()[["elapsed"]]
-        if (remaining <= 0) stop(paste("VERDICT run", id, "is still running; resume polling"))
+        if (remaining <= 0) break
         Sys.sleep(min(interval, remaining))
       }
+      stop(paste("VERDICT run", id, "is still running; resume polling"))
     }
   )
 }
