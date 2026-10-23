@@ -14,6 +14,15 @@
 #'   result(id), workflows(), submit_workflow(input, idempotency_key),
 #'   and wait(id, timeout, interval). Supply a stable idempotency key when retrying
 #'   submissions. wait() returns terminal failures as well as successful runs.
+#' @details High-level methods: run_trial(input, idempotency_key, timeout = 3600,
+#'   poll_interval = 5) submits a live workflow and waits for a displayable report.
+#'   Reuse the same key for retries; use a new key for intentional new inference.
+#'   No local cache or automatic file writes occur. wait_for_trial(id, timeout,
+#'   poll_interval) waits for an existing run without submitting. get_trial_result(id)
+#'   fetches a completed report once without polling. Reports expose summary,
+#'   biology, efficacy, safety, raw, run_id, ui_url, and save_json(path).
+#'   A verdict_trial_timeout error retains run_id; resume with wait_for_trial.
+#'   A verdict_trial_run_error retains run_id and status if a terminal run has no report.
 #' @export
 verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
                            api_base_url = Sys.getenv("VERDICT_API_BASE_URL", "https://verdict.synthesize.bio"),
@@ -62,7 +71,7 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     result
   }
   run <- function(id) send("GET", paste0("runs/", encode(id)))
-  list(
+  client <- list(
     models = function() send("GET", "models"),
     example = function(model, operation = NULL) {
       path <- paste0("models/", encode(model), "/example-query")
@@ -92,7 +101,36 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
         if (remaining <= 0) break
         Sys.sleep(min(interval, remaining))
       }
-      stop(paste("VERDICT run", id, "is still running; resume polling"))
+      stop(structure(list(message = paste("VERDICT run", id, "is still running; resume polling"),
+        call = NULL, run_id = id), class = c("verdict_trial_timeout", "error", "condition")))
     }
   )
+  polling_options <- function(timeout, poll_interval) {
+    stopifnot(length(timeout) == 1, is.finite(timeout), timeout > 0,
+      length(poll_interval) == 1, is.finite(poll_interval), poll_interval > 0)
+  }
+  client$get_trial_result <- function(id) {
+    report <- client$result(id)
+    .verdict_validate_report(report, id)
+    .verdict_trial_result(report, base, "Retrieved from the VERDICT API")
+  }
+  client$wait_for_trial <- function(id, timeout = 3600, poll_interval = 5) {
+    polling_options(timeout, poll_interval)
+    status <- client$wait(id, timeout = timeout, interval = poll_interval)
+    if (is.null(status$result)) stop(structure(list(message = paste("Trial", id, "has no report:", status$status, status$failureCode),
+      call = NULL, run_id = id, status = status), class = c("verdict_trial_run_error", "error", "condition")))
+    client$get_trial_result(id)
+  }
+  client$run_trial <- function(input, idempotency_key, timeout = 3600, poll_interval = 5) {
+    polling_options(timeout, poll_interval)
+    key <- validate_key(idempotency_key)
+    execution <- client$workflows()$execution
+    if (!identical(execution$mode, "live")) stop("Deployment is not in live mode; no trial was submitted")
+    submitted <- client$submit_workflow(input, key)
+    result <- client$wait_for_trial(submitted$id, timeout, poll_interval)
+    .verdict_validate_report(result$raw, submitted$id, input)
+    .verdict_trial_result(result$raw, base, "Retrieved from the VERDICT API", execution)
+  }
+  client
+
 }

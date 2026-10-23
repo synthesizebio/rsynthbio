@@ -31,3 +31,14 @@ unavailable values and model provenance are preserved. Existing Platform
 functions and their defaults are unchanged. Create a key in VERDICT at
 \url{https://verdict.synthesize.bio/app/api-keys}.
 }
+\details{
+High-level methods: run_trial(input, idempotency_key, timeout = 3600,
+  poll_interval = 5) submits a live workflow and waits for a displayable report.
+  Reuse the same key for retries; use a new key for intentional new inference.
+  No local cache or automatic file writes occur. wait_for_trial(id, timeout,
+  poll_interval) waits for an existing run without submitting. get_trial_result(id)
+  fetches a completed report once without polling. Reports expose summary,
+  biology, efficacy, safety, raw, run_id, ui_url, and save_json(path).
+  A verdict_trial_timeout error retains run_id; resume with wait_for_trial.
+  A verdict_trial_run_error retains run_id and status if a terminal run has no report.
+}
