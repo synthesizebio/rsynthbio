@@ -50,7 +50,7 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     if (!is.null(idempotency_key)) headers <- c(headers, `Idempotency-Key` = idempotency_key)
     if (!is.null(body)) {
       # httr's JSON encoder turns NULL into {}, which violates nullable fields.
-      body <- jsonlite::toJSON(body, auto_unbox = TRUE, null = "null", digits = NA)
+      body <- jsonlite::toJSON(body, auto_unbox = TRUE, null = "null", digits = 17)
       headers <- c(headers, `Content-Type` = "application/json")
     }
     response <- httr::VERB(method, paste0(base, "/api/v1/", path),

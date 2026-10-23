@@ -114,7 +114,7 @@ plot.verdict_trial_view <- function(x, ...) {
   }
   structure(list(raw = report, run_id = report$run_id, ui_url = ui_url,
     provenance = provenance,
-    save_json = function(path) writeLines(jsonlite::toJSON(report, auto_unbox = TRUE, pretty = TRUE, null = "null", digits = NA), path),
+    save_json = function(path) writeLines(jsonlite::toJSON(report, auto_unbox = TRUE, pretty = TRUE, null = "null", digits = 17), path),
     summary = structure(list(data = report$analyses, html = summary_html,
       text = paste(c(report$request$trial$name, source, paste("Overall status:", report$status), ui_url,
         vapply(report$analyses, function(a) paste(a$analysis, a$status, sep = ": "), character(1))), collapse = "\n")), class = "verdict_trial_view"),
