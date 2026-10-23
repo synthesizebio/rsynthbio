@@ -47,7 +47,8 @@ test_that("VERDICT sends the API contract with credentials and redirect protecti
     reply
   })
   client <- verdict_client("vdt_test")
-  input <- list(inputs = list(list(name = "example")))
+  input <- list(inputs = list(list(name = "example", max_age_years = NULL,
+    value = 0.123456789012345, source_ids = list("source"), empty = list())))
   client$predict("safety", "predict_adverse_event_incidence", input, "model-1")
   client$submit_workflow(input, "trial-1")
   client$models()
@@ -55,9 +56,15 @@ test_that("VERDICT sends the API contract with credentials and redirect protecti
   expect_identical(vapply(calls, `[[`, "", "verb"), c("POST", "POST", "GET", "GET"))
   expect_identical(vapply(calls, `[[`, "", "url"), paste0("https://verdict.synthesize.bio/api/v1/",
     c("models/safety/predict", "workflows", "models", "models/gem-2/example-query?operation=autoencode")))
-  expect_identical(calls[[1]]$args$body, list(operation = "predict_adverse_event_incidence", input = input))
+  expect_identical(jsonlite::fromJSON(calls[[1]]$args$body, simplifyVector = FALSE),
+    list(operation = "predict_adverse_event_incidence", input = input))
   expect_identical(calls[[1]]$args[[1]]$headers[["Idempotency-Key"]], "model-1")
-  expect_identical(calls[[2]]$args$body, list(input = input, idempotencyKey = "trial-1"))
+  expect_identical(jsonlite::fromJSON(calls[[2]]$args$body, simplifyVector = FALSE),
+    list(input = input, idempotencyKey = "trial-1"))
+  for (call in calls[1:2]) {
+    expect_identical(call$args$encode, "raw")
+    expect_identical(call$args[[1]]$headers[["Content-Type"]], "application/json")
+  }
   for (call in calls) {
     expect_identical(call$args[[1]]$headers[["Authorization"]], "Bearer vdt_test")
     expect_identical(call$args[[3]]$options$followlocation, 0L)

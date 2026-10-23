@@ -39,9 +39,14 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
   send <- function(method, path, body = NULL, idempotency_key = NULL) {
     headers <- c(Authorization = paste("Bearer", api_key))
     if (!is.null(idempotency_key)) headers <- c(headers, `Idempotency-Key` = idempotency_key)
+    if (!is.null(body)) {
+      # httr's JSON encoder turns NULL into {}, which violates nullable fields.
+      body <- jsonlite::toJSON(body, auto_unbox = TRUE, null = "null", digits = NA)
+      headers <- c(headers, `Content-Type` = "application/json")
+    }
     response <- httr::VERB(method, paste0(base, "/api/v1/", path),
       httr::add_headers(.headers = headers), httr::timeout(timeout),
-      httr::config(followlocation = 0L), body = body, encode = "json")
+      httr::config(followlocation = 0L), body = body, encode = "raw")
     raw_body <- httr::content(response, "text", encoding = "UTF-8")
     result <- tryCatch(jsonlite::fromJSON(raw_body, simplifyVector = FALSE), error = function(e) e)
     malformed <- inherits(result, "error")
