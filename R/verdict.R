@@ -23,6 +23,11 @@
 #'   biology, efficacy, safety, raw, run_id, ui_url, and save_json(path).
 #'   A verdict_trial_timeout error retains run_id; resume with wait_for_trial.
 #'   A verdict_trial_run_error retains run_id and status if a terminal run has no report.
+#'   import_trial(nct_id = NULL, document = NULL, timeout = 210) proposes a trial
+#'   draft from exactly one NCT ID or local PDF/DOCX/TXT file (up to 5 MiB).
+#'   It returns draft and metadata with field evidence and review flags; it never
+#'   submits an analysis. Streamed extraction errors raise verdict_api_error even
+#'   with HTTP 200. Retrying performs fresh extraction, not run recovery.
 #' @export
 verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
                            api_base_url = Sys.getenv("VERDICT_API_BASE_URL", "https://verdict.synthesize.bio"),
@@ -46,7 +51,7 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     value
   }
   http_timeout <- timeout
-  send <- function(method, path, body = NULL, idempotency_key = NULL, request_timeout = http_timeout) {
+  send <- function(method, path, body = NULL, idempotency_key = NULL, form = NULL, request_timeout = http_timeout) {
     headers <- c(Authorization = paste("Bearer", api_key))
     if (!is.null(idempotency_key)) headers <- c(headers, `Idempotency-Key` = idempotency_key)
     if (!is.null(body)) {
@@ -56,7 +61,8 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     }
     response <- httr::VERB(method, paste0(base, "/api/v1/", path),
       httr::add_headers(.headers = headers), httr::timeout(request_timeout),
-      httr::config(followlocation = 0L), body = body, encode = "raw")
+      httr::config(followlocation = 0L), body = if (is.null(form)) body else form,
+      encode = if (is.null(form)) "raw" else "multipart")
     raw_body <- httr::content(response, "text", encoding = "UTF-8")
     result <- tryCatch(jsonlite::fromJSON(raw_body, simplifyVector = FALSE), error = function(e) e)
     malformed <- inherits(result, "error")
@@ -72,7 +78,33 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     result
   }
   run <- function(id) send("GET", paste0("runs/", encode(id)))
+  import_trial <- function(nct_id = NULL, document = NULL, timeout = 210) {
+    if (is.null(nct_id) == is.null(document)) stop("Supply exactly one of nct_id or document", call. = FALSE)
+    if (!is.numeric(timeout) || length(timeout) != 1L || !is.finite(timeout) || timeout <= 0)
+      stop("timeout must be a positive finite number", call. = FALSE)
+    if (!is.null(nct_id)) {
+      if (!is.character(nct_id) || length(nct_id) != 1L || is.na(nct_id) || !nzchar(trimws(nct_id)))
+        stop("nct_id must be a nonblank string", call. = FALSE)
+      form <- list(nctId = nct_id)
+    } else {
+      if (!is.character(document) || length(document) != 1L || is.na(document) ||
+          !grepl("\\.(pdf|docx|txt)$", document, ignore.case = TRUE))
+        stop("document must be a PDF, DOCX, or TXT path", call. = FALSE)
+      size <- file.info(document)$size
+      if (is.na(size) || file.info(document)$isdir || size < 1 || size > 5 * 1024^2)
+        stop("document must be a readable file between 1 byte and 5 MiB", call. = FALSE)
+      form <- list(document = httr::upload_file(document))
+    }
+    result <- send("POST", "synthia/import", form = form, request_timeout = timeout)
+    if (!is.list(result) || !is.null(result$error) || !is.list(result$result)) {
+      stop(structure(list(message = paste("Synthia trial import failed:",
+        jsonlite::toJSON(result, auto_unbox = TRUE)), call = NULL,
+        status_code = 200L, details = result), class = c("verdict_api_error", "error", "condition")))
+    }
+    result$result
+  }
   client <- list(
+    import_trial = import_trial,
     models = function() send("GET", "models"),
     example = function(model, operation = NULL) {
       path <- paste0("models/", encode(model), "/example-query")
