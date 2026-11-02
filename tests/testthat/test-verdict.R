@@ -107,3 +107,25 @@ test_that("VERDICT polling resumes saved IDs and caps waits at the deadline", {
   expect_error(client$wait("saved-id", timeout = 0), "positive")
   expect_error(client$wait("saved-id", interval = 0), "positive")
 })
+
+test_that("polling caps HTTP requests and retains run IDs on deadline expiry", {
+  clock <- 0
+  budgets <- numeric()
+  mode <- "deadline"
+  mockery::stub(verdict_client, "proc.time", function() c(elapsed = clock))
+  mockery::stub(verdict_client, "httr::VERB", function(verb, url, ...) {
+    budgets <<- c(budgets, list(...)[[2]]$options$timeout_ms)
+    if (mode == "deadline") clock <<- clock + 2
+    stop(structure(list(message = "transport failed", call = NULL),
+      class = c("curl_error_operation_timedout", "curl_error", "error", "condition")))
+  })
+  client <- verdict_client("key")
+  failure <- tryCatch(client$wait("saved-id", timeout = 2), error = identity)
+  expect_identical(budgets, 2000)
+  expect_s3_class(failure, "verdict_trial_timeout")
+  expect_identical(failure$run_id, "saved-id")
+  mode <- "early"
+  shorter <- verdict_client("key", timeout = 1)
+  expect_error(shorter$wait("saved-id", timeout = 10), class = "curl_error_operation_timedout")
+  expect_identical(tail(budgets, 1), 1000)
+})
