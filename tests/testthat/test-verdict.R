@@ -107,3 +107,36 @@ test_that("VERDICT polling resumes saved IDs and caps waits at the deadline", {
   expect_error(client$wait("saved-id", timeout = 0), "positive")
   expect_error(client$wait("saved-id", interval = 0), "positive")
 })
+
+test_that("Synthia imports preserve review metadata and streamed errors", {
+  calls <- list()
+  reply <- structure(list(url = "https://verdict.synthesize.bio", status_code = 200L,
+    headers = list(`content-type` = "application/json"),
+    content = charToRaw(' {"result":{"draft":{"source":"custom"},"metadata":{"fields":[{"needsReview":true}]}}}')), class = "response")
+  mockery::stub(verdict_client, "httr::VERB", function(verb, url, ...) {
+    calls[[length(calls) + 1L]] <<- list(verb = verb, url = url, args = list(...))
+    reply
+  })
+  client <- verdict_client("key")
+  expect_error(client$import_trial(), "exactly one")
+  expect_error(client$import_trial(nct_id = "id", document = "protocol.txt"), "exactly one")
+  expect_error(client$import_trial(nct_id = ""), "nonblank")
+  expect_length(calls, 0L)
+  imported <- client$import_trial(nct_id = "NCT01945775")
+  expect_true(imported$metadata$fields[[1]]$needsReview)
+  expect_identical(calls[[1]]$args$body, list(nctId = "NCT01945775"))
+  expect_identical(calls[[1]]$args$encode, "multipart")
+  expect_identical(calls[[1]]$args[[2]]$options$timeout_ms, 210000)
+  expect_identical(calls[[1]]$args[[3]]$options$followlocation, 0L)
+  path <- tempfile(fileext = ".txt")
+  on.exit(unlink(path))
+  writeLines("A randomized study in adults with cancer.", path)
+  client$import_trial(document = path)
+  expect_s3_class(calls[[2]]$args$body$document, "form_file")
+  expect_identical(calls[[2]]$url, "https://verdict.synthesize.bio/api/v1/synthia/import")
+  reply$content <- charToRaw(' {"error":"Extraction unavailable"}')
+  failure <- tryCatch(client$import_trial(nct_id = "NCT01945775"), verdict_api_error = function(e) e)
+  expect_s3_class(failure, "verdict_api_error")
+  expect_identical(failure$status_code, 200L)
+  expect_identical(failure$details$error, "Extraction unavailable")
+})

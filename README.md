@@ -195,3 +195,17 @@ so `expression` has one row per result and zero columns. Reconstruction
 `model_release_id` and `vae_run_id`; `latents` has zero columns. Missing sample
 metadata retains row alignment. Existing GEM-2 compatibility model names also
 use these formats. `raw_response = TRUE` returns the original response unchanged.
+
+
+## Synthia 2.0 trial imports (preview)
+
+```r
+client <- rsynthbio::verdict_client() # VERDICT_API_KEY, optionally VERDICT_API_BASE_URL
+proposal <- client$import_trial(nct_id = "NCT01945775")
+# Or: proposal <- client$import_trial(document = "protocol.pdf")
+print(proposal$metadata$fields)
+```
+
+Use an API-enabled VERDICT deployment with Synthia support. Imports accept exactly one NCT ID or local PDF/DOCX/TXT file, up to 5 MiB, and return an editable form draft plus provenance and review metadata. They do not submit an analysis. Review flagged fields before constructing a workflow input; the draft is not itself a workflow request. The import timeout defaults to 210 seconds. Extraction errors raise the normal API error even when the streamed response has HTTP 200. Retrying starts fresh extraction, so save successful proposals locally.
+
+See the [VERDICT Synthia guide](https://verdict.synthesize.bio/app/api-docs/synthia) for review semantics and limits. These helpers are on the `app-2924-synthia-api` development branch and are not yet a published release.
