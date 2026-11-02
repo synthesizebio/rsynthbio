@@ -27,3 +27,14 @@ test_that("trial files retain nulls, arrays, and numeric precision", {
   expect_identical(load_trial(path), trial)
   expect_error(load_trial_result(path), "trial result")
 })
+
+test_that("report validation compares the JSON request rather than R container types", {
+  input <- list(requested_analyses = c("biology", "toxicity"),
+    trial = list(endpoints = list(list(outcome_analysis = list(value = 1L))), age = NULL))
+  wire <- jsonlite::fromJSON(jsonlite::toJSON(input, auto_unbox = TRUE, null = "null", digits = 17), simplifyVector = FALSE)
+  wire$trial$endpoints[[1]]$outcome_analysis$endpoint_role <- "primary"
+  report <- list(run_id = "run", request = wire, components = list(), analyses = list(), status = "complete")
+  expect_no_error(rsynthbio:::.verdict_validate_report(report, "run", input))
+  report$request$requested_analyses <- rev(report$request$requested_analyses)
+  expect_error(rsynthbio:::.verdict_validate_report(report, "run", input), "does not match")
+})

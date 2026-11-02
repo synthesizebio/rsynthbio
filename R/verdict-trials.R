@@ -58,6 +58,9 @@ plot.verdict_trial_view <- function(x, ...) {
   gsub("'", "&#39;", x, fixed = TRUE)
 }
 .verdict_comparable_input <- function(value) {
+  # Match the encoder used by send(), including arrays, nulls and precision.
+  value <- jsonlite::fromJSON(jsonlite::toJSON(value, auto_unbox = TRUE,
+    null = "null", digits = 17), simplifyVector = FALSE)
   sort_keys <- function(x) {
     if (!is.list(x)) return(x)
     if (!is.null(names(x))) x <- x[order(names(x))]

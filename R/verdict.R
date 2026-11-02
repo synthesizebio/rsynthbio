@@ -50,7 +50,8 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     }
     value
   }
-  send <- function(method, path, body = NULL, idempotency_key = NULL, form = NULL, request_timeout = timeout) {
+  http_timeout <- timeout
+  send <- function(method, path, body = NULL, idempotency_key = NULL, form = NULL, request_timeout = http_timeout) {
     headers <- c(Authorization = paste("Bearer", api_key))
     if (!is.null(idempotency_key)) headers <- c(headers, `Idempotency-Key` = idempotency_key)
     if (!is.null(body)) {
@@ -124,17 +125,28 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
       send("POST", "workflows", list(input = input, idempotencyKey = idempotency_key))
     },
     wait = function(id, timeout = 1800, interval = 5) {
-      if (timeout <= 0 || interval <= 0) stop("timeout and interval must be positive")
+      if (!is.numeric(timeout) || length(timeout) != 1L || !is.finite(timeout) || timeout <= 0 ||
+          !is.numeric(interval) || length(interval) != 1L || !is.finite(interval) || interval <= 0)
+        stop("timeout and interval must be positive finite numbers")
       deadline <- proc.time()[["elapsed"]] + timeout
-      while (proc.time()[["elapsed"]] < deadline) {
-        value <- run(id)
-        if (!value$status %in% c("queued", "running")) return(value)
+      expired <- function() stop(structure(list(
+        message = paste("VERDICT run", id, "is still running; resume polling"),
+        call = NULL, run_id = id), class = c("verdict_trial_timeout", "error", "condition")))
+      repeat {
         remaining <- deadline - proc.time()[["elapsed"]]
-        if (remaining <= 0) break
+        if (remaining <= 0) expired()
+        budget <- if (http_timeout > 0) min(http_timeout, remaining) else remaining
+        value <- tryCatch(send("GET", paste0("runs/", encode(id)), request_timeout = budget),
+          error = function(error) {
+            if (proc.time()[["elapsed"]] >= deadline ||
+                (budget == remaining && inherits(error, "curl_error_operation_timedout"))) expired()
+            stop(error)
+          })
+        remaining <- deadline - proc.time()[["elapsed"]]
+        if (remaining <= 0) expired()
+        if (!value$status %in% c("queued", "running")) return(value)
         Sys.sleep(min(interval, remaining))
       }
-      stop(structure(list(message = paste("VERDICT run", id, "is still running; resume polling"),
-        call = NULL, run_id = id), class = c("verdict_trial_timeout", "error", "condition")))
     }
   )
   polling_options <- function(timeout, poll_interval) {
