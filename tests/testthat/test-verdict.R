@@ -139,4 +139,5 @@ test_that("Synthia imports preserve review metadata and streamed errors", {
   expect_s3_class(failure, "verdict_api_error")
   expect_identical(failure$status_code, 200L)
   expect_identical(failure$details$error, "Extraction unavailable")
+  expect_match(conditionMessage(failure), "Extraction unavailable")
 })

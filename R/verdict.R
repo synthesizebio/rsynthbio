@@ -96,7 +96,8 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     }
     result <- send("POST", "synthia/import", form = form, request_timeout = timeout)
     if (!is.list(result) || !is.null(result$error) || !is.list(result$result)) {
-      stop(structure(list(message = "Synthia trial import failed", call = NULL,
+      stop(structure(list(message = paste("Synthia trial import failed:",
+        jsonlite::toJSON(result, auto_unbox = TRUE)), call = NULL,
         status_code = 200L, details = result), class = c("verdict_api_error", "error", "condition")))
     }
     result$result
