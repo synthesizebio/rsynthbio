@@ -41,4 +41,9 @@ High-level methods: run_trial(input, idempotency_key, timeout = 3600,
   biology, efficacy, safety, raw, run_id, ui_url, and save_json(path).
   A verdict_trial_timeout error retains run_id; resume with wait_for_trial.
   A verdict_trial_run_error retains run_id and status if a terminal run has no report.
+  import_trial(nct_id = NULL, document = NULL, timeout = 210) proposes a trial
+  draft from exactly one NCT ID or local PDF/DOCX/TXT file (up to 5 MiB).
+  It returns draft and metadata with field evidence and review flags; it never
+  submits an analysis. Streamed extraction errors raise verdict_api_error even
+  with HTTP 200. Retrying performs fresh extraction, not run recovery.
 }
