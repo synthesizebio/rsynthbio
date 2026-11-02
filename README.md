@@ -149,6 +149,12 @@ reviewable in PRs.
 
 Free usage of Synthesize Bio is limited. If you exceed this limit, you'll receive an error message. To generate more samples, please contact us at [support@synthesize.bio](mailto:support@synthesize.bio).
 
+## VERDICT models and trials
+
+Sign in to [VERDICT API docs](https://verdict.synthesize.bio/app/api-docs/r)
+for the R client guide, API keys, model calls, and trial workflows.
+An approved VERDICT account is required.
+
 ## Hosted GEM-2 operations
 
 Use `predict_query(..., model_id = "gem-2")` with a release supporting the
