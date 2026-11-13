@@ -22,7 +22,10 @@ Imports:
     getPass,
     keyring,
     jsonlite,
-    httr
+    httr,
+    R6,
+    stats,
+    tools
 Suggests:
     rmarkdown,
     knitr,
@@ -33,6 +36,7 @@ Suggests:
 Config/testthat/edition: 3
 Encoding: UTF-8
 RoxygenNote: 7.3.3
+Roxygen: list(r6 = FALSE)
 LazyData: true
 VignetteBuilder: knitr
 License: MIT + file LICENSE

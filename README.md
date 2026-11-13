@@ -209,3 +209,52 @@ print(proposal$metadata$fields)
 Use an API-enabled VERDICT deployment with Trial Import support. Imports accept exactly one NCT ID or local PDF/DOCX/TXT file, up to 5 MiB, and return an editable form draft plus provenance and review metadata. They do not submit an analysis. Review flagged fields before constructing a workflow input; the draft is not itself a workflow request. The import timeout defaults to 210 seconds. Extraction errors raise the normal API error even when the streamed response has HTTP 200. Retrying starts fresh extraction, so save successful proposals locally.
 
 See the [VERDICT Trial Import guide](https://verdict.synthesize.bio/app/api-docs/trial-import) for review semantics and limits. These helpers are on the `app-2924-trial-import` development branch and are not yet a published release.
+
+## Trial designs (preview)
+
+Build, inspect and edit a VERDICT trial design in R, then review and run it.
+Nothing contacts the API until `$review()` or `$run()`.
+
+```r
+library(rsynthbio)
+
+trial_vocabulary()            # every allowed value, offline
+trial_vocabulary("blinding")  # one field's values
+trial_fields()                # every editable field, as a data frame
+
+trial <- Trial$new("HCC phase 3")
+trial$population$set_disease("hepatocellular carcinoma")
+trial$edit(phase = "phase 3", allocation = "randomized", blinding = "open label", min_age = 18)
+trial$arms$add("Durvalumab", type = "experimental", treatments = "durvalumab")
+trial$arms$add("Sorafenib", type = "active comparator", treatments = "sorafenib")
+trial$endpoints$add("Overall survival", family = "overall_survival",
+  effect_measure = "hazard ratio", hypothesis = "superiority")
+trial                         # prints the design
+
+client <- verdict_client()
+trial$review(client)                                  # what will run; runs nothing
+result <- trial$run(client, idempotency_key = "hcc-phase3-v1")
+result                                                # headline numbers
+result$efficacy$table                                 # readable data frames
+result$safety$table
+result$biology$table
+
+# Variations: every combination, submitted together and compared side by side
+sweep <- trial$vary(sex = c("female", "male"), min_age = c(18, 65))
+sweep$review(client)
+sweep$run(client, idempotency_prefix = "hcc-sweep")$table
+```
+
+Start from an import with `trial_from_import(client$import_trial(nct_id = ...))`,
+or save and reload a design with `trial$save(path)` / `load_trial_design(path)`.
+Arms, endpoints, comparisons and treatments each support `add()`, `remove()`,
+`edit()`, `list()`, `names()` and `get()` by name or 1-based position;
+comparisons are found as `"A vs B"`. Values are matched forgivingly ("phase 3",
+"double", "placebo"); an unknown value raises a `trial_design_error` listing the
+allowed ones, and a failed edit changes nothing. Analyses the deployed models
+cannot score are skipped and named in the review instead of refusing the run;
+Toxicity is skipped when the release needs a safety query and none was given.
+Reuse an idempotency key to recover the same run. Sample size is not a model
+input. The lower-level client methods are `client$trial_catalog()`,
+`client$trial_schema()`, `client$prepare_trial_design()` and
+`client$run_trial_design()`.

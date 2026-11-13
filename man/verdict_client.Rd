@@ -46,4 +46,16 @@ High-level methods: run_trial(input, idempotency_key, timeout = 3600,
   It returns draft and metadata with field evidence and review flags; it never
   submits an analysis. Streamed extraction errors raise verdict_api_error even
   with HTTP 200. Retrying performs fresh extraction, not run recovery.
+
+  Trial designs (\code{verdict.clinical-design/v1}; see \code{\link{Trial}}):
+  trial_catalog() returns endpoint families and release evidence;
+  trial_schema() returns the request schema as OpenAPI 3.1;
+  prepare_trial_design(design, idempotency_key = NULL) resolves names and checks
+  every analysis without running anything, returning issues, entities,
+  assumptions, availability and the reviewFingerprint;
+  run_trial_design(design, review_fingerprint, idempotency_key) executes a
+  reviewed design and returns the run receipt (id, status). Send the same design
+  and key to both. Design keys start with a letter or digit and use only
+  letters, digits, '_', '.', ':' or '-' (at most 200 characters). A design may
+  be a list or a \code{Trial}.
 }

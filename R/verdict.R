@@ -28,6 +28,18 @@
 #'   It returns draft and metadata with field evidence and review flags; it never
 #'   submits an analysis. Streamed extraction errors raise verdict_api_error even
 #'   with HTTP 200. Retrying performs fresh extraction, not run recovery.
+#'
+#'   Trial designs (\code{verdict.clinical-design/v1}; see \code{\link{Trial}}):
+#'   trial_catalog() returns endpoint families and release evidence;
+#'   trial_schema() returns the request schema as OpenAPI 3.1;
+#'   prepare_trial_design(design, idempotency_key = NULL) resolves names and checks
+#'   every analysis without running anything, returning issues, entities,
+#'   assumptions, availability and the reviewFingerprint;
+#'   run_trial_design(design, review_fingerprint, idempotency_key) executes a
+#'   reviewed design and returns the run receipt (id, status). Send the same design
+#'   and key to both. Design keys start with a letter or digit and use only
+#'   letters, digits, '_', '.', ':' or '-' (at most 200 characters). A design may
+#'   be a list or a \code{Trial}.
 #' @export
 verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
                            api_base_url = Sys.getenv("VERDICT_API_BASE_URL", "https://verdict.synthesize.bio"),
@@ -175,6 +187,35 @@ verdict_client <- function(api_key = Sys.getenv("VERDICT_API_KEY"),
     .verdict_validate_report(result$raw, submitted$id, input)
     .verdict_trial_result(result$raw, base, "Retrieved from the VERDICT API", execution)
   }
+  # ---- Trial designs (verdict.clinical-design/v1) ----
+  design_key <- function(value) {
+    if (is.null(value)) return(.verdict_random_key())
+    if (!is.character(value) || length(value) != 1L || is.na(value) ||
+        !grepl(.verdict_design_key_pattern, value)) {
+      stop("idempotency_key must start with a letter or digit and use only letters, digits, ",
+        "'_', '.', ':' or '-' (at most 200 characters)", call. = FALSE)
+    }
+    value
+  }
+  as_design <- function(design) if (inherits(design, "Trial")) design$to_list() else design
+  client$trial_catalog <- function() send("GET", "trial-designs/catalog")
+  client$trial_schema <- function() send("GET", "trial-designs/openapi.json")
+  client$prepare_trial_design <- function(design, idempotency_key = NULL) {
+    send("POST", "trial-designs/prepare",
+      list(idempotencyKey = design_key(idempotency_key), design = as_design(design)))
+  }
+  client$run_trial_design <- function(design, review_fingerprint, idempotency_key) {
+    if (missing(idempotency_key) || is.null(idempotency_key)) {
+      stop("run_trial_design requires an explicit idempotency_key", call. = FALSE)
+    }
+    send("POST", "trial-designs/run", list(idempotencyKey = design_key(idempotency_key),
+      design = as_design(design), reviewFingerprint = review_fingerprint))
+  }
   client
 
+}
+
+.verdict_random_key <- function() {
+  hex <- function(n) paste(sample(c(0:9, letters[1:6]), n, replace = TRUE), collapse = "")
+  paste(hex(8), hex(4), paste0("4", hex(3)), paste0(sample(c("8", "9", "a", "b"), 1L), hex(3)), hex(12), sep = "-")
 }
