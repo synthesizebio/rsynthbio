@@ -362,3 +362,15 @@ test_that("screen swaps each drug into one arm", {
   expect_identical(one$get("tremelimumab")$arms$get(1)$treatments$get(1)$chembl, "CHEMBL2108658")
   expect_error(trial$screen("Durvalumab", character()), "at least one drug")
 })
+
+test_that("imports warn when an arm lists alternative regimens", {
+  proposal <- fixture("verdict-import-proposal.json")
+  proposal$draft$custom$arms[[1]]$regimenAlternatives <- "  letrozole or anastrozole.  "
+  label <- proposal$draft$custom$arms[[1]]$label
+  expect_warning(trial <- trial_from_import(proposal),
+    paste0("Arm '", label, "' lists alternative regimens: letrozole or anastrozole. ",
+      "Keep one regimen and remove the other treatments before running."), fixed = TRUE)
+  expect_s3_class(trial, "Trial")
+  proposal$draft$custom$arms[[1]]$regimenAlternatives <- "   "
+  expect_no_warning(trial_from_import(proposal))
+})

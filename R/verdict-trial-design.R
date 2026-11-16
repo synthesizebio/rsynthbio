@@ -1303,6 +1303,13 @@ trial_from_import <- function(proposal) {
     added <- trial$arms$add(if (is.null(label)) paste("Arm", trial$arms$count() + 1L) else label,
       if (kind %in% .trial_vocabulary$arm_type) kind else NULL)
     if (!is.null(arm$id)) arm_ids[[arm$id]] <- added
+    alternatives <- .trial_or_null(arm$regimenAlternatives)
+    if (is.character(alternatives) && nzchar(trimws(alternatives))) {
+      # The source offers alternatives ("A or B"); every option is listed as a
+      # treatment, which would run as a combination.
+      warning("Arm '", added$label, "' lists alternative regimens: ", trimws(alternatives),
+        " Keep one regimen and remove the other treatments before running.", call. = FALSE)
+    }
     for (t in arm$treatments) {
       if (is.null(.trial_or_null(t$name))) next
       identity <- if (is.null(t$identity)) "" else t$identity
