@@ -29,6 +29,7 @@
     "HEALTH_SERVICES_RESEARCH", "BASIC_SCIENCE", "DEVICE_FEASIBILITY", "OTHER"),
   sponsor_type = c("INDUSTRY", "NIH", "FED", "OTHER_GOV", "NETWORK", "INDIV", "UNKNOWN", "OTHER"),
   seriousness = c("serious", "other"),
+  enrollment_type = c("ANTICIPATED", "ACTUAL", "UNKNOWN"),
   analysis = c("trial_characteristics", "efficacy", "toxicity", "biology")
 )
 
@@ -55,6 +56,8 @@
   "details.sponsor_type", "choice", "sponsor_type", "Lead sponsor class",
   "details.arm_count", "int", NA, "Registered arms, if more than modeled",
   "details.primary_endpoint_count", "int", NA, "Primary endpoints in the trial",
+  "details.enrollment", "int", NA, "Sample size: participants across all arms",
+  "details.enrollment_type", "choice", "enrollment_type", "Planned (ANTICIPATED) or achieved (ACTUAL)",
   "population.disease", "text", NA, "Condition name; MONDO resolves on review",
   "population.mondo_id", "MONDO:#######", NA, "Optional explicit disease identity",
   "population.sex", "choice", "sex", "Sex eligibility",
@@ -449,6 +452,11 @@ TrialCollection <- R6::R6Class("TrialCollection",
     .push = function(item) {
       private$items[[length(private$items) + 1L]] <- item
       invisible(item)
+    },
+    # Internal: replace the item at a 1-based position.
+    .set = function(position, item) {
+      private$items[[position]] <- item
+      invisible(item)
     }
   ),
   private = list(
@@ -803,6 +811,7 @@ TrialDetails <- R6::R6Class("TrialDetails",
   public = list(
     name = NULL, phases = character(), start_date = NULL, allocation = NULL, blinding = NULL,
     purpose = NULL, sponsor_type = NULL, arm_count = NULL, primary_endpoint_count = NULL,
+    enrollment = NULL, enrollment_type = NULL,
     initialize = function(name) private$apply_changes(list(name = name)),
     edit = function(...) {
       changes <- list(...)
@@ -821,13 +830,13 @@ TrialDetails <- R6::R6Class("TrialDetails",
   ),
   private = list(
     fields = c("name", "phases", "start_date", "allocation", "blinding", "purpose", "sponsor_type",
-      "arm_count", "primary_endpoint_count"),
+      "arm_count", "primary_endpoint_count", "enrollment", "enrollment_type"),
     check = function(name, value, state) {
       switch(name,
         name = .trial_text(value, "name", required = TRUE),
         phases = .trial_phases(value),
         start_date = .trial_start_date(value),
-        allocation = , blinding = , purpose = , sponsor_type = .trial_choose(name, value),
+        allocation = , blinding = , purpose = , sponsor_type = , enrollment_type = .trial_choose(name, value),
         .trial_count(value, name))
     }
   )
@@ -893,7 +902,7 @@ TrialPopulation <- R6::R6Class("TrialPopulation",
 # ---- The trial ----------------------------------------------------------------------
 
 .trial_detail_keys <- c("name", "phases", "phase", "start_date", "allocation", "blinding", "purpose",
-  "sponsor_type", "arm_count", "primary_endpoint_count")
+  "sponsor_type", "arm_count", "primary_endpoint_count", "enrollment", "enrollment_type")
 .trial_population_keys <- c("conditions", "sex", "min_age", "max_age", "healthy_volunteers", "notes",
   "disease", "mondo_id")
 
@@ -909,7 +918,8 @@ TrialPopulation <- R6::R6Class("TrialPopulation",
 #' @section Sections:
 #' \describe{
 #'   \item{\code{details}}{Name, phases, start date, allocation, blinding, purpose,
-#'     sponsor type, arm count, primary endpoint count. Change with
+#'     sponsor type, arm count, primary endpoint count, enrollment (sample size:
+#'     participants across all arms) and enrollment type (anticipated or actual). Change with
 #'     \code{trial$details$edit(phase = "phase 3", blinding = "double")}.}
 #'   \item{\code{population}}{Conditions, sex, ages, healthy volunteers, notes.
 #'     \code{trial$population$set_disease("hepatocellular carcinoma")}.}
@@ -934,7 +944,15 @@ TrialPopulation <- R6::R6Class("TrialPopulation",
 #'   \item{\code{$copy(name = NULL)}, \code{$variant(name = NULL, ...)}}{Independent
 #'     copies, optionally with changes.}
 #'   \item{\code{$vary(...)}}{Every combination of the given values as a
-#'     \code{\link{TrialSet}}: \code{trial$vary(sex = c("female", "male"), min_age = c(18, 65))}.}
+#'     \code{\link{TrialSet}}: \code{trial$vary(sex = c("female", "male"), min_age = c(18, 65))}
+#'     or \code{trial$vary(enrollment = c(200, 600, 1200))}.}
+#'   \item{\code{$screen(arm, drugs, replace = NULL)}}{One variant per drug as a
+#'     \code{\link{TrialSet}} labelled by drug name. Each drug (a name, a list of
+#'     \code{\link{Treatment}} fields or a \code{Treatment}) replaces the arm's study
+#'     treatment, or \code{replace} (a treatment name or 1-based position). The old
+#'     treatment's role and timing are kept and its dose is cleared; the other arms,
+#'     endpoints and comparisons stay the same, and the trial itself is unchanged:
+#'     \code{trial$screen("Durvalumab", c("durvalumab", "atezolizumab", "nivolumab"))}.}
 #'   \item{\code{$to_list()}, \code{$to_json()}, \code{$save(path)}}{The API request
 #'     body; see \code{\link{load_trial_design}} and \code{\link{trial_from_list}}.}
 #'   \item{\code{$review(client, idempotency_key = NULL)}}{Ask the server to resolve
@@ -1034,6 +1052,43 @@ Trial <- R6::R6Class("Trial",
       }
       variants
     },
+    screen = function(arm, drugs, replace = NULL) {
+      target <- self$arms$get(arm)
+      position <- self$arms$index(target)
+      treatments <- target$treatments$list()
+      if (!length(treatments)) .trial_error("Arm '", target$label, "' has no treatment to replace")
+      slot <- if (is.null(replace)) {
+        study <- which(vapply(treatments, function(t) is.null(t$role) || identical(t$role, "study"), logical(1)))
+        if (length(study)) study[[1]] else 1L
+      } else {
+        target$treatments$index(replace)
+      }
+      old <- treatments[[slot]]
+      # A single Treatment or field list is one drug, not a list of drugs.
+      if (inherits(drugs, "Treatment") || (is.list(drugs) && !is.null(names(drugs)) && "name" %in% names(drugs))) {
+        drugs <- list(drugs)
+      }
+      variants <- TrialSet$new()
+      for (drug in as.list(drugs)) {
+        fields <- if (inherits(drug, "Treatment")) {
+          drug$to_list()
+        } else if (is.list(drug)) {
+          drug
+        } else {
+          list(name = drug)
+        }
+        if (is.null(fields$role)) fields$role <- old$role
+        if (is.null(fields$timing)) fields$timing <- old$timing
+        fields <- Filter(Negate(is.null), fields)
+        replacement <- do.call(Treatment$new, fields)
+        label <- replacement$name
+        twin <- self$copy(paste0(self$name, " (", label, ")"))
+        twin$arms$get(position)$treatments$.set(slot, replacement)
+        variants$add(label, twin)
+      }
+      if (!variants$count()) .trial_error("Pass at least one drug to screen")
+      variants
+    },
     to_list = function() {
       d <- self$details
       p <- self$population
@@ -1049,6 +1104,11 @@ Trial <- R6::R6Class("Trial",
         armCount = if (is.null(d$arm_count)) NULL else max(d$arm_count, length(arms)),
         primaryEndpointCount = d$primary_endpoint_count)
       if (!is.null(d$start_date)) metadata$startDate <- d$start_date
+      # Sample size; omitted when unset so older servers accept the design.
+      if (!is.null(d$enrollment)) {
+        metadata$enrollment <- d$enrollment
+        if (!is.null(d$enrollment_type)) metadata$enrollmentType <- d$enrollment_type
+      }
       design <- list(
         schemaVersion = .trial_schema_version,
         name = d$name,
@@ -1124,6 +1184,8 @@ Trial <- R6::R6Class("Trial",
         paste("Trial:", d$name),
         paste0("  ", d$phase, " \u00b7 ", self$population$summary),
         paste0("  Design: ", if (length(design)) paste(vapply(design, .trial_label, ""), collapse = " \u00b7 ") else "not stated"),
+        if (!is.null(d$enrollment)) paste0("  Enrollment: ", d$enrollment,
+          if (!is.null(d$enrollment_type)) paste0(" (", tolower(d$enrollment_type), ")")),
         "Arms:", indent(self$arms),
         "Endpoints:", indent(self$endpoints),
         "Comparisons:", indent(self$comparisons),
@@ -1174,7 +1236,8 @@ trial_from_list <- function(design) {
   trial$details$edit(phases = unlist(population$phases), start_date = metadata$startDate,
     allocation = metadata$allocation, blinding = metadata$blinding, purpose = metadata$purpose,
     sponsor_type = metadata$sponsorType, arm_count = metadata$armCount,
-    primary_endpoint_count = metadata$primaryEndpointCount)
+    primary_endpoint_count = metadata$primaryEndpointCount, enrollment = metadata$enrollment,
+    enrollment_type = metadata$enrollmentType)
   trial$population$edit(conditions = population$conditions, sex = population$sex,
     min_age = population$minAge, max_age = population$maxAge,
     healthy_volunteers = population$healthyVolunteers, notes = population$notes)
@@ -1217,11 +1280,14 @@ trial_from_import <- function(proposal) {
   outcome <- design$outcomeDesign
   endpoints <- design$endpoints
   counts <- unique(unlist(lapply(endpoints, function(e) .trial_or_null(e$analysis$primaryEndpoints))))
+  enrollment <- .trial_form_number(design$enrollment)
   trial$details$edit(phases = unlist(design$phases), start_date = .trial_or_null(design$startDate),
     allocation = .trial_or_null(outcome$allocation), blinding = .trial_or_null(outcome$masking),
     purpose = .trial_or_null(outcome$primaryPurpose), sponsor_type = .trial_or_null(outcome$sponsorClass),
     arm_count = .trial_form_number(outcome$numberOfArms),
-    primary_endpoint_count = if (length(counts) == 1L) .trial_form_number(counts) else NULL)
+    primary_endpoint_count = if (length(counts) == 1L) .trial_form_number(counts) else NULL,
+    enrollment = enrollment,
+    enrollment_type = if (is.null(enrollment)) NULL else .trial_or_null(design$enrollmentType))
   healthy <- c(yes = TRUE, no = FALSE)
   trial$population$edit(
     conditions = Filter(function(c) !is.null(.trial_or_null(c$name)), design$conditions),

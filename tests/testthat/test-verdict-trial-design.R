@@ -311,3 +311,54 @@ test_that("review printouts count model notes instead of listing them", {
   expect_true(any(grepl("18 model notes: see review$assumptions", out, fixed = TRUE)))
   expect_false(any(grepl("note 1", out, fixed = TRUE)))
 })
+
+test_that("sample size is a design field you can vary", {
+  trial <- hcc_trial()
+  expect_false("enrollment" %in% names(trial$to_list()$metadata)) # unset: left out
+  trial$details$edit(enrollment_type = "anticipated")
+  expect_false("enrollmentType" %in% names(trial$to_list()$metadata)) # needs an enrollment
+  trial$details$edit(enrollment = 600)
+  metadata <- trial$to_list()$metadata
+  expect_identical(metadata$enrollment, 600L)
+  expect_identical(metadata$enrollmentType, "ANTICIPATED")
+  expect_identical(trial_from_list(trial$to_list())$details$enrollment, 600L)
+  expect_identical(trial_from_list(trial$to_list())$details$enrollment_type, "ANTICIPATED")
+  expect_output(print(trial), "Enrollment: 600 \\(anticipated\\)")
+  sizes <- trial$vary(enrollment = c(100, 600, 1200))
+  expect_identical(vapply(sizes$list(), function(t) t$details$enrollment, integer(1)),
+    c("enrollment=100" = 100L, "enrollment=600" = 600L, "enrollment=1200" = 1200L))
+  expect_error(trial$edit(enrollment = 0), "positive whole number")
+  expect_error(trial$edit(enrollment_type = "planned"), "ANTICIPATED")
+  expect_identical(trial$details$enrollment, 600L)
+  expect_true(all(c("details.enrollment", "details.enrollment_type") %in% trial_fields()$field))
+})
+
+test_that("Trial Import drafts keep their enrollment", {
+  proposal <- fixture("verdict-import-proposal.json")
+  proposal$draft$custom$enrollment <- "668"
+  proposal$draft$custom$enrollmentType <- "ACTUAL"
+  trial <- trial_from_import(proposal)
+  expect_identical(trial$details$enrollment, 668L)
+  expect_identical(trial$details$enrollment_type, "ACTUAL")
+})
+
+test_that("screen swaps each drug into one arm", {
+  trial <- hcc_trial()
+  trial$arms$get("Durvalumab")$treatments$edit("durvalumab", role = "study", dose = "1500 mg")
+  trial$arms$get("Durvalumab")$treatments$add("lenvatinib", role = "background")
+  drugs <- trial$screen("Durvalumab", list("atezolizumab", list(name = "nivolumab")))
+  expect_identical(drugs$labels(), c("atezolizumab", "nivolumab"))
+  arm <- drugs$get("nivolumab")$arms$get("Durvalumab")
+  expect_identical(arm$treatments$names(), c("nivolumab", "lenvatinib"))
+  expect_identical(arm$treatments$get("nivolumab")$role, "study")
+  expect_null(arm$treatments$get("nivolumab")$dose)
+  expect_identical(trial$arms$get("Durvalumab")$treatments$names(), c("durvalumab", "lenvatinib"))
+  expect_identical(drugs$get("atezolizumab")$arms$get("Sorafenib")$treatments$names(), "sorafenib")
+  expect_identical(drugs$get("atezolizumab")$comparisons$count(), trial$comparisons$count())
+  by_position <- trial$screen(1, c("pembrolizumab"), replace = 2)
+  expect_identical(by_position$get("pembrolizumab")$arms$get(1)$treatments$names(), c("durvalumab", "pembrolizumab"))
+  expect_identical(by_position$get("pembrolizumab")$arms$get(1)$treatments$get(2)$role, "background")
+  one <- trial$screen("Durvalumab", Treatment$new("tremelimumab", chembl = "CHEMBL2108658"))
+  expect_identical(one$get("tremelimumab")$arms$get(1)$treatments$get(1)$chembl, "CHEMBL2108658")
+  expect_error(trial$screen("Durvalumab", character()), "at least one drug")
+})

@@ -18,7 +18,8 @@ allowed values when nothing matches. Edits apply all-or-nothing.
 
 \describe{
   \item{\code{details}}{Name, phases, start date, allocation, blinding, purpose,
-    sponsor type, arm count, primary endpoint count. Change with
+    sponsor type, arm count, primary endpoint count, enrollment (sample size:
+    participants across all arms) and enrollment type (anticipated or actual). Change with
     \code{trial$details$edit(phase = "phase 3", blinding = "double")}.}
   \item{\code{population}}{Conditions, sex, ages, healthy volunteers, notes.
     \code{trial$population$set_disease("hepatocellular carcinoma")}.}
@@ -45,7 +46,15 @@ allowed values when nothing matches. Edits apply all-or-nothing.
   \item{\code{$copy(name = NULL)}, \code{$variant(name = NULL, ...)}}{Independent
     copies, optionally with changes.}
   \item{\code{$vary(...)}}{Every combination of the given values as a
-    \code{\link{TrialSet}}: \code{trial$vary(sex = c("female", "male"), min_age = c(18, 65))}.}
+    \code{\link{TrialSet}}: \code{trial$vary(sex = c("female", "male"), min_age = c(18, 65))}
+    or \code{trial$vary(enrollment = c(200, 600, 1200))}.}
+  \item{\code{$screen(arm, drugs, replace = NULL)}}{One variant per drug as a
+    \code{\link{TrialSet}} labelled by drug name. Each drug (a name, a list of
+    \code{\link{Treatment}} fields or a \code{Treatment}) replaces the arm's study
+    treatment, or \code{replace} (a treatment name or 1-based position). The old
+    treatment's role and timing are kept and its dose is cleared; the other arms,
+    endpoints and comparisons stay the same, and the trial itself is unchanged:
+    \code{trial$screen("Durvalumab", c("durvalumab", "atezolizumab", "nivolumab"))}.}
   \item{\code{$to_list()}, \code{$to_json()}, \code{$save(path)}}{The API request
     body; see \code{\link{load_trial_design}} and \code{\link{trial_from_list}}.}
   \item{\code{$review(client, idempotency_key = NULL)}}{Ask the server to resolve

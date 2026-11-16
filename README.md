@@ -240,9 +240,13 @@ result$safety$table
 result$biology$table
 
 # Variations: every combination, submitted together and compared side by side
-sweep <- trial$vary(sex = c("female", "male"), min_age = c(18, 65))
-sweep$review(client)
-sweep$run(client, idempotency_prefix = "hcc-sweep")$table
+sizes <- trial$vary(enrollment = c(200, 600, 1200))
+sizes$review(client)
+sizes$run(client, idempotency_prefix = "hcc-size")$table
+
+# Screen drugs: one variant per drug swapped into an arm
+drugs <- trial$screen("Durvalumab", c("durvalumab", "atezolizumab", "nivolumab"))
+drugs$run(client, idempotency_prefix = "hcc-screen")$table
 ```
 
 Start from an import with `trial_from_import(client$import_trial(nct_id = ...))`,
@@ -254,7 +258,9 @@ comparisons are found as `"A vs B"`. Values are matched forgivingly ("phase 3",
 allowed ones, and a failed edit changes nothing. Analyses the deployed models
 cannot score are skipped and named in the review instead of refusing the run;
 Toxicity is skipped when the release needs a safety query and none was given.
-Reuse an idempotency key to recover the same run. Sample size is not a model
-input. The lower-level client methods are `client$trial_catalog()`,
+Reuse an idempotency key to recover the same run. Sample size is
+`details$enrollment` (participants across all arms), so `vary(enrollment = ...)`
+sweeps it; `screen()` keeps the replaced treatment's role and timing and clears
+its dose. The lower-level client methods are `client$trial_catalog()`,
 `client$trial_schema()`, `client$prepare_trial_design()` and
 `client$run_trial_design()`.
