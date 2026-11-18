@@ -12,7 +12,12 @@ load_trial <- function(path) {
 #' @param path Path to a saved trial report JSON file.
 #' @param api_base_url VERDICT origin used only to construct the UI link.
 #' @return A verdict_trial_result with summary, biology, efficacy, safety, raw,
-#'   run_id, ui_url, and save_json(path). Loading and displaying never run models.
+#'   run_id, ui_url, headlines(), and save_json(path). Each analysis view has a
+#'   readable data frame in \code{$table}: efficacy has one row per comparison and
+#'   endpoint (probabilities, expected magnitude, hazard ratio); safety has one row
+#'   per serious adverse event with one column per arm; biology has one row per
+#'   tissue (by name) with one column per comparison. Missing predictions are NA.
+#'   Loading and displaying never run models.
 #' @export
 load_trial_result <- function(path, api_base_url = "https://verdict.synthesize.bio") {
   report <- jsonlite::fromJSON(path, simplifyVector = FALSE)
@@ -25,7 +30,11 @@ load_trial_result <- function(path, api_base_url = "https://verdict.synthesize.b
 #' @return The input, invisibly. Printing an analysis view draws its saved charts.
 #' @export
 print.verdict_trial_result <- function(x, ...) {
-  cat("VERDICT trial", x$run_id, "\u00b7", x$raw$status, "\n", x$ui_url, "\n")
+  lines <- c(paste0(x$raw$request$trial$name, " \u2014 ", x$raw$status), x$ui_url,
+    .verdict_headline_lines(x$headlines()),
+    vapply(x$raw$analyses, function(a) paste0(a$analysis, ": ", a$status), character(1)),
+    "Tables: $efficacy$table  $safety$table  $biology$table  ($raw for JSON)")
+  cat(lines[[1]], paste0("  ", lines[-1]), sep = "\n")
   invisible(x)
 }
 
@@ -34,7 +43,12 @@ print.verdict_trial_result <- function(x, ...) {
 print.verdict_trial_view <- function(x, ...) {
   if ("IRkernel" %in% loadedNamespaces() && requireNamespace("IRdisplay", quietly = TRUE)) {
     IRdisplay::display_html(x$html)
-  } else cat(x$text, "\n")
+  } else {
+    cat(x$text, "\n")
+    if (!is.null(x$table) && nrow(x$table)) {
+      print(utils::head(.verdict_display_table(x$table, x$kind), 15L), row.names = FALSE)
+    }
+  }
   if (!is.null(x$draw)) x$draw(...)
   invisible(x)
 }
@@ -107,9 +121,15 @@ plot.verdict_trial_view <- function(x, ...) {
     notes <- paste(vapply(analysis$issues, function(i) i$message, character(1)), collapse = "; ")
     status <- if (is.null(analysis)) "not requested" else analysis$status
     text <- paste(title, status, notes, sep = " \u00b7 ")
-    html <- paste0("<h2>", title, "</h2><p>", .verdict_html_escape(text), "</p>")
+    builder <- switch(kind, efficacy = .verdict_efficacy_table, toxicity = .verdict_safety_table,
+      biology = .verdict_biology_table)
+    table <- tryCatch(builder(report), error = function(e) {
+      warning("Could not build the ", title, " table: ", conditionMessage(e), call. = FALSE)
+      NULL
+    })
+    html <- paste0("<h2>", title, "</h2><p>", .verdict_html_escape(text), "</p>", .verdict_table_html(table, kind))
     structure(list(data = list(analysis = analysis, components = components),
-      text = text, html = html,
+      kind = kind, status = status, table = table, text = text, html = html,
       draw = function(...) {
         if (is.null(analysis)) { cat(text, "\n"); return(invisible(NULL)) }
         get(plot_name, envir = environment(.verdict_trial_result))(report, ...)
@@ -117,6 +137,7 @@ plot.verdict_trial_view <- function(x, ...) {
   }
   structure(list(raw = report, run_id = report$run_id, ui_url = ui_url,
     provenance = provenance,
+    headlines = function() .verdict_headlines(report),
     save_json = function(path) writeLines(jsonlite::toJSON(report, auto_unbox = TRUE, pretty = TRUE, null = "null", digits = 17), path),
     summary = structure(list(data = report$analyses, html = summary_html,
       text = paste(c(report$request$trial$name, source, paste("Overall status:", report$status), ui_url,

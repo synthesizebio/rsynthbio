@@ -136,9 +136,7 @@ NULL
   has_median <- any(vapply(rows, function(o) !is.null(o$median_donor_shift), logical(1)))
   statistic <- if (has_median) "median_donor_shift" else "value"
   rows <- rows[order(-vapply(rows, function(o) .verdict_number(o[[statistic]]), numeric(1)), vapply(rows, function(o) o$tissue_id, character(1)), na.last = TRUE)]
-  tissues <- c("0000014" = "Skin", "0002046" = "Thyroid", "0002048" = "Lung", "0002084" = "Heart \u00b7 left ventricle",
-    "0000310" = "Mammary gland", "0002107" = "Liver", "0000945" = "Stomach", "0001264" = "Pancreas", "0002113" = "Kidney", "0000178" = "Blood", "0001911" = "Mammary gland", "0002097" = "Skin")
-  tissue_name <- function(id) { key <- sub("UBERON:", "", id); if (key %in% names(tissues)) unname(tissues[[key]]) else id }
+  tissue_name <- .verdict_tissue_name
   label <- if (contrast$kind == "trial_comparison") .verdict_comparison(report$request$trial, contrast$comparison_id) else paste(.verdict_arm(report$request$trial, contrast$arm_id), "vs untreated")
   old <- par(no.readonly = TRUE); on.exit(par(old))
   par(mar = c(5, 12, 4, 2), mfrow = c(1, 1))

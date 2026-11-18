@@ -13,7 +13,12 @@ load_trial_result(path, api_base_url = "https://verdict.synthesize.bio")
 }
 \value{
 A verdict_trial_result with summary, biology, efficacy, safety, raw,
-  run_id, ui_url, and save_json(path). Loading and displaying never run models.
+  run_id, ui_url, headlines(), and save_json(path). Each analysis view has a
+  readable data frame in \code{$table}: efficacy has one row per comparison and
+  endpoint (probabilities, expected magnitude, hazard ratio); safety has one row
+  per serious adverse event with one column per arm; biology has one row per
+  tissue (by name) with one column per comparison. Missing predictions are NA.
+  Loading and displaying never run models.
 }
 \description{
 Load a saved trial result offline
