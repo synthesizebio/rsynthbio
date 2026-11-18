@@ -1,3 +1,15 @@
+# rsynthbio 4.3.0
+
+- New `verdict_client()` for Synthesize Bio's VERDICT service: run single
+  GEM-2, Safety and Outcome model calls or complete virtual trials, and
+  recover a run with its idempotency key.
+- New Trial API (`Trial`, `TrialSet`, `Treatment`) to build, import, edit,
+  review and vary trial designs. `client$import_trial()` proposes a design from
+  a ClinicalTrials.gov ID or a protocol document, and `trial_from_import()` opens
+  it as a `Trial`. Results read as data frames and plots, and
+  `load_trial_result()` reopens a saved result offline.
+- Adds R6 to Imports and IRdisplay to Suggests.
+
 # rsynthbio 4.2.3
 
 - Format hosted GEM-2 baseline, reference-based expression, metadata prediction
