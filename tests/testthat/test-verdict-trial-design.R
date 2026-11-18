@@ -374,3 +374,18 @@ test_that("imports warn when an arm lists alternative regimens", {
   proposal$draft$custom$arms[[1]]$regimenAlternatives <- "   "
   expect_no_warning(trial_from_import(proposal))
 })
+
+test_that("the Biology chart names tissues like the tables", {
+  text <- paste(readLines(test_path("fixtures", "verdict-trial-report.json"), warn = FALSE), collapse = "\n")
+  # A tissue outside the chart's former hard-coded list.
+  report <- jsonlite::fromJSON(gsub("UBERON:0002048", "UBERON:0001155", text, fixed = TRUE), simplifyVector = FALSE)
+  labels <- NULL
+  local_mocked_bindings(.verdict_frame = function(labels, ...) {
+    labels <<- labels
+    stop("labels captured")
+  })
+  expect_error(.verdict_plot_biology(report), "labels captured")
+  expect_true(any(startsWith(labels, "Colon (n=")))
+  expect_true(any(startsWith(labels, "Thyroid gland (n=")))
+  expect_false(any(grepl("UBERON", labels)))
+})

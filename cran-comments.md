@@ -10,7 +10,7 @@ notebook display.
 
 ## Check results
 
-All 591 testthat assertions passed locally with no failures, warnings or skips.
+All 595 testthat assertions passed locally with no failures, warnings or skips.
 No API credentials are required for the checks.
 
 R CMD build completed successfully, including rebuilding all vignettes.
